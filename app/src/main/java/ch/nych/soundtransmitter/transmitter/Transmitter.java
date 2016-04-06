@@ -72,10 +72,12 @@ public class Transmitter {
                 AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT);
         this.audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                48000, AudioFormat.CHANNEL_OUT_MONO,
+                48000,
+                AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
                 minBufferSize,
                 AudioTrack.MODE_STREAM);
+        Log.d("MyTag", "minbuffersize: " + minBufferSize);
     }
 
     public int transmitData(byte[] data) {

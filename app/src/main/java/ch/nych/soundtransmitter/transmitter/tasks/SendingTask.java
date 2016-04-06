@@ -23,10 +23,14 @@ public class SendingTask extends TransmissionTask {
     @Override
     public void run() {
         Log.i("MyTag", "ID:\t" + this.message.getMessageId() + " - sending tone sequence");
+        int samplesSent = 0;
         this.transmitter.getAudioTrack().play();
         for(Tone tone : this.message.getToneSequence()) {
-            this.transmitter.getAudioTrack().write(tone.getSamples(), 0, tone.getLength());
+            samplesSent += this.transmitter.getAudioTrack().write(tone.getSamples(), 0, tone.getLength());
         }
-        Log.i("MyTag", "ID:\t" + this.message.getMessageId() + " - sent tone sequence");
+        this.message.setState(Message.STATE_SENT);
+        this.transmitter.getAudioTrack().stop();
+        Log.i("MyTag", "ID:\t" + this.message.getMessageId() + " - sent a total of " + samplesSent + " samples");
+        Log.i("MyTag", "ID:\t" + this.message.getMessageId() + " state of audiotrack: " + this.transmitter.getAudioTrack().getState());
     }
 }
