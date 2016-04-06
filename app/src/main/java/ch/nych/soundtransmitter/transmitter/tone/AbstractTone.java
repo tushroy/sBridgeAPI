@@ -22,4 +22,8 @@ public abstract class AbstractTone implements Tone {
         this.length = length;
         this.volume = volume;
     }
+
+    public int getLength() {
+        return (int) this.length;
+    }
 }

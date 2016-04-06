@@ -1,5 +1,7 @@
 package ch.nych.soundtransmitter.transmitter.tasks;
 
+import android.util.Log;
+
 import ch.nych.soundtransmitter.transmitter.Transmitter;
 import ch.nych.soundtransmitter.transmitter.message.Message;
 
@@ -12,7 +14,7 @@ public class PreparationTask extends TransmissionTask {
         super(transmitter, message, TransmissionTask.PREPARATION_TASK);
     }
     private void twoStatePreparation() {
-        System.out.println("ID:\t" + this.message.getMessageId() + " - prepare bytes");
+        Log.i("MyTag", "ID:\t" + this.message.getMessageId() + " - prepare bytes");
         short mask = 0;
         int i = 0;
         byte[] originalData = this.message.getOriginalData();
@@ -33,7 +35,7 @@ public class PreparationTask extends TransmissionTask {
     }
 
     private void fourStatePreparation() {
-        System.out.println("ID:\t" + this.message.getMessageId() + " - prepare bytes");
+        Log.i("MyTag", "ID:\t" + this.message.getMessageId() + " - prepare bytes");
         short mask = 0;
         int i = 0;
         byte[] originalData = this.message.getOriginalData();

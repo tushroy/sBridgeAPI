@@ -1,5 +1,7 @@
 package ch.nych.soundtransmitter.transmitter.tasks;
 
+import android.util.Log;
+
 import ch.nych.soundtransmitter.transmitter.Transmitter;
 import ch.nych.soundtransmitter.transmitter.message.Message;
 import ch.nych.soundtransmitter.transmitter.tone.Tone;
@@ -14,7 +16,7 @@ public class ModulationTask extends TransmissionTask {
     }
 
     protected void fourStateModulation() {
-        System.out.println("ID:\t" + this.message.getMessageId() + " - prepare tone sequence");
+        Log.i("MyTag", "ID:\t" + this.message.getMessageId() + " - prepare tone sequence");
         Tone[] toneSet = this.transmitter.getToneSet();
         byte[] preparedData = this.message.getPreparedData();
         Tone[] toneSequence = new Tone[preparedData.length];

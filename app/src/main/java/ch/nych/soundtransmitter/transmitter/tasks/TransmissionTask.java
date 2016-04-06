@@ -24,7 +24,7 @@ public abstract class TransmissionTask implements Runnable {
     protected abstract TransmissionTask getNextTask();
 
     protected void transmitterCallback() {
-        //this.transmitter.callback(this.getNextTask());
+        this.transmitter.callback(this.getNextTask());
     }
 
     public int getTaskType() {

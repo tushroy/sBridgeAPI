@@ -3,6 +3,7 @@ package ch.nych.soundtransmitter.transmitter;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,16 +42,19 @@ public class Transmitter {
             //ToDo
         }
         this.initToneSet();
+        this.initAudioTrack();
     }
 
     private void initToneSet() {
         if(this.transmissionMode == Transmitter.TWO_STATE_TRANSMITTER) {
+            Log.i("MyTag", "Init TWO_STATE_TRANSMITTER");
             this.toneSet = new Tone[]{new SineTone(19800, 480, 48000, 1),
                     new SineTone(19900, 480, 48000, 1),
                     new SineTone(20000, 480, 48000, 1),
                     new SineTone(20100, 480, 48000, 1),
                     new SineTone(20200, 480, 48000, 1)};
         } else if(this.transmissionMode == Transmitter.FOUR_STATE_TRANSMITTER) {
+            Log.i("MyTag", "Init FOUR_STATE_TRANSMITTER");
             this.toneSet = new Tone[]{new SineTone(19600, 480, 48000, 1),
                     new SineTone(19700, 480, 48000, 1),
                     new SineTone(19800, 480, 48000, 1),
@@ -75,6 +79,7 @@ public class Transmitter {
     }
 
     public int transmitData(byte[] data) {
+        Log.i("MyTag", "Try to transmit data");
         Message message = new Message(data, this.idPool);
         this.messages.put(this.idPool, message);
         this.task1.execute(new PreparationTask(this, message));
