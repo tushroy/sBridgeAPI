@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import ch.nych.soundtransmitter.transmitter.message.Message;
+import ch.nych.soundtransmitter.transmitter.tasks.PreparationTask;
 import ch.nych.soundtransmitter.transmitter.tasks.TransmissionTask;
 import ch.nych.soundtransmitter.transmitter.tone.SineTone;
 import ch.nych.soundtransmitter.transmitter.tone.Tone;
@@ -58,19 +60,46 @@ public class Transmitter {
     }
 
     public int transmitData(byte[] data) {
-        return 0;
+        Message message = new Message(data, this.idPool);
+        this.messages.put(this.idPool, message);
+        this.task1.execute(new PreparationTask(this, message));
+        return this.idPool++;
     }
 
     public void callback(TransmissionTask task) {
-
+        if(task == null) {
+            //Transmission done
+        } else if(task.getTaskType() == TransmissionTask.MODULATION_TASK) {
+            this.task2.execute(task);
+        } else if(task.getTaskType() == TransmissionTask.SENDING_TASK) {
+            this.task3.execute(task);
+        } else {
+            System.err.println("Take a look at the callback method");
+        }
     }
 
     public void shutdownAndAwaitTermination() {
-
+        System.out.println("Start shutdown transmitter");
+        this.shutdownExecutor(task1);
+        this.shutdownExecutor(task2);
+        this.shutdownExecutor(task3);
+        System.out.println("Transmitter down");
     }
 
     private void shutdownExecutor(ExecutorService executor) {
-
+        System.out.println("Start shutdown executor");
+        executor.shutdown();
+        try {
+            if(!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+                if(!executor.awaitTermination(60, TimeUnit.SECONDS))
+                    System.err.println("Executor did not terminate");
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+        System.out.println("Executor down");
     }
 
     public int getState(int id) {
