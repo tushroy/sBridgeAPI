@@ -1,5 +1,9 @@
 package ch.nych.soundtransmitter.transmitter;
 
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -23,10 +27,10 @@ public class Transmitter {
     private int idPool = 0;
     private Tone[] toneSet = null;
     private Map<Integer, Message> messages = new HashMap<Integer, Message>();
-
     private ExecutorService task1 = Executors.newSingleThreadExecutor();
     private ExecutorService task2 = Executors.newSingleThreadExecutor();
     private ExecutorService task3 = Executors.newSingleThreadExecutor();
+    private AudioTrack audioTrack = null;
 
     public Transmitter(int states) {
         if(states == Transmitter.TWO_STATE_TRANSMITTER) {
@@ -57,6 +61,17 @@ public class Transmitter {
                     new SineTone(20300, 480, 48000, 1),
                     new SineTone(20400, 480, 48000, 1)};
         }
+    }
+
+    private void initAudioTrack() {
+        int minBufferSize = AudioTrack.getMinBufferSize(48000,
+                AudioFormat.CHANNEL_OUT_MONO,
+                AudioFormat.ENCODING_PCM_16BIT);
+        this.audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+                48000, AudioFormat.CHANNEL_OUT_MONO,
+                AudioFormat.ENCODING_PCM_16BIT,
+                minBufferSize,
+                AudioTrack.MODE_STREAM);
     }
 
     public int transmitData(byte[] data) {
@@ -111,5 +126,9 @@ public class Transmitter {
 
     public Tone[] getToneSet() {
         return this.toneSet;
+    }
+
+    public AudioTrack getAudioTrack() {
+        return this.audioTrack;
     }
 }
