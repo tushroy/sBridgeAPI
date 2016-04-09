@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import ch.nych.soundtransmitter.receiver.RecordingTask;
 import ch.nych.soundtransmitter.transmitter.Transmitter;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,7 +24,9 @@ public class MainActivity extends AppCompatActivity {
         final byte[] defaultMessage = new byte[]{'A','n','d','r','o','i','d'};
         final EditText txt_message = (EditText) this.findViewById(R.id.txt_message);
         Button btn_send = (Button) this.findViewById(R.id.btn_send);
-
+        final RecordingTask recordingTask = new RecordingTask();
+        final Thread t = new Thread(recordingTask);
+        t.start();
         if (btn_send != null) {
             btn_send.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -38,9 +41,14 @@ public class MainActivity extends AppCompatActivity {
                             message[i] = (byte) carray[i];
                         }
                     }
-                    transmitter.transmitData(message);
+
+                    recordingTask.read = false;
+
+                  //  transmitter.transmitData(message);
                 }
             });
         }
     }
+
+
 }
