@@ -1,5 +1,7 @@
 package ch.nych.soundtransmitter.receiver;
 
+import android.util.Log;
+
 import ch.nych.soundtransmitter.receiver.tasks.ReceiverTask;
 import ch.nych.soundtransmitter.receiver.tasks.SampleBuffer;
 import ch.nych.soundtransmitter.receiver.tasks.recording.*;

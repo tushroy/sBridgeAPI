@@ -1,5 +1,7 @@
 package ch.nych.soundtransmitter.receiver.tasks.transformation;
 
+import android.util.Log;
+
 import ch.nych.soundtransmitter.receiver.Receiver;
 import ch.nych.soundtransmitter.receiver.tasks.ReceiverTask;
 import ch.nych.soundtransmitter.receiver.tasks.SampleBuffer;
@@ -35,12 +37,35 @@ public class TransformationTask extends ReceiverTask {
     }
 
     private void processWindow() {
-        //process window
+        short[] window = this.sampleBuffer.getNextWindow();
+        if(window == null) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            for(int i = 0; i < window.length; i++) {
+                window[i] *= this.windowFunction[i];
+            }
+            for(int i = 0; i < window.length; i++) {
+                for(Goertzel g : this.goertzels) {
+                    g.processSample(window[i]);
+                }
+            }
+            for(Goertzel g : this.goertzels) {
+                g.getMagnitudeSquared();
+                g.resetGoertzel();
+            }
+        }
     }
 
     @Override
     public void run() {
         while(!this.shutdown) {
+            this.processWindow();
+        }
+        while(this.sampleBuffer.getNextWindow() != null) {
             this.processWindow();
         }
     }
