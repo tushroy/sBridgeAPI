@@ -41,12 +41,12 @@ public class Config {
     /*
      *
      */
-    public final static float ULTRASONIC_BASE_FREQUENCY = 19000.0f;
+    public final static double ULTRASONIC_BASE_FREQUENCY = 19000.0;
 
     /*
      *
      */
-    public final static int LINEAR_TONE = 0;
+    public final static double DEFAULT_FREQUENCY_DELTA = 100.0;
 
     /*
      *
@@ -78,8 +78,12 @@ public class Config {
     /**
      *
      */
-    private float baseFrequency = 0.0f;
+    private double baseFrequency = 0.0;
 
+    /**
+     *
+     */
+    private double frequencyDelta = 0.0;
 
     private Config() {};
 
@@ -90,7 +94,7 @@ public class Config {
         config.toneSize = Config.DEFAULT_TONE_SIZE;
         config.sampleRate = Config.SAMPLE_RATE_48KHZ;
         config.baseFrequency = Config.ULTRASONIC_BASE_FREQUENCY;
-
+        config.frequencyDelta = Config.DEFAULT_FREQUENCY_DELTA;
         return config;
     }
 
@@ -98,19 +102,70 @@ public class Config {
         return this.transmissionMode;
     }
 
+    public boolean setTransmissionMode(final int transmissionMode) {
+        if(transmissionMode == Config.TWO_STATE_TRANSMISSION ||
+                transmissionMode == Config.FOUR_STATE_TRANSMISSION) {
+            this.transmissionMode = transmissionMode;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public int getToneType() {
         return this.toneType;
+    }
+
+    public boolean setToneType(final int toneType) {
+        if(toneType == Config.SINE_TONE) {
+            this.toneType = toneType;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public int getToneSize() {
         return this.toneSize;
     }
 
+    public boolean setToneSize(final int toneSize) {
+        // TODO: 4/12/16 argument validation
+        this.toneSize = toneSize;
+        return true;
+    }
+
     public int getSampleRate() {
         return this.sampleRate;
     }
 
-    public float getBaseFrequency() {
+    public boolean setSampleRate(final int sampleRate) {
+        if(sampleRate == Config.SAMPLE_RATE_48KHZ ||
+                sampleRate == Config.SAMPLE_RATE_44KHZ) {
+            this.sampleRate = sampleRate;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public double getBaseFrequency() {
         return this.baseFrequency;
+    }
+
+    public boolean setBaseFrequency(final double baseFrequency) {
+        // TODO: 4/12/16 argument validation
+        this.baseFrequency = baseFrequency;
+        return true;
+    }
+
+    public double getFrequencyDelta() {
+        return this.frequencyDelta;
+    }
+
+    public boolean setFrequencyDelta(final double frequencyDelta) {
+        // TODO: 4/12/16 arugment validation
+        this.frequencyDelta = frequencyDelta;
+        return true;
     }
 }
