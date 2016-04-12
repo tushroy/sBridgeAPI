@@ -11,20 +11,14 @@ public class Message {
     public final static int STATE_SENDING = 1;
     public final static int STATE_SENT = 2;
 
-    private int messageId = -1;
     private byte[] originalData = null;
     private byte[] preparedData = null;
     private Tone[] toneSequence = null;
     private volatile int state = -1;
 
-    public Message(byte[] data, int messageId) {
+    public Message(byte[] data) {
         this.originalData = data;
-        this.messageId = messageId;
         this.state = Message.STATE_PENDING;
-    }
-
-    public int getMessageId() {
-        return this.messageId;
     }
 
     public byte[] getOriginalData() {

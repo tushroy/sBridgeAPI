@@ -1,5 +1,7 @@
-package ch.nych.soundtransmitter;
+package ch.nych.demoApp;
 
+import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,7 +9,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import ch.nych.soundtransmitter.receiver.RecordingTask;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+import ch.nych.soundtransmitter.R;
+import ch.nych.soundtransmitter.receiver.Receiver;
 import ch.nych.soundtransmitter.transmitter.Transmitter;
 
 public class MainActivity extends AppCompatActivity {
@@ -17,21 +24,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.init();
+
     }
 
     private void init() {
         final Transmitter transmitter = new Transmitter(Transmitter.FOUR_STATE_TRANSMITTER);
-        final byte[] defaultMessage = new byte[]{'A','n','d','r','o','i','d'};
+        final Receiver receiver = new Receiver();
+        /*final byte[] defaultMessage = new byte[]{'A','n','d','r','o','i','d'};
         final EditText txt_message = (EditText) this.findViewById(R.id.txt_message);
         Button btn_send = (Button) this.findViewById(R.id.btn_send);
-        final RecordingTask recordingTask = new RecordingTask();
-        final Thread t = new Thread(recordingTask);
-        t.start();
+        final boolean run = false;
         if (btn_send != null) {
             btn_send.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    byte[] message = null;
+                    /*byte[] message = null;
                     if(txt_message.length() <= 0) {
                         message = defaultMessage;
                     } else {
@@ -42,12 +49,15 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
 
-                    recordingTask.read = false;
-
-                  //  transmitter.transmitData(message);
+                    transmitter.transmitData(message);
+                    if(run) {
+                        receiver.shutdownReceiver();
+                    } else {
+                        receiver.startReceiver();
+                    }
                 }
             });
-        }
+        }*/
     }
 
 

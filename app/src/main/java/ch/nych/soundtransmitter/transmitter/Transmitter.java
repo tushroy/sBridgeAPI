@@ -5,8 +5,6 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.util.Log;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -25,24 +23,29 @@ public class Transmitter {
     public final static int FOUR_STATE_TRANSMITTER = 4;
 
     public int transmissionMode = 0;
-    private int idPool = 0;
     private Tone[] toneSet = null;
-    private Map<Integer, Message> messages = new HashMap<Integer, Message>();
-    private ExecutorService task1 = Executors.newSingleThreadExecutor();
-    private ExecutorService task2 = Executors.newSingleThreadExecutor();
-    private ExecutorService task3 = Executors.newSingleThreadExecutor();
+    private ExecutorService[] executorServices = null;
     private AudioTrack audioTrack = null;
 
-    public Transmitter(int states) {
+    public Transmitter(final int states) {
         if(states == Transmitter.TWO_STATE_TRANSMITTER) {
             this.transmissionMode = Transmitter.TWO_STATE_TRANSMITTER;
         } else if(states == Transmitter.FOUR_STATE_TRANSMITTER) {
             this.transmissionMode = Transmitter.FOUR_STATE_TRANSMITTER;
         } else {
-            //ToDo
+            //// TODO: 4/12/16
         }
+        this.initExecutors();
         this.initToneSet();
         this.initAudioTrack();
+    }
+
+    private void initExecutors() {
+        this.executorServices = new ExecutorService[]{
+                Executors.newSingleThreadExecutor(),
+                Executors.newSingleThreadExecutor(),
+                Executors.newSingleThreadExecutor()
+        };
     }
 
     private void initToneSet() {
@@ -80,21 +83,22 @@ public class Transmitter {
         Log.d("MyTag", "minbuffersize: " + minBufferSize);
     }
 
-    public int transmitData(byte[] data) {
-        Log.i("MyTag", "Try to transmit data");
-        Message message = new Message(data, this.idPool);
-        this.messages.put(this.idPool, message);
-        this.task1.execute(new PreparationTask(this, message));
-        return this.idPool++;
+    public Message transmitData(byte[] data) {
+        Message message = null;
+        if(data != null && data.length > 0) {
+            message = new Message(data);
+            this.executorServices[0].execute(new PreparationTask(this, message));
+        }
+        return message;
     }
 
     public void callback(TransmissionTask task) {
         if(task == null) {
             //Transmission done
         } else if(task.getTaskType() == TransmissionTask.MODULATION_TASK) {
-            this.task2.execute(task);
+            this.executorServices[1].execute(task);
         } else if(task.getTaskType() == TransmissionTask.SENDING_TASK) {
-            this.task3.execute(task);
+            this.executorServices[2].execute(task);
         } else {
             System.err.println("Take a look at the callback method");
         }
@@ -102,9 +106,9 @@ public class Transmitter {
 
     public void shutdownAndAwaitTermination() {
         System.out.println("Start shutdown transmitter");
-        this.shutdownExecutor(task1);
-        this.shutdownExecutor(task2);
-        this.shutdownExecutor(task3);
+        for(ExecutorService executor : this.executorServices) {
+            this.shutdownExecutor(executor);
+        }
         System.out.println("Transmitter down");
     }
 
@@ -122,13 +126,6 @@ public class Transmitter {
             Thread.currentThread().interrupt();
         }
         System.out.println("Executor down");
-    }
-
-    public int getState(int id) {
-        Message m = this.messages.get(id);
-        if(m == null)
-            return -1;
-        return m.getState();
     }
 
     public Tone[] getToneSet() {
