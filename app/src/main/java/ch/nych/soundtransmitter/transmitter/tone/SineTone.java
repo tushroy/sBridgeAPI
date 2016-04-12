@@ -5,7 +5,7 @@ package ch.nych.soundtransmitter.transmitter.tone;
  */
 public class SineTone extends AbstractTone {
 
-    public SineTone(int frequency, int length, int sampleRate, double volume) {
+    public SineTone(double frequency, int length, int sampleRate, double volume) {
         super(frequency, length, sampleRate, volume);
     }
 

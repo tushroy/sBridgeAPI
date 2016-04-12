@@ -16,7 +16,7 @@ public abstract class AbstractTone implements Tone {
     // The calculated samples
     protected short[] samples = null;
 
-    public AbstractTone(int frequency, int length, int sampleRate, double volume) {
+    public AbstractTone(double frequency, int length, int sampleRate, double volume) {
         this.frequency = frequency;
         this.sampleRate = sampleRate;
         this.length = length;
