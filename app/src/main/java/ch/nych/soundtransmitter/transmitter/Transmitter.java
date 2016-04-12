@@ -133,4 +133,8 @@ public class Transmitter {
     public AudioTrack getAudioTrack() {
         return this.audioTrack;
     }
+
+    public Config getConfig() {
+        return this.config;
+    }
 }
