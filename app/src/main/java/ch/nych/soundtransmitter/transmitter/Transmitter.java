@@ -14,32 +14,30 @@ import ch.nych.soundtransmitter.transmitter.tasks.PreparationTask;
 import ch.nych.soundtransmitter.transmitter.tasks.TransmissionTask;
 import ch.nych.soundtransmitter.transmitter.tone.SineTone;
 import ch.nych.soundtransmitter.transmitter.tone.Tone;
+import ch.nych.soundtransmitter.util.Config;
 
 /**
  * Created by nych on 4/6/16.
  */
 public class Transmitter {
-    public final static int TWO_STATE_TRANSMITTER = 2;
-    public final static int FOUR_STATE_TRANSMITTER = 4;
 
-    public int transmissionMode = 0;
+    private Config config = null;
     private Tone[] toneSet = null;
     private ExecutorService[] executorServices = null;
     private AudioTrack audioTrack = null;
 
-    public Transmitter(final int states) {
-        if(states == Transmitter.TWO_STATE_TRANSMITTER) {
-            this.transmissionMode = Transmitter.TWO_STATE_TRANSMITTER;
-        } else if(states == Transmitter.FOUR_STATE_TRANSMITTER) {
-            this.transmissionMode = Transmitter.FOUR_STATE_TRANSMITTER;
+    public int initTransmitter(Config config) {
+        if(config == null) {
+            return -1;
         } else {
-            //// TODO: 4/12/16
+            this.config = config;
         }
-        this.initExecutors();
         this.initToneSet();
-        this.initAudioTrack();
+        //init toneset
+        //init exec
+        //init audiotrack
+        return 0;
     }
-
     private void initExecutors() {
         this.executorServices = new ExecutorService[]{
                 Executors.newSingleThreadExecutor(),
@@ -49,14 +47,14 @@ public class Transmitter {
     }
 
     private void initToneSet() {
-        if(this.transmissionMode == Transmitter.TWO_STATE_TRANSMITTER) {
+        if(this.config.getTransmissionMode() == Config.TWO_STATE_TRANSMISSION) {
             Log.i("MyTag", "Init TWO_STATE_TRANSMITTER");
             this.toneSet = new Tone[]{new SineTone(19800, 480, 48000, 1),
                     new SineTone(19900, 480, 48000, 1),
                     new SineTone(20000, 480, 48000, 1),
                     new SineTone(20100, 480, 48000, 1),
                     new SineTone(20200, 480, 48000, 1)};
-        } else if(this.transmissionMode == Transmitter.FOUR_STATE_TRANSMITTER) {
+        } else if(this.config.getTransmissionMode() == Config.FOUR_STATE_TRANSMISSION) {
             Log.i("MyTag", "Init FOUR_STATE_TRANSMITTER");
             this.toneSet = new Tone[]{new SineTone(19600, 480, 48000, 1),
                     new SineTone(19700, 480, 48000, 1),
@@ -71,11 +69,11 @@ public class Transmitter {
     }
 
     private void initAudioTrack() {
-        int minBufferSize = AudioTrack.getMinBufferSize(48000,
+        int minBufferSize = AudioTrack.getMinBufferSize(this.config.getSampleRate(),
                 AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT);
         this.audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                48000,
+                this.config.getSampleRate(),
                 AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
                 minBufferSize,
