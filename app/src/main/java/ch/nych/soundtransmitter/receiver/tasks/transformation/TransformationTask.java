@@ -38,6 +38,8 @@ public class TransformationTask extends ReceiverTask {
 
     private void processWindow() {
         short[] window = this.sampleBuffer.getNextWindow();
+        double[] magnitude = new double[this.goertzels.length];
+
         if(window == null) {
             try {
                 Thread.sleep(10);
@@ -53,9 +55,9 @@ public class TransformationTask extends ReceiverTask {
                     g.processSample(window[i]);
                 }
             }
-            for(Goertzel g : this.goertzels) {
-                g.getMagnitudeSquared();
-                g.resetGoertzel();
+            for (int i = 0; i < magnitude.length; i++) {
+                magnitude[i] = this.goertzels[i].getMagnitudeSquared();
+                this.goertzels[i].resetGoertzel();
             }
         }
     }
