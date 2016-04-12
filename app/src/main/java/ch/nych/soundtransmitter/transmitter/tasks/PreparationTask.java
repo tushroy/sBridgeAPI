@@ -4,6 +4,7 @@ import android.util.Log;
 
 import ch.nych.soundtransmitter.transmitter.Transmitter;
 import ch.nych.soundtransmitter.transmitter.message.Message;
+import ch.nych.soundtransmitter.util.Config;
 
 /**
  * Created by nych on 4/6/16.
@@ -14,7 +15,6 @@ public class PreparationTask extends TransmissionTask {
         super(transmitter, message, TransmissionTask.PREPARATION_TASK);
     }
     private void twoStatePreparation() {
-        Log.i("MyTag", "ID:\t" + this.message.getMessageId() + " - prepare bytes");
         short mask = 0;
         int i = 0;
         byte[] originalData = this.message.getOriginalData();
@@ -35,7 +35,6 @@ public class PreparationTask extends TransmissionTask {
     }
 
     private void fourStatePreparation() {
-        Log.i("MyTag", "ID:\t" + this.message.getMessageId() + " - prepare bytes");
         short mask = 0;
         int i = 0;
         byte[] originalData = this.message.getOriginalData();
@@ -60,13 +59,14 @@ public class PreparationTask extends TransmissionTask {
 
     @Override
     public void run() {
-        if(this.transmitter.transmissionMode == Transmitter.TWO_STATE_TRANSMITTER){
+        if(this.transmitter.getConfig().getTransmissionMode() ==
+                Config.TWO_STATE_TRANSMISSION){
             this.twoStatePreparation();
-        } else if(this.transmitter.transmissionMode == Transmitter.FOUR_STATE_TRANSMITTER) {
+        } else if(this.transmitter.getConfig().getTransmissionMode() ==
+                Config.FOUR_STATE_TRANSMISSION) {
             this.fourStatePreparation();
         } else {
-            //Something really went wrong
-            System.err.println("Take a look at the run method of the preparationtask");
+            //// TODO: 4/12/16
         }
         this.transmitterCallback();
     }
