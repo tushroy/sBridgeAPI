@@ -14,6 +14,7 @@ import ch.nych.soundtransmitter.transmitter.tasks.PreparationTask;
 import ch.nych.soundtransmitter.transmitter.tasks.TransmissionTask;
 import ch.nych.soundtransmitter.transmitter.tone.SineTone;
 import ch.nych.soundtransmitter.transmitter.tone.Tone;
+import ch.nych.soundtransmitter.transmitter.tone.ToneFactory;
 import ch.nych.soundtransmitter.util.Config;
 
 /**
@@ -32,40 +33,14 @@ public class Transmitter {
         } else {
             this.config = config;
         }
-        this.initToneSet();
-        //init toneset
-        //init exec
-        //init audiotrack
-        return 0;
-    }
-    private void initExecutors() {
+        this.toneSet = ToneFactory.getToneSet(this.config);
         this.executorServices = new ExecutorService[]{
                 Executors.newSingleThreadExecutor(),
                 Executors.newSingleThreadExecutor(),
                 Executors.newSingleThreadExecutor()
         };
-    }
-
-    private void initToneSet() {
-        if(this.config.getTransmissionMode() == Config.TWO_STATE_TRANSMISSION) {
-            Log.i("MyTag", "Init TWO_STATE_TRANSMITTER");
-            this.toneSet = new Tone[]{new SineTone(19800, 480, 48000, 1),
-                    new SineTone(19900, 480, 48000, 1),
-                    new SineTone(20000, 480, 48000, 1),
-                    new SineTone(20100, 480, 48000, 1),
-                    new SineTone(20200, 480, 48000, 1)};
-        } else if(this.config.getTransmissionMode() == Config.FOUR_STATE_TRANSMISSION) {
-            Log.i("MyTag", "Init FOUR_STATE_TRANSMITTER");
-            this.toneSet = new Tone[]{new SineTone(19600, 480, 48000, 1),
-                    new SineTone(19700, 480, 48000, 1),
-                    new SineTone(19800, 480, 48000, 1),
-                    new SineTone(19900, 480, 48000, 1),
-                    new SineTone(20000, 480, 48000, 1),
-                    new SineTone(20100, 480, 48000, 1),
-                    new SineTone(20200, 480, 48000, 1),
-                    new SineTone(20300, 480, 48000, 1),
-                    new SineTone(20400, 480, 48000, 1)};
-        }
+        this.initAudioTrack();
+        return 0;
     }
 
     private void initAudioTrack() {
@@ -78,7 +53,6 @@ public class Transmitter {
                 AudioFormat.ENCODING_PCM_16BIT,
                 minBufferSize,
                 AudioTrack.MODE_STREAM);
-        Log.d("MyTag", "minbuffersize: " + minBufferSize);
     }
 
     public Message transmitData(byte[] data) {
@@ -98,7 +72,7 @@ public class Transmitter {
         } else if(task.getTaskType() == TransmissionTask.SENDING_TASK) {
             this.executorServices[2].execute(task);
         } else {
-            System.err.println("Take a look at the callback method");
+            //// TODO: 4/12/16
         }
     }
 
