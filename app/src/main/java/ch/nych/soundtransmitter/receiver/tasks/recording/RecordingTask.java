@@ -1,42 +1,34 @@
 package ch.nych.soundtransmitter.receiver.tasks.recording;
 
-import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.media.MediaRecorder;
 import android.util.Log;
-
-import java.lang.reflect.Array;
-import java.util.Arrays;
 
 import ch.nych.soundtransmitter.receiver.Receiver;
 import ch.nych.soundtransmitter.receiver.tasks.ReceiverTask;
 import ch.nych.soundtransmitter.receiver.tasks.SampleBuffer;
+import ch.nych.soundtransmitter.util.Configuration;
 
 /**
  * Created by nych on 4/9/16.
  */
 public class RecordingTask extends ReceiverTask {
 
+    private final String logTag = Configuration.LOG_TAG;
     private SampleBuffer sampleBuffer = null;
 
-    private int audioSource = MediaRecorder.AudioSource.MIC;
-    private int sampleRateInHz = 48000;
-    private int channelConfig = AudioFormat.CHANNEL_IN_MONO;
-    private int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
-    private int bufferSizeInShorts = 960;
-
-    short buffer[] = new short[bufferSizeInShorts];
+    short buffer[] = null;
     AudioRecord audioRecorder = null;
 
     public RecordingTask(Receiver receiver) {
         super(receiver);
         this.sampleBuffer = this.receiver.getSampleBuffer();
+        this.buffer = new short[this.configuration.getAudioRecordBufferSize()];
         this.audioRecorder = new AudioRecord(
-                this.audioSource,
-                this.sampleRateInHz,
-                this.channelConfig,
-                this.audioFormat,
-                this.bufferSizeInShorts);
+                this.configuration.getAudioSource(),
+                this.configuration.getSampleRate(),
+                this.configuration.getChannelConfig(),
+                this.configuration.getAudioFormat(),
+                this.configuration.getAudioRecordBufferSize());
     }
 
     @Override
@@ -49,7 +41,7 @@ public class RecordingTask extends ReceiverTask {
             return;
         }
         while(!this.shutdown) {
-            this.audioRecorder.read(buffer, 0, bufferSizeInShorts);
+            this.audioRecorder.read(this.buffer, 0, this.buffer.length);
             this.sampleBuffer.addSamples(this.buffer);
         }
         this.audioRecorder.stop();

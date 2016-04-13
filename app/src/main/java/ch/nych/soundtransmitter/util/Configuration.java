@@ -181,27 +181,6 @@ public class Configuration {
     /**
      *
      */
-    private int sampleBufferSize = 0;
-
-    public int getSampleBufferSize() {
-        return this.sampleBufferSize;
-    }
-
-    public boolean setSampleBufferSize(final int sampleBufferSize) {
-        int minBufferSize = this.audioRecordBufferSize * 10;
-        if(sampleBufferSize < minBufferSize) {
-            Log.w(Configuration.LOG_TAG, "Invalid sampleBuffer size. Minimal size is: " +
-                    minBufferSize);
-            return false;
-        }
-        this.sampleBufferSize = sampleBufferSize;
-        return true;
-
-    }
-
-    /**
-     *
-     */
     private int audioSource = 0;
 
     public int getAudioSource() {
@@ -285,6 +264,29 @@ public class Configuration {
         this.audioRecordBufferSize = audioRecordBufferSize;
         return true;
     }
+
+    /**
+     *
+     */
+    private int sampleBufferSize = 0;
+
+    public int getSampleBufferSize() {
+        return this.sampleBufferSize;
+    }
+
+    public boolean setSampleBufferSize(final int sampleBufferSize) {
+        int minBufferSize = this.audioRecordBufferSize * 10;
+        if(sampleBufferSize < minBufferSize) {
+            Log.w(Configuration.LOG_TAG, "Invalid sampleBuffer size. Minimal size is: " +
+                    minBufferSize);
+            return false;
+        }
+        this.sampleBufferSize = sampleBufferSize;
+        return true;
+
+    }
+
+
 
     private Configuration() {};
 
