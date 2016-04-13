@@ -30,7 +30,7 @@ public class Transmitter {
 
     public int initTransmitter(Configuration configuration) {
 
-        Log.d(this.logTag, "Initialize Transmitter");
+        Log.i(this.logTag, "Initialize Transmitter");
 
         if(configuration == null) {
             Log.e(this.logTag, "Invalid Configuration, Transmitter is not ready");
@@ -79,6 +79,8 @@ public class Transmitter {
         if(data != null && data.length > 0) {
             message = new Message(data);
             this.executorServices[0].execute(new PreparationTask(this, message));
+        } else {
+            Log.w(this.logTag, "Invalid arguments on transmitData(), could not transmit message");
         }
         return message;
     }
@@ -96,27 +98,31 @@ public class Transmitter {
     }
 
     public void shutdownAndAwaitTermination() {
-        System.out.println("Start shutdown transmitter");
+        Log.i(this.logTag, "Try to shutdown Transmitter");
         for(ExecutorService executor : this.executorServices) {
             this.shutdownExecutor(executor);
         }
-        System.out.println("Transmitter down");
+        //Log.i()
     }
 
-    private void shutdownExecutor(ExecutorService executor) {
-        System.out.println("Start shutdown executor");
+    private boolean shutdownExecutor(ExecutorService executor) {
+        Log.d(this.logTag, "Shutdown executor");
         executor.shutdown();
         try {
             if(!executor.awaitTermination(60, TimeUnit.SECONDS)) {
                 executor.shutdownNow();
-                if(!executor.awaitTermination(60, TimeUnit.SECONDS))
-                    System.err.println("Executor did not terminate");
+                if(!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                    Log.e(this.logTag, "Executor did not terminate");
+                    return false;
+                }
             }
         } catch (InterruptedException e) {
+            //// TODO: 4/13/16
             executor.shutdownNow();
             Thread.currentThread().interrupt();
         }
-        System.out.println("Executor down");
+
+        return true;
     }
 
     public Tone[] getToneSet() {
