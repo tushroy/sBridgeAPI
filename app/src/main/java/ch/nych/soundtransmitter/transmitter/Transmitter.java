@@ -29,25 +29,35 @@ public class Transmitter {
     private AudioTrack audioTrack = null;
 
     public int initTransmitter(Configuration configuration) {
+
         Log.d(this.logTag, "Initialize Transmitter");
+
         if(configuration == null) {
             Log.e(this.logTag, "Invalid Configuration, Transmitter is not ready");
             return -1;
         } else {
             this.configuration = configuration;
         }
+
         this.toneSet = ToneFactory.getToneSet(this.configuration);
+
+        Log.d(this.logTag, "Initialize Executors");
         this.executorServices = new ExecutorService[]{
                 Executors.newSingleThreadExecutor(),
                 Executors.newSingleThreadExecutor(),
                 Executors.newSingleThreadExecutor()
         };
-        this.initAudioTrack();
+
+        if(!this.initAudioTrack()) {
+            return -2;
+        }
+
         this.ready = true;
         return 0;
     }
 
-    private void initAudioTrack() {
+    private boolean initAudioTrack() {
+        Log.d(this.logTag, "Initialize AudioTrack");
         int minBufferSize = AudioTrack.getMinBufferSize(this.configuration.getSampleRate(),
                 AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT);
@@ -57,9 +67,14 @@ public class Transmitter {
                 AudioFormat.ENCODING_PCM_16BIT,
                 minBufferSize,
                 AudioTrack.MODE_STREAM);
+        if(audioTrack.getState() == AudioTrack.STATE_UNINITIALIZED) {
+            Log.e(this.logTag, "Could not initialize AudioTrack, Transmitter is not ready");
+            return false;
+        }
+        return true;
     }
 
-    public Message transmitData(byte[] data) {
+    public Message transmitData(final byte[] data) {
         Message message = null;
         if(data != null && data.length > 0) {
             message = new Message(data);
