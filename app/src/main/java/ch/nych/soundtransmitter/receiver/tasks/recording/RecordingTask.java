@@ -21,6 +21,10 @@ public class RecordingTask extends ReceiverTask {
 
     public RecordingTask(Receiver receiver) {
         super(receiver);
+    }
+
+    public boolean initRecordingTask() {
+        Log.d(this.logTag, "Initialize RecordingTask");
         this.sampleBuffer = this.receiver.getSampleBuffer();
         this.buffer = new short[this.configuration.getAudioRecordBufferSize()];
         this.audioRecorder = new AudioRecord(
@@ -29,22 +33,51 @@ public class RecordingTask extends ReceiverTask {
                 this.configuration.getChannelConfig(),
                 this.configuration.getAudioFormat(),
                 this.configuration.getAudioRecordBufferSize());
+        if(this.audioRecorder.getState() == AudioRecord.STATE_UNINITIALIZED) {
+            Log.e(this.logTag, "Could not initialize AudioRecord object");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean startRecording() {
+        if(this.audioRecorder.getState() != AudioRecord.STATE_INITIALIZED) {
+            return false;
+        }
+        this.audioRecorder.startRecording();
+        return true;
+    }
+
+    private void record() {
+        while(!this.shutdown) {
+            if(this.audioRecorder.read(this.buffer, 0, this.buffer.length) <= 0) {
+                Log.e(this.logTag, "Error occured while reading from AudioRecord");
+                return;
+            } else {
+                this.sampleBuffer.addSamples(this.buffer);
+            }
+        }
+    }
+
+    private void releaseAudioRecord() {
+        if(this.audioRecorder.getState() == AudioRecord.STATE_INITIALIZED) {
+            this.audioRecorder.release();
+            if(this.audioRecorder.getRecordingState() == AudioRecord.STATE_UNINITIALIZED) {
+                Log.d(this.logTag, "Propperly released AudioRecord resource");
+            } else {
+                Log.e(this.logTag, "Could not release AudioRecord because its state was already" +
+                        "AudioRecord.STATE_UNINITIALIZED");
+            }
+        }
     }
 
     @Override
     public void run() {
-        Log.i("MyTag", "Start Recording Task");
-        if(this.audioRecorder.getState() == AudioRecord.STATE_INITIALIZED) {
-            this.audioRecorder.startRecording();
-        } else {
-            //// TODO: 4/9/16
-            return;
+        Log.d(this.logTag, "Start Recording Task");
+        if(!this.startRecording()) {
+            Log.e(this.logTag, "Could not start recording because AudioRecord is not initialized");
         }
-        while(!this.shutdown) {
-            this.audioRecorder.read(this.buffer, 0, this.buffer.length);
-            this.sampleBuffer.addSamples(this.buffer);
-        }
-        this.audioRecorder.stop();
-        this.audioRecorder.release();
+        this.record();
+        this.releaseAudioRecord();
     }
 }
