@@ -60,20 +60,30 @@ public class Configuration {
     /**
      *
      */
-    private final static int AUDIO_SOURCE = MediaRecorder.AudioSource.MIC;
+    public final static int AUDIO_SOURCE = MediaRecorder.AudioSource.MIC;
 
     /**
      *
      */
-    private final static int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
+    public final static int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
 
     /**
      *
      */
-    private final static int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
+    public final static int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
 
     /* -------------------------------------------------------------------------------------------*/
 
+    // TODO: 4/13/16 This might change with the usage of another transformation algorithm than goertzel
+    /**
+     *
+     */
+    public final static int MIN_WINDOW_SIZE = 480;
+
+    /**
+     *
+     */
+    public final static int DEFAULT_OVERLAPPING_FACTOR = 3;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -286,7 +296,42 @@ public class Configuration {
 
     }
 
+    /**
+     *
+     */
+    private int windowSize = 0;
 
+    public int getWindowSize() {
+        return this.windowSize;
+    }
+
+    public boolean setWindowSize(int windowSize) {
+        if(windowSize < Configuration.MIN_WINDOW_SIZE) {
+            Log.w(Configuration.LOG_TAG, "Invalid Window size. Minimal size is: " +
+                    Configuration.MIN_WINDOW_SIZE);
+            return false;
+        }
+        this.windowSize = windowSize;
+        return true;
+    }
+
+    /**
+     *
+     */
+    private int overlappingFactor = 0;
+
+    public int getOverlappingFactor() {
+        return this.overlappingFactor;
+    }
+
+    public boolean setOverlappingFactor(final int overlappingFactor) {
+        if(overlappingFactor < 1) {
+            Log.w(Configuration.LOG_TAG, "Invalid Overlapping factor. Can not be smaller than one");
+            return false;
+        }
+        this.overlappingFactor = overlappingFactor;
+        return true;
+    }
 
     private Configuration() {};
 
@@ -303,6 +348,8 @@ public class Configuration {
         configuration.audioFormat = Configuration.AUDIO_FORMAT;
         configuration.audioRecordBufferSize = configuration.getMinimumAudioRecordBufferSize();
         configuration.sampleBufferSize = configuration.getAudioRecordBufferSize() * 10;
+        configuration.windowSize = Configuration.MIN_WINDOW_SIZE;
+        configuration.overlappingFactor = Configuration.DEFAULT_OVERLAPPING_FACTOR;
         return configuration;
     }
 }

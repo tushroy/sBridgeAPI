@@ -1,5 +1,6 @@
 package ch.nych.soundtransmitter.receiver.tasks;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -17,12 +18,19 @@ public class SampleBuffer {
 
     private int head = 0;
     private int tail = 0;
+    private int windowSize = 0;
+    private int overlappingValue = 0;
     private short[] sampleBuffer = null;
     private Lock lock = null;
 
-    public SampleBuffer(final int size) {
-        Log.d(this.logTag, "Initialize new SampleBuffer with the size of: " + size);
-        this.sampleBuffer = new short[size];
+    public SampleBuffer(final Configuration configuration) {
+        Log.d(this.logTag, "Initialize new SampleBuffer with the size of: " +
+                configuration.getSampleBufferSize());
+        this.windowSize = configuration.getWindowSize();
+        this.overlappingValue = configuration.getWindowSize();
+        this.overlappingValue /= configuration.getOverlappingFactor();
+
+        this.sampleBuffer = new short[configuration.getSampleBufferSize()];
         this.lock = new ReentrantLock(true);
     }
 
@@ -41,13 +49,14 @@ public class SampleBuffer {
         for(int i = amount; i < this.tail; i++) {
             this.sampleBuffer[i-this.head] = this.sampleBuffer[i];
         }
-        Log.d(this.logTag, "\tShifted left");
-        Log.d(this.logTag, "\t\tHead_old: " + this.head);
-        Log.d(this.logTag, "\t\tTail_old: " + this.tail);
+
+        Log.d(this.logTag,
+                "\tShifted left" + "\n\t\tHead_old: " + this.head + "\n\t\tTail_old: " + this.tail);
+
         this.tail -= amount;
         this.head = 0;
-        Log.d(this.logTag, "\t\tHead_new: " + this.head);
-        Log.d(this.logTag, "\t\tTail_new: " + this.tail);
+
+        Log.d(this.logTag, "\t\tHead_new: " + this.head + "\n\t\tTail_new: " + this.tail);
     }
 
     public void addSamples(final short[] samples) {
@@ -58,17 +67,14 @@ public class SampleBuffer {
                 this.shiftLeft(samples.length);
             }
 
-            Log.d(this.logTag, "Head_old:\t" + this.head);
-            Log.d(this.logTag, "Tail_old:\t" + this.tail);
+            Log.d(this.logTag, "Head_old:\t" + this.head + "\nTail_old:\t" + this.tail);
 
             for(int i = 0; i < samples.length; i++) {
                 this.sampleBuffer[this.tail++] = samples[i];
             }
 
-            Log.d(this.logTag, "Head_new:\t" + this.head);
-            Log.d(this.logTag, "Tail_new:\t" + this.tail);
-            Log.d(this.logTag, "Added " + samples.length +" samples");
-            Log.d(this.logTag, "-----------------------------");
+            Log.d(this.logTag, "Head_new:\t" + this.head + "\nTail_new:\t" + this.tail +
+                    "\nAdded " + samples.length +" samples" + "\n-----------------------------");
         } finally {
             this.lock.unlock();
         }
@@ -79,18 +85,19 @@ public class SampleBuffer {
         short[] window = null;
         try {
             Log.d(this.logTag, "\n--------------------------");
-            if((this.head + 480) <= this.tail) {
-                Log.d(this.logTag, "Get next window");
-                Log.d(this.logTag, "Head_old:\t" + this.head);
-                Log.d(this.logTag, "Tail_old:\t" + this.tail);
-                window = Arrays.copyOfRange(this.sampleBuffer, this.head, this.head + 480);
-                this.head += 480;
-                Log.d(this.logTag, "Head_new:\t" + this.head);
-                Log.d(this.logTag, "Tail_new:\t" + this.tail);
-                Log.d(this.logTag, "--------------------------");
+            if((this.head + this.windowSize) <= this.tail) {
+                Log.d(this.logTag, "Get next window" + "\nHead_old:\t" + this.head +
+                        "\nTail_old:\t" + this.tail);
+                window = Arrays.copyOfRange(this.sampleBuffer,
+                        this.head,
+                        (this.head + this.windowSize));
+                this.head += this.overlappingValue;
+                Log.d(this.logTag, "Head_new:\t" + this.head + "\nTail_new:\t" + this.tail);
+
             } else {
                 Log.d(this.logTag, "No Window available at the moment");
             }
+            Log.d(this.logTag, "--------------------------");
         } finally {
             this.lock.unlock();
         }

@@ -30,7 +30,7 @@ public class Receiver {
             this.configuration = configuration;
         }
 
-        this.sampleBuffer = new SampleBuffer(this.configuration.getSampleBufferSize());
+        this.sampleBuffer = new SampleBuffer(this.configuration);
 
         this.initTasks();
 
