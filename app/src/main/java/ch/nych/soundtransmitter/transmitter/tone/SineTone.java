@@ -1,5 +1,7 @@
 package ch.nych.soundtransmitter.transmitter.tone;
 
+import android.util.Log;
+
 /**
  * Created by nych on 4/6/16.
  */
@@ -7,6 +9,8 @@ public class SineTone extends AbstractTone {
 
     public SineTone(double frequency, int length, int sampleRate, double volume) {
         super(frequency, length, sampleRate, volume);
+        Log.d(this.logTag, "Create new SineTone Object\n" +
+                "\tFrequency:\t\t" + frequency);
     }
 
     @Override
@@ -22,6 +26,7 @@ public class SineTone extends AbstractTone {
      * length / samplerate
      */
     private void generateTone() {
+        Log.d(this.logTag, "Generate Tone Samples for SineTone of: " + this.frequency + "Hz");
         this.samples = new short[(int) this.length];
         short volume = (short) (Short.MAX_VALUE * this.volume);
         double const1 = 2 * Math.PI * (1.0 / (this.length * 2));

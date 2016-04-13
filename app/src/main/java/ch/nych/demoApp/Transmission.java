@@ -8,7 +8,7 @@ import android.widget.EditText;
 
 import ch.nych.soundtransmitter.R;
 import ch.nych.soundtransmitter.transmitter.Transmitter;
-import ch.nych.soundtransmitter.util.Config;
+import ch.nych.soundtransmitter.util.Configuration;
 
 public class Transmission extends AppCompatActivity {
 
@@ -17,7 +17,7 @@ public class Transmission extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transmission);
         final Transmitter transmitter = new Transmitter();
-        transmitter.initTransmitter(Config.newUltrasonicConfig());
+        transmitter.initTransmitter(Configuration.newUltrasonicConfiguration());
 
         final Button btn_send = (Button) this.findViewById(R.id.btn_send);
         final EditText txt_message = (EditText) this.findViewById(R.id.editText);

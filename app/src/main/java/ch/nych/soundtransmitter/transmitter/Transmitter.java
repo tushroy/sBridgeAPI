@@ -22,6 +22,7 @@ import ch.nych.soundtransmitter.util.Configuration;
 public class Transmitter {
 
     private final String logTag = Configuration.LOG_TAG;
+    private boolean ready = false;
     private Configuration configuration = null;
     private Tone[] toneSet = null;
     private ExecutorService[] executorServices = null;
@@ -30,7 +31,7 @@ public class Transmitter {
     public int initTransmitter(Configuration configuration) {
         Log.d(this.logTag, "Initialize Transmitter");
         if(configuration == null) {
-            Log.d(this.logTag, "Invalid Config");
+            Log.e(this.logTag, "Invalid Configuration, Transmitter is not ready");
             return -1;
         } else {
             this.configuration = configuration;
@@ -42,6 +43,7 @@ public class Transmitter {
                 Executors.newSingleThreadExecutor()
         };
         this.initAudioTrack();
+        this.ready = true;
         return 0;
     }
 
