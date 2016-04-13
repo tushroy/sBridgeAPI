@@ -51,7 +51,6 @@ public class SampleBuffer {
     public void addSamples(final short[] samples) {
         this.lock.lock();
         Log.d("MyTag", "\n--------------------------");
-        Log.d("MyTag", "Added " + samples.length +" samples");
         Log.d("MyTag", "Head_old:\t" + this.head);
         Log.d("MyTag", "Tail_old:\t" + this.tail);
         try {
@@ -65,6 +64,7 @@ public class SampleBuffer {
 
             Log.d("MyTag", "Head_new: " + this.head);
             Log.d("MyTag", "Tail_new: " + this.tail);
+            Log.d("MyTag", "Added " + samples.length +" samples");
             Log.d("MyTag", "-----------------------------");
         } finally {
             this.lock.unlock();

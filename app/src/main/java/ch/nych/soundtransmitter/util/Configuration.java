@@ -1,17 +1,13 @@
 package ch.nych.soundtransmitter.util;
 
-import android.util.Log;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Properties;
-
 /**
- * Created by nych on 4/10/16.
+ * Created by nych on 4/13/16.
  */
-public class Config {
+public class Configuration {
+    /*
+    *
+    */
+    public final static String LOG_TAG = "BridgeAPI";
 
     /*
      *
@@ -85,17 +81,17 @@ public class Config {
      */
     private double frequencyDelta = 0.0;
 
-    private Config() {};
+    private Configuration() {};
 
-    public static Config newUltrasonicConfig() {
-        Config config = new Config();
-        config.transmissionMode = Config.FOUR_STATE_TRANSMISSION;
-        config.toneType = Config.SINE_TONE;
-        config.toneSize = Config.DEFAULT_TONE_SIZE;
-        config.sampleRate = Config.SAMPLE_RATE_48KHZ;
-        config.baseFrequency = Config.ULTRASONIC_BASE_FREQUENCY;
-        config.frequencyDelta = Config.DEFAULT_FREQUENCY_DELTA;
-        return config;
+    public static Configuration newUltrasonicConfiguration() {
+        Configuration configuration = new Configuration();
+        configuration.transmissionMode = Configuration.FOUR_STATE_TRANSMISSION;
+        configuration.toneType = Configuration.SINE_TONE;
+        configuration.toneSize = Configuration.DEFAULT_TONE_SIZE;
+        configuration.sampleRate = Configuration.SAMPLE_RATE_48KHZ;
+        configuration.baseFrequency = Configuration.ULTRASONIC_BASE_FREQUENCY;
+        configuration.frequencyDelta = Configuration.DEFAULT_FREQUENCY_DELTA;
+        return configuration;
     }
 
     public int getTransmissionMode() {
@@ -103,8 +99,8 @@ public class Config {
     }
 
     public boolean setTransmissionMode(final int transmissionMode) {
-        if(transmissionMode == Config.TWO_STATE_TRANSMISSION ||
-                transmissionMode == Config.FOUR_STATE_TRANSMISSION) {
+        if(transmissionMode == Configuration.TWO_STATE_TRANSMISSION ||
+                transmissionMode == Configuration.FOUR_STATE_TRANSMISSION) {
             this.transmissionMode = transmissionMode;
             return true;
         } else {
@@ -117,7 +113,7 @@ public class Config {
     }
 
     public boolean setToneType(final int toneType) {
-        if(toneType == Config.SINE_TONE) {
+        if(toneType == Configuration.SINE_TONE) {
             this.toneType = toneType;
             return true;
         } else {
@@ -140,8 +136,8 @@ public class Config {
     }
 
     public boolean setSampleRate(final int sampleRate) {
-        if(sampleRate == Config.SAMPLE_RATE_48KHZ ||
-                sampleRate == Config.SAMPLE_RATE_44KHZ) {
+        if(sampleRate == Configuration.SAMPLE_RATE_48KHZ ||
+                sampleRate == Configuration.SAMPLE_RATE_44KHZ) {
             this.sampleRate = sampleRate;
             return true;
         } else {

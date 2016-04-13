@@ -4,7 +4,7 @@ import android.util.Log;
 
 import ch.nych.soundtransmitter.transmitter.Transmitter;
 import ch.nych.soundtransmitter.transmitter.message.Message;
-import ch.nych.soundtransmitter.util.Config;
+import ch.nych.soundtransmitter.util.Configuration;
 
 /**
  * Created by nych on 4/6/16.
@@ -59,11 +59,11 @@ public class PreparationTask extends TransmissionTask {
 
     @Override
     public void run() {
-        if(this.transmitter.getConfig().getTransmissionMode() ==
-                Config.TWO_STATE_TRANSMISSION){
+        if(this.transmitter.getConfiguration().getTransmissionMode() ==
+                Configuration.TWO_STATE_TRANSMISSION){
             this.twoStatePreparation();
-        } else if(this.transmitter.getConfig().getTransmissionMode() ==
-                Config.FOUR_STATE_TRANSMISSION) {
+        } else if(this.transmitter.getConfiguration().getTransmissionMode() ==
+                Configuration.FOUR_STATE_TRANSMISSION) {
             this.fourStatePreparation();
         } else {
             //// TODO: 4/12/16

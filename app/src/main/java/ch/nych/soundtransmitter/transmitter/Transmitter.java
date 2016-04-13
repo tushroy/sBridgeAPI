@@ -12,28 +12,30 @@ import java.util.concurrent.TimeUnit;
 import ch.nych.soundtransmitter.transmitter.message.Message;
 import ch.nych.soundtransmitter.transmitter.tasks.PreparationTask;
 import ch.nych.soundtransmitter.transmitter.tasks.TransmissionTask;
-import ch.nych.soundtransmitter.transmitter.tone.SineTone;
 import ch.nych.soundtransmitter.transmitter.tone.Tone;
 import ch.nych.soundtransmitter.transmitter.tone.ToneFactory;
-import ch.nych.soundtransmitter.util.Config;
+import ch.nych.soundtransmitter.util.Configuration;
 
 /**
  * Created by nych on 4/6/16.
  */
 public class Transmitter {
 
-    private Config config = null;
+    private final String logTag = Configuration.LOG_TAG;
+    private Configuration configuration = null;
     private Tone[] toneSet = null;
     private ExecutorService[] executorServices = null;
     private AudioTrack audioTrack = null;
 
-    public int initTransmitter(Config config) {
-        if(config == null) {
+    public int initTransmitter(Configuration configuration) {
+        Log.d(this.logTag, "Initialize Transmitter");
+        if(configuration == null) {
+            Log.d(this.logTag, "Invalid Config");
             return -1;
         } else {
-            this.config = config;
+            this.configuration = configuration;
         }
-        this.toneSet = ToneFactory.getToneSet(this.config);
+        this.toneSet = ToneFactory.getToneSet(this.configuration);
         this.executorServices = new ExecutorService[]{
                 Executors.newSingleThreadExecutor(),
                 Executors.newSingleThreadExecutor(),
@@ -44,11 +46,11 @@ public class Transmitter {
     }
 
     private void initAudioTrack() {
-        int minBufferSize = AudioTrack.getMinBufferSize(this.config.getSampleRate(),
+        int minBufferSize = AudioTrack.getMinBufferSize(this.configuration.getSampleRate(),
                 AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT);
         this.audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                this.config.getSampleRate(),
+                this.configuration.getSampleRate(),
                 AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
                 minBufferSize,
@@ -108,7 +110,7 @@ public class Transmitter {
         return this.audioTrack;
     }
 
-    public Config getConfig() {
-        return this.config;
+    public Configuration getConfiguration() {
+        return this.configuration;
     }
 }
