@@ -5,6 +5,7 @@ import android.util.Log;
 import ch.nych.soundtransmitter.receiver.Receiver;
 import ch.nych.soundtransmitter.receiver.tasks.ReceiverTask;
 import ch.nych.soundtransmitter.receiver.tasks.SampleBuffer;
+import ch.nych.soundtransmitter.util.Configuration;
 
 /**
  * Created by nych on 4/9/16.
@@ -15,25 +16,22 @@ public class TransformationTask extends ReceiverTask {
     private double[] windowFunction = null;
     private Goertzel[] goertzels = null;
 
-    public TransformationTask(Receiver receiver) {
+    public TransformationTask(final Receiver receiver) {
         super(receiver);
         this.sampleBuffer = this.receiver.getSampleBuffer();
-        this.windowFunction = WindowFunction.getHammingWindow(480);
-        this.initGoertzels();
+        this.initTransformationTask();
     }
 
-    private void initGoertzels() {
-        this.goertzels = new Goertzel[] {
-                new Goertzel(48000, 19600, 480),
-                new Goertzel(48000, 19700, 480),
-                new Goertzel(48000, 19800, 480),
-                new Goertzel(48000, 19900, 480),
-                new Goertzel(48000, 20000, 480),
-                new Goertzel(48000, 20100, 480),
-                new Goertzel(48000, 20200, 480),
-                new Goertzel(48000, 20300, 480),
-                new Goertzel(48000, 20400, 480)
-        };
+    private void initTransformationTask() {
+        this.goertzels = new Goertzel[this.configuration.getFrequencies().length];
+        for(int i = 0; i < this.goertzels.length; i++) {
+            this.goertzels[i] = new Goertzel(
+                    this.configuration.getSampleRate(),
+                    this.configuration.getFrequencies()[i],
+                    this.configuration.getBlocksize());
+        }
+
+        this.windowFunction = WindowFunction.getWindowFunction(this.configuration);
     }
 
     private void processWindow() {

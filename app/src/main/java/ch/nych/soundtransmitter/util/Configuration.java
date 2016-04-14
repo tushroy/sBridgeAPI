@@ -85,6 +85,21 @@ public class Configuration {
      */
     public final static int DEFAULT_OVERLAPPING_FACTOR = 3;
 
+    /**
+     *
+     */
+    public final static int MIN_BLOCKSIZE = 480;
+
+    /**
+     *
+     */
+    public final static int HAMMING_WINDOW = 1;
+
+    /**
+     *
+     */
+    public final static int HANNING_WINDOW = 2;
+
     //--------------------------------------------------------------------------------------------//
 
     /**
@@ -186,6 +201,24 @@ public class Configuration {
         // TODO: 4/12/16 arugment validation
         this.frequencyDelta = frequencyDelta;
         return true;
+    }
+
+    /**
+     *
+     */
+    private double[] frequencySet = null;
+
+    public double[] getFrequencies() {
+        if(this.frequencySet == null) {
+            int numberOfStates = this.transmissionMode * 2 + 1;
+            this.frequencySet = new double[numberOfStates];
+
+            for (int i = 0; i < numberOfStates; i++) {
+                frequencySet[i] = this.baseFrequency;
+                frequencySet[i] += i * this.frequencyDelta;
+            }
+        }
+        return this.frequencySet;
     }
 
     /**
@@ -333,6 +366,39 @@ public class Configuration {
         return true;
     }
 
+    private int blockSize = 0;
+
+    public int getBlocksize() {
+        return this.blockSize;
+    }
+
+    public boolean setBlocksize(final int blockSize) {
+        if(blockSize < Configuration.MIN_BLOCKSIZE) {
+            Log.w(Configuration.LOG_TAG, "Invalid Blocksize. Minimal Blocksize is: " +
+                    Configuration.MIN_BLOCKSIZE);
+            return false;
+        }
+        this.blockSize = blockSize;
+        return true;
+    }
+
+    private int windowFunction = 0;
+
+    public int getWindowFunction() {
+        return this.windowFunction;
+    }
+
+    public boolean setWindowFunction(final int windowFunction) {
+        if(windowFunction != Configuration.HAMMING_WINDOW ||
+                windowFunction != Configuration.HANNING_WINDOW) {
+            Log.w(Configuration.LOG_TAG, "Invalid window function. (If implemented a new one, you" +
+                    "need to update the Configuration class");
+            return false;
+        }
+        this.windowFunction = windowFunction;
+        return true;
+    }
+
     private Configuration() {};
 
     public static Configuration newUltrasonicConfiguration() {
@@ -350,6 +416,8 @@ public class Configuration {
         configuration.sampleBufferSize = configuration.getAudioRecordBufferSize() * 10;
         configuration.windowSize = Configuration.MIN_WINDOW_SIZE;
         configuration.overlappingFactor = Configuration.DEFAULT_OVERLAPPING_FACTOR;
+        configuration.blockSize = Configuration.MIN_BLOCKSIZE;
+        configuration.windowFunction = Configuration.HANNING_WINDOW;
         return configuration;
     }
 }
