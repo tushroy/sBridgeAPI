@@ -22,7 +22,7 @@ public class Goertzel {
 
     private double sampleRate;
     private double targetFrequency;
-    private int n;
+    private int blockSize;
 
     private double coeff;
     private double Q1;
@@ -39,13 +39,13 @@ public class Goertzel {
      *                      is the sampling rate of the signal to be analyzed
      * @param targetFrequency
      *                      is the frequency that Goertzel will look for.
-     * @param inN
+     * @param blockSize
      *                      is the block size to use with Goertzel
      */
-    public Goertzel(final double sampleRate, final double targetFrequency, final int inN){
+    public Goertzel(final double sampleRate, final double targetFrequency, final int blockSize){
         this.sampleRate = sampleRate;
         this.targetFrequency = targetFrequency;
-        this.n = inN;
+        this.blockSize = blockSize;
         this.initGoertzel();
     }
 
@@ -53,8 +53,8 @@ public class Goertzel {
         int k;
         double omega;
 
-        k = (int) (0.5 + ((this.n * this.targetFrequency) / this.sampleRate));
-        omega = (2.0 * Math.PI * k) / this.n;
+        k = (int) (0.5 + ((this.blockSize * this.targetFrequency) / this.sampleRate));
+        omega = (2.0 * Math.PI * k) / this.blockSize;
         this.sine = Math.sin(omega);
         this.cosine = Math.cos(omega);
         this.coeff = 2.0 * cosine;

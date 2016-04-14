@@ -13,7 +13,6 @@ import ch.nych.soundtransmitter.util.Configuration;
  */
 public class RecordingTask extends ReceiverTask {
 
-    private final String logTag = Configuration.LOG_TAG;
     private SampleBuffer sampleBuffer = null;
 
     short buffer[] = null;

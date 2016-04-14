@@ -49,6 +49,10 @@ public class Receiver {
         };
     }
 
+    public void callback() {
+
+    }
+
     public void startReceiver() {
         for(Thread thread : this.workingThreads) {
             thread.start();

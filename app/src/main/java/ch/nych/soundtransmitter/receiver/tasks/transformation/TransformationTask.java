@@ -18,20 +18,21 @@ public class TransformationTask extends ReceiverTask {
 
     public TransformationTask(final Receiver receiver) {
         super(receiver);
-        this.sampleBuffer = this.receiver.getSampleBuffer();
         this.initTransformationTask();
     }
 
     private void initTransformationTask() {
+        Log.d(this.logTag, "Initialize TransformationTask");
+        this.sampleBuffer = this.receiver.getSampleBuffer();
         this.goertzels = new Goertzel[this.configuration.getFrequencies().length];
+        this.windowFunction = WindowFunction.getWindowFunction(this.configuration);
+
         for(int i = 0; i < this.goertzels.length; i++) {
             this.goertzels[i] = new Goertzel(
                     this.configuration.getSampleRate(),
                     this.configuration.getFrequencies()[i],
                     this.configuration.getBlocksize());
         }
-
-        this.windowFunction = WindowFunction.getWindowFunction(this.configuration);
     }
 
     private void processWindow() {
@@ -42,12 +43,15 @@ public class TransformationTask extends ReceiverTask {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.e(this.logTag, e.getMessage());
             }
         } else {
+            //Process samples with windowFunction
             for(int i = 0; i < window.length; i++) {
                 window[i] *= this.windowFunction[i];
             }
+
+            //Process samples with the Goertzel algorithm
             for(int i = 0; i < window.length; i++) {
                 for(Goertzel g : this.goertzels) {
                     g.processSample(window[i]);

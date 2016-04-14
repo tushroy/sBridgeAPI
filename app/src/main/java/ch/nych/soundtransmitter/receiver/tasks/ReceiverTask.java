@@ -7,6 +7,9 @@ import ch.nych.soundtransmitter.util.Configuration;
  * Created by nych on 4/9/16.
  */
 public abstract class ReceiverTask implements Runnable {
+
+    protected final String logTag = Configuration.LOG_TAG;
+
     protected Receiver receiver = null;
     protected Configuration configuration = null;
     protected boolean shutdown = false;
