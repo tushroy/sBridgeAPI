@@ -2,8 +2,11 @@ package ch.nych.soundtransmitter.receiver;
 
 import android.util.Log;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import ch.nych.soundtransmitter.receiver.tasks.ReceiverTask;
 import ch.nych.soundtransmitter.receiver.tasks.SampleBuffer;
+import ch.nych.soundtransmitter.receiver.tasks.analyzation.AnalyzationTask;
 import ch.nych.soundtransmitter.receiver.tasks.recording.RecordingTask;
 import ch.nych.soundtransmitter.receiver.tasks.transformation.TransformationTask;
 import ch.nych.soundtransmitter.util.Configuration;
@@ -16,6 +19,7 @@ public class Receiver {
     private final String logTag = Configuration.LOG_TAG;
     private Configuration configuration = null;
     private SampleBuffer sampleBuffer = null;
+    private ConcurrentLinkedQueue<double[]> magnitudeBuffer = new ConcurrentLinkedQueue<double[]>();
     private ReceiverTask[] receiverTasks = null;
     private Thread[] workingThreads = null;
 
@@ -41,16 +45,14 @@ public class Receiver {
         Log.d(this.logTag, "Initialize Tasks and Executing Threads");
         this.receiverTasks = new ReceiverTask[]{
                 new RecordingTask(this),
-                new TransformationTask(this)
+                new TransformationTask(this),
+                new AnalyzationTask(this)
         };
         this.workingThreads = new Thread[]{
                 new Thread(this.receiverTasks[0]),
-                new Thread(this.receiverTasks[1])
+                new Thread(this.receiverTasks[1]),
+                new Thread(this.receiverTasks[2])
         };
-    }
-
-    public void callback() {
-
     }
 
     public void startReceiver() {
@@ -77,4 +79,7 @@ public class Receiver {
         return this.sampleBuffer;
     }
 
+    public ConcurrentLinkedQueue<double[]> getMagnitudeBuffer() {
+        return this.magnitudeBuffer;
+    }
 }

@@ -11,9 +11,9 @@ public class WindowFunction {
 
     public static double[] getWindowFunction(final Configuration configuration) {
         if(configuration.getWindowFunction() == Configuration.HAMMING_WINDOW) {
-            return WindowFunction.getHammingWindow(configuration.getBlocksize());
-        } else if(configuration.getWindowFunction() == Configuration.HANNING_WINDOW) {
-            return WindowFunction.getHanningWindow(configuration.getBlocksize());
+            return WindowFunction.getHammingWindow(configuration.getWindowSize());
+        } else if(configuration.getWindowFunction() == Configuration.HANN_WINDOW) {
+            return WindowFunction.getHanningWindow(configuration.getWindowSize());
         } else {
             // TODO: 4/14/16
             return null;

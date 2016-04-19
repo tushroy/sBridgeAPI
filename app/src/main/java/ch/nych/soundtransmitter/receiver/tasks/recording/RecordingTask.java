@@ -20,6 +20,8 @@ public class RecordingTask extends ReceiverTask {
 
     public RecordingTask(Receiver receiver) {
         super(receiver);
+        // TODO: 4/14/16 the initializing of the receivertasks should be generalized
+        this.initRecordingTask();
     }
 
     public boolean initRecordingTask() {

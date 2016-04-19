@@ -2,6 +2,8 @@ package ch.nych.soundtransmitter.receiver.tasks.transformation;
 
 import android.util.Log;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import ch.nych.soundtransmitter.receiver.Receiver;
 import ch.nych.soundtransmitter.receiver.tasks.ReceiverTask;
 import ch.nych.soundtransmitter.receiver.tasks.SampleBuffer;
@@ -13,6 +15,7 @@ import ch.nych.soundtransmitter.util.Configuration;
 public class TransformationTask extends ReceiverTask {
 
     private SampleBuffer sampleBuffer = null;
+    private ConcurrentLinkedQueue<double[]> magnitudeBuffer = null;
     private double[] windowFunction = null;
     private Goertzel[] goertzels = null;
 
@@ -24,6 +27,7 @@ public class TransformationTask extends ReceiverTask {
     private void initTransformationTask() {
         Log.d(this.logTag, "Initialize TransformationTask");
         this.sampleBuffer = this.receiver.getSampleBuffer();
+        this.magnitudeBuffer = this.receiver.getMagnitudeBuffer();
         this.goertzels = new Goertzel[this.configuration.getFrequencies().length];
         this.windowFunction = WindowFunction.getWindowFunction(this.configuration);
 
@@ -31,7 +35,7 @@ public class TransformationTask extends ReceiverTask {
             this.goertzels[i] = new Goertzel(
                     this.configuration.getSampleRate(),
                     this.configuration.getFrequencies()[i],
-                    this.configuration.getBlocksize());
+                    this.configuration.getWindowSize());
         }
     }
 
@@ -61,6 +65,7 @@ public class TransformationTask extends ReceiverTask {
                 magnitude[i] = this.goertzels[i].getMagnitudeSquared();
                 this.goertzels[i].resetGoertzel();
             }
+            this.magnitudeBuffer.add(magnitude);
         }
     }
 

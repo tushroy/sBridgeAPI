@@ -47,11 +47,6 @@ public class Configuration {
     /*
      *
      */
-    public final static double DEFAULT_FREQUENCY_DELTA = 100.0;
-
-    /*
-     *
-     */
     public final static int SINE_TONE = 1;
 
     /* -------------------------------------------------------------------------------------------*/
@@ -88,17 +83,12 @@ public class Configuration {
     /**
      *
      */
-    public final static int MIN_BLOCKSIZE = 480;
-
-    /**
-     *
-     */
     public final static int HAMMING_WINDOW = 1;
 
     /**
      *
      */
-    public final static int HANNING_WINDOW = 2;
+    public final static int HANN_WINDOW = 2;
 
     //--------------------------------------------------------------------------------------------//
 
@@ -194,9 +184,17 @@ public class Configuration {
     private double frequencyDelta = 0.0;
 
     public double getFrequencyDelta() {
+        if(this.frequencyDelta <= 0.0) {
+           this.frequencyDelta = this.sampleRate / this.windowSize;
+        }
         return this.frequencyDelta;
     }
 
+    /**
+     * Shoult always be a integer multiple of the value samplerate / windowsize
+     * @param frequencyDelta
+     * @return
+     */
     public boolean setFrequencyDelta(final double frequencyDelta) {
         // TODO: 4/12/16 arugment validation
         this.frequencyDelta = frequencyDelta;
@@ -366,22 +364,6 @@ public class Configuration {
         return true;
     }
 
-    private int blockSize = 0;
-
-    public int getBlocksize() {
-        return this.blockSize;
-    }
-
-    public boolean setBlocksize(final int blockSize) {
-        if(blockSize < Configuration.MIN_BLOCKSIZE) {
-            Log.w(Configuration.LOG_TAG, "Invalid Blocksize. Minimal Blocksize is: " +
-                    Configuration.MIN_BLOCKSIZE);
-            return false;
-        }
-        this.blockSize = blockSize;
-        return true;
-    }
-
     private int windowFunction = 0;
 
     public int getWindowFunction() {
@@ -390,7 +372,7 @@ public class Configuration {
 
     public boolean setWindowFunction(final int windowFunction) {
         if(windowFunction != Configuration.HAMMING_WINDOW ||
-                windowFunction != Configuration.HANNING_WINDOW) {
+                windowFunction != Configuration.HANN_WINDOW) {
             Log.w(Configuration.LOG_TAG, "Invalid window function. (If implemented a new one, you" +
                     "need to update the Configuration class");
             return false;
@@ -408,16 +390,16 @@ public class Configuration {
         configuration.toneSize = Configuration.DEFAULT_TONE_SIZE;
         configuration.sampleRate = Configuration.SAMPLE_RATE_48KHZ;
         configuration.baseFrequency = Configuration.ULTRASONIC_BASE_FREQUENCY;
-        configuration.frequencyDelta = Configuration.DEFAULT_FREQUENCY_DELTA;
+        configuration.windowSize = Configuration.MIN_WINDOW_SIZE;
+        configuration.frequencyDelta = configuration.getFrequencyDelta();
         configuration.audioSource = Configuration.AUDIO_SOURCE;
         configuration.channelConfig = Configuration.CHANNEL_CONFIG;
         configuration.audioFormat = Configuration.AUDIO_FORMAT;
         configuration.audioRecordBufferSize = configuration.getMinimumAudioRecordBufferSize();
         configuration.sampleBufferSize = configuration.getAudioRecordBufferSize() * 10;
-        configuration.windowSize = Configuration.MIN_WINDOW_SIZE;
+
         configuration.overlappingFactor = Configuration.DEFAULT_OVERLAPPING_FACTOR;
-        configuration.blockSize = Configuration.MIN_BLOCKSIZE;
-        configuration.windowFunction = Configuration.HANNING_WINDOW;
+        configuration.windowFunction = Configuration.HANN_WINDOW;
         return configuration;
     }
 }

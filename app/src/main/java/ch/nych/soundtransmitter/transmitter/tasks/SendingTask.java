@@ -5,11 +5,14 @@ import android.util.Log;
 import ch.nych.soundtransmitter.transmitter.Transmitter;
 import ch.nych.soundtransmitter.transmitter.message.Message;
 import ch.nych.soundtransmitter.transmitter.tone.Tone;
+import ch.nych.soundtransmitter.util.Configuration;
 
 /**
  * Created by nych on 4/6/16.
  */
 public class SendingTask extends TransmissionTask {
+
+    private final String logTag = Configuration.LOG_TAG;
 
     public SendingTask(Transmitter transmitter, Message message) {
         super(transmitter, message, TransmissionTask.SENDING_TASK);
@@ -26,6 +29,7 @@ public class SendingTask extends TransmissionTask {
         int samplesSent = 0;
         this.transmitter.getAudioTrack().play();
         for(Tone tone : this.message.getToneSequence()) {
+            Log.d(this.logTag, "Sending tone: " + tone.getFrequency());
             samplesSent += this.transmitter.getAudioTrack().write(tone.getSamples(), 0, tone.getLength());
         }
         this.message.setState(Message.STATE_SENT);

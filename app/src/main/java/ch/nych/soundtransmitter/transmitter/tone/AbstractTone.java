@@ -31,4 +31,9 @@ public abstract class AbstractTone implements Tone {
     public int getLength() {
         return (int) this.length;
     }
+
+    //to remove
+    public double getFrequency() {
+        return this.frequency;
+    }
 }

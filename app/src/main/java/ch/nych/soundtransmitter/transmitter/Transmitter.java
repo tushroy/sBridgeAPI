@@ -102,7 +102,6 @@ public class Transmitter {
         for(ExecutorService executor : this.executorServices) {
             this.shutdownExecutor(executor);
         }
-        //Log.i()
     }
 
     private boolean shutdownExecutor(ExecutorService executor) {
@@ -121,7 +120,6 @@ public class Transmitter {
             executor.shutdownNow();
             Thread.currentThread().interrupt();
         }
-
         return true;
     }
 
