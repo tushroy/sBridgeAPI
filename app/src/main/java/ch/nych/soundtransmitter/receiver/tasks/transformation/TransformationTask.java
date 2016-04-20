@@ -1,5 +1,6 @@
 package ch.nych.soundtransmitter.receiver.tasks.transformation;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -38,44 +39,69 @@ public class TransformationTask extends ReceiverTask {
                     this.configuration.getWindowSize());
         }
     }
+    
+    private void detectFrameBegin() {
+        Goertzel listener = this.goertzels[this.configuration.getTransmissionMode() / 2];
+        double threshold = 2000000000000.0;
+        short[] window = null;
 
-    private void processWindow() {
-        short[] window = this.sampleBuffer.getNextWindow();
-        double[] magnitude = new double[this.goertzels.length];
-
-        if(window == null) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                Log.e(this.logTag, e.getMessage());
-            }
-        } else {
-            //Process samples with windowFunction
-            for(int i = 0; i < window.length; i++) {
-                window[i] *= this.windowFunction[i];
-            }
-
-            //Process samples with the Goertzel algorithm
-            for(int i = 0; i < window.length; i++) {
-                for(Goertzel g : this.goertzels) {
-                    g.processSample(window[i]);
+        while(!this.shutdown) {
+            if((window = this.sampleBuffer.getNextWindow()) != null) {
+                this.preprocessWindow(window);
+                for(short sample : window) {
+                    listener.processSample(sample);
+                }
+                if(listener.getMagnitudeSquared() > threshold) {
+                    Log.d(this.logTag, "Frame detected");
+                    listener.resetGoertzel();
+                    return;
+                }
+            } else {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    Log.e(this.logTag, e.getMessage());
                 }
             }
-            for (int i = 0; i < magnitude.length; i++) {
-                magnitude[i] = this.goertzels[i].getMagnitudeSquared();
-                this.goertzels[i].resetGoertzel();
-            }
-            this.magnitudeBuffer.add(magnitude);
+            listener.resetGoertzel();
         }
     }
+
+    private void recordFrame() {
+        Frame frame = new Frame(this.configuration);
+        Goertzel listener = this.goertzels[this.configuration.getTransmissionMode() / 2];
+        double threshold = 2000000000000.0;
+        short[] window = null;
+        double[] magnitudes = new double[this.goertzels.length];
+
+        while(!this.shutdown || listener.getMagnitudeSquared() < threshold) {
+            if((window = this.sampleBuffer.getNextWindow()) != null) {
+                this.preprocessWindow(window);
+                for(int i = 0; i < this.goertzels.length; i++) {
+                    for(short sample : window) {
+                        this.goertzels[i].processSample(sample);
+                    }
+                    magnitudes[i] = this.goertzels[i].getMagnitudeSquared();
+                    this.goertzels[i].getMagnitudeSquared();
+                }
+                frame.addMagnitudeSet(magnitudes);
+                // TODO: 4/20/16 Callback or similiar
+            }
+        }
+    }
+
+    private void preprocessWindow(final short[] window) {
+        for(int i = 0; i < window.length; i++) {
+            window[i] *= this.windowFunction[i];
+        }
+    }
+
 
     @Override
     public void run() {
         while(!this.shutdown) {
-            this.processWindow();
-        }
-        while(this.sampleBuffer.getNextWindow() != null) {
-            this.processWindow();
+            this.detectFrameBegin();
+            this.recordFrame();
         }
     }
 }
