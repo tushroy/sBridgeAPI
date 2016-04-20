@@ -157,6 +157,8 @@ public class Configuration {
         if(sampleRate == Configuration.SAMPLE_RATE_48KHZ ||
                 sampleRate == Configuration.SAMPLE_RATE_44KHZ) {
             this.sampleRate = sampleRate;
+            this.frequencyFactor = this.sampleRate / this.windowSize;
+            this.calcBaseFrequency(this.baseFrequency);
             return true;
         } else {
             return false;
@@ -166,39 +168,145 @@ public class Configuration {
     /**
      *
      */
+    private int windowSize = 0;
+
+    public int getWindowSize() {
+        return this.windowSize;
+    }
+
+    public boolean setWindowSize(final int windowSize) {
+        if(windowSize < Configuration.MIN_WINDOW_SIZE) {
+            Log.w(Configuration.LOG_TAG, "Invalid Window size. Minimal size is: " +
+                    Configuration.MIN_WINDOW_SIZE);
+            return false;
+        }
+        this.windowSize = windowSize;
+        this.frequencyFactor = this.sampleRate / this.windowSize;
+        this.calcBaseFrequency(this.baseFrequency);
+        return true;
+    }
+
+    /**
+     * The base frequency for the carrier frequency set.
+     */
     private double baseFrequency = 0.0;
 
+    /**
+     * Getter method for the base frequency. This frequency is the base for the carrier frequencies.
+     * The number of carrier frequencies above the base frequency, depends on the chosen
+     * transmission mode.
+     * @return The configured base frequency.
+     */
     public double getBaseFrequency() {
         return this.baseFrequency;
     }
 
-    public boolean setBaseFrequency(final double baseFrequency) {
-        // TODO: 4/12/16 argument validation
-        this.baseFrequency = baseFrequency;
-        return true;
-    }
-
     /**
-     *
+     * When setting the base frequency manually, always set the secure flag on true. The base
+     * frequency will then be calculated for you. The reason is that the base frequency and the
+     * resulting carrier frequencies should be integer multiples of the frequency factor. If you're
+     * not setting the secureFlag, you should be careful. Choosing the wrong base frequency can and
+     * will result in poor behavior of the Goertzel algorithm, respectively the Discrete Fourier
+     * transform.
+     * @param baseFrequency The base frequency of your carrier frequencies. Based on the
+     *                      transmission mode you chose, a set of frequencies above the base
+     *                      frequency will be used for data transmission. The calculation of these
+     *                      frequencies is done in dependence of the window size and the sample
+     *                      rate.
+     * @param secureFlag This flag should always be turned on unless you want to force a specific
+     *                   base frequency. If the flag is set to false, the baseFrequency parameter is
+     *                   only checked against the nyquist frequency (SAMPLE_RATE / 2) and zero or
+     *                   less. The base frequency will be set exactly to the baseFrequency
+     *                   parameter.
+     * @return True if the baseFrequency is bigger than zero and less than the nyquist frequency,
+     * False otherwise.
      */
-    private double frequencyDelta = 0.0;
-
-    public double getFrequencyDelta() {
-        if(this.frequencyDelta <= 0.0) {
-           this.frequencyDelta = this.sampleRate / this.windowSize;
+    public boolean setBaseFrequency(final double baseFrequency, final boolean secureFlag) {
+        double nyquistLimit = this.sampleRate / 2;
+        nyquistLimit -= this.getFrequencies().length * this.frequencyFactor;
+        if(baseFrequency <= 0) {
+            Log.w(Configuration.LOG_TAG, "Base frequency can't be zero or less");
+            return false;
+        } else if(baseFrequency >= nyquistLimit) {
+            Log.w(Configuration.LOG_TAG, "Base frequency can't be higher than the nyquist" +
+                    "frequency of: " + nyquistLimit);
+            return false;
         }
-        return this.frequencyDelta;
+        if(secureFlag) {
+            this.baseFrequency = this.calcBaseFrequency(baseFrequency);
+        } else {
+            this.baseFrequency = baseFrequency;
+        }
+        return true;
     }
 
     /**
-     * Shoult always be a integer multiple of the value samplerate / windowsize
-     * @param frequencyDelta
-     * @return
+     * The method calculated the base frequency upon an approximation value. Because the base
+     * frequency and the resulting carrier frequencies should be integer multiples of the
+     * frequency factor, it is useful to use this method. The reason lays in the maths of the
+     * Goertzel algorithm, respectively the Discrete Fourier transform.
+     * @param approximationValue The approximate frequency you want as base frequency.
+     * @return The calculated base frequency based on your approximation value or -1 if the
+     * approximationValue parameter was zero or below. If the base frequency and the carrier
+     * frequencies above, exceed the nyquist frequency of (SAMPLE_RATE / 2), the return value is -2.
      */
-    public boolean setFrequencyDelta(final double frequencyDelta) {
-        // TODO: 4/12/16 arugment validation
-        this.frequencyDelta = frequencyDelta;
-        return true;
+    public double calcBaseFrequency(final double approximationValue) {
+        double nyquistLimit = this.sampleRate / 2;
+        nyquistLimit -= this.getFrequencies().length * this.frequencyFactor;
+
+        if(baseFrequency <= 0) {
+            Log.w(Configuration.LOG_TAG, "A calculation of a base frequency of zero or below is" +
+                    "not allowed");
+            return -1;
+        } else if(baseFrequency >= nyquistLimit) {
+            Log.w(Configuration.LOG_TAG, "A calculation of a base frequency higher than the" +
+                    "nyquist frequency of: " + nyquistLimit + " is not allowed.");
+            return -2;
+        }
+
+        double baseFrequency;
+        baseFrequency = (int) approximationValue / this.frequencyFactor;
+        baseFrequency *= this.frequencyFactor;
+        return baseFrequency;
+    }
+
+    /**
+     * The frequency factor is the delta between the single carrier frequencies. It should be
+     * calculated by the formula SAMPLE_RATE / WINDOW_SIZE.
+     */
+    private double frequencyFactor = 0.0;
+
+    /**
+     * The method returns the calculated frequency factor. The frequency factor is the delta between
+     * the single carrier frequencies.
+     * @return The frequency factor or frequency delta
+     */
+    public double getFrequencyFactor() {
+        if(this.frequencyFactor <= 0.0) {
+           this.frequencyFactor = this.sampleRate / this.windowSize;
+        }
+        return this.frequencyFactor;
+    }
+
+    /**
+     * If you don't exactly what you are doing, don't set the frequency factor manually. This
+     * factor or delta between the single carrier frequencies is calculated with the formula
+     * SAMPLE_RATE / WINDOW_SIZE. For the Goertzel algorithm, respectively the Discrete Fourier
+     * transform, it is important, that the carrier frequencies are a integer multiple of this
+     * factor.
+     * By setting the force flag, the frequencyFactor is only checked against zero. It is not
+     * guaranteed that the application will work successfully.
+     *
+     * @param frequencyFactor The delta between the single carrier frequencies
+     * @return  True if the force flag is set and the frequencyFactor is bigger than zero. Otherwise
+     * the return value is false.
+     */
+    public boolean setFrequencyFactor(final double frequencyFactor, final boolean force) {
+        if(force && frequencyFactor > 0) {
+            this.frequencyFactor = frequencyFactor;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -213,7 +321,7 @@ public class Configuration {
 
             for (int i = 0; i < numberOfStates; i++) {
                 frequencySet[i] = this.baseFrequency;
-                frequencySet[i] += i * this.frequencyDelta;
+                frequencySet[i] += i * this.frequencyFactor;
             }
         }
         return this.frequencySet;
@@ -229,7 +337,7 @@ public class Configuration {
     }
 
     public boolean setAudioSource(final int audioSource) {
-        //// TODO: 4/13/16 Validate if there are other possible audio source for our purpose
+        // TODO: 4/19/16  Validate if there are other possible audio source for our purpose
         if(audioSource != MediaRecorder.AudioSource.MIC) {
             Log.w(Configuration.LOG_TAG, "Invalid AudioSource");
             return false;
@@ -248,7 +356,7 @@ public class Configuration {
     }
 
     public boolean setChannelConfig(final int channelConfig) {
-        //// TODO: 4/13/16 Validate if there are other possible channel configurations for our purpose
+        // TODO: 4/13/16 Validate if there are other possible channel configurations for our purpose
         if(channelConfig != AudioFormat.CHANNEL_IN_MONO) {
             Log.w(Configuration.LOG_TAG, "Invalid ChannelConfig");
             return false;
@@ -302,6 +410,8 @@ public class Configuration {
                     this.getMinimumAudioRecordBufferSize());
             return false;
         }
+        // TODO: 4/19/16 This argument should also be checked against a max value
+        // TODO: 4/19/16 If buffersize is raised, the samplebuffersize also needs to be resized
         this.audioRecordBufferSize = audioRecordBufferSize;
         return true;
     }
@@ -325,25 +435,6 @@ public class Configuration {
         this.sampleBufferSize = sampleBufferSize;
         return true;
 
-    }
-
-    /**
-     *
-     */
-    private int windowSize = 0;
-
-    public int getWindowSize() {
-        return this.windowSize;
-    }
-
-    public boolean setWindowSize(int windowSize) {
-        if(windowSize < Configuration.MIN_WINDOW_SIZE) {
-            Log.w(Configuration.LOG_TAG, "Invalid Window size. Minimal size is: " +
-                    Configuration.MIN_WINDOW_SIZE);
-            return false;
-        }
-        this.windowSize = windowSize;
-        return true;
     }
 
     /**
@@ -391,7 +482,7 @@ public class Configuration {
         configuration.sampleRate = Configuration.SAMPLE_RATE_48KHZ;
         configuration.baseFrequency = Configuration.ULTRASONIC_BASE_FREQUENCY;
         configuration.windowSize = Configuration.MIN_WINDOW_SIZE;
-        configuration.frequencyDelta = configuration.getFrequencyDelta();
+        configuration.frequencyFactor = configuration.getFrequencyFactor();
         configuration.audioSource = Configuration.AUDIO_SOURCE;
         configuration.channelConfig = Configuration.CHANNEL_CONFIG;
         configuration.audioFormat = Configuration.AUDIO_FORMAT;

@@ -19,7 +19,7 @@ public class ToneFactory {
                         "\tStateMachine:\t" + configuration.getTransmissionMode() + "States\n" +
                         "\tBaseFrequeny:\t" + configuration.getBaseFrequency() + "Hz\n" +
                         "\tToneSize:\t\t" + configuration.getToneSize() + " Samples\n" +
-                        "\tFrequencyDelta:\t" + configuration.getFrequencyDelta() + "Hz\n" +
+                        "\tFrequencyDelta:\t" + configuration.getFrequencyFactor() + "Hz\n" +
                         "\tSampleRate:\t\t" + configuration.getSampleRate() + "Hz");
 
         double[] frequencies = configuration.getFrequencies();
