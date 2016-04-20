@@ -30,7 +30,10 @@ public class SendingTask extends TransmissionTask {
         this.transmitter.getAudioTrack().play();
         for(Tone tone : this.message.getToneSequence()) {
             Log.d(this.logTag, "Sending tone: " + tone.getFrequency());
-            samplesSent += this.transmitter.getAudioTrack().write(tone.getSamples(), 0, tone.getLength());
+            samplesSent +=this.transmitter.getAudioTrack().write(
+                    tone.getSamples(),
+                    0,
+                    (int) tone.getLength());
         }
         this.message.setState(Message.STATE_SENT);
         this.transmitter.getAudioTrack().stop();

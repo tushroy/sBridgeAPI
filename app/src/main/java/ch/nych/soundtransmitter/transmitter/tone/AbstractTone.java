@@ -11,13 +11,12 @@ public abstract class AbstractTone implements Tone {
 
     // Tone frequency
     protected double frequency = 0;
-    // Length of tone in samples
-    protected double length = 0;
     // Sample rate of tone
     protected double sampleRate = 0;
+    // Length of tone in samples
+    protected double length = 0;
     // Volume of tone
     protected double volume = 0;
-
     // The calculated samples
     protected short[] samples = null;
 
@@ -28,12 +27,19 @@ public abstract class AbstractTone implements Tone {
         this.volume = volume;
     }
 
-    public int getLength() {
-        return (int) this.length;
-    }
-
-    //to remove
     public double getFrequency() {
         return this.frequency;
+    }
+
+    public double getSampleRate() {
+        return this.sampleRate;
+    }
+
+    public double getLength() {
+        return this.length;
+    }
+
+    public double getVolume() {
+        return this.volume;
     }
 }

@@ -1,14 +1,10 @@
 package ch.nych.soundtransmitter.util;
 
 import android.media.AudioFormat;
-import android.media.AudioRecord;
 import android.media.MediaRecorder;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import java.security.cert.CertificateParsingException;
-import java.security.spec.ECField;
 
 import static org.junit.Assert.*;
 
@@ -311,90 +307,37 @@ public class ConfigurationTest {
 
     @Test
     public void testGetAudioSource() throws Exception {
-    //    assertEquals(MediaRecorder.AudioSource.MIC, this.configuration.getAudioSource());
+        assertEquals(MediaRecorder.AudioSource.MIC, this.configuration.getAudioSource());
     }
 
     @Test
     public void testSetAudioSource() throws Exception {
-     /*   assertEquals(true, this.configuration.setAudioSource(Configuration.AUDIO_SOURCE));
+        assertEquals(true, this.configuration.setAudioSource(Configuration.AUDIO_SOURCE));
         assertEquals(true, this.configuration.setAudioSource(MediaRecorder.AudioSource.MIC));
-        assertEquals(false, this.configuration.setAudioSource(MediaRecorder.AudioSource.CAMCORDER));*/
+        assertEquals(false, this.configuration.setAudioSource(MediaRecorder.AudioSource.CAMCORDER));
     }
 
     @Test
     public void testGetChannelConfig() throws Exception {
-       // assertEquals(AudioFormat.CHANNEL_IN_MONO, this.configuration.getChannelConfig());
+        assertEquals(AudioFormat.CHANNEL_IN_MONO, this.configuration.getChannelConfig());
     }
 
     @Test
     public void testSetChannelConfig() throws Exception {
-       /* assertEquals(true, this.configuration.setChannelConfig(Configuration.CHANNEL_CONFIG));
+        assertEquals(true, this.configuration.setChannelConfig(Configuration.CHANNEL_CONFIG));
         assertEquals(true, this.configuration.setChannelConfig(AudioFormat.CHANNEL_IN_MONO));
-        assertEquals(false, this.configuration.setChannelConfig(AudioFormat.CHANNEL_IN_BACK));*/
+        assertEquals(false, this.configuration.setChannelConfig(AudioFormat.CHANNEL_IN_BACK));
     }
 
     @Test
     public void testGetAudioFormat() throws Exception {
-     //   assertEquals(AudioFormat.ENCODING_PCM_16BIT, this.configuration.getAudioFormat());
+        assertEquals(AudioFormat.ENCODING_PCM_16BIT, this.configuration.getAudioFormat());
     }
 
     @Test
     public void testSetAudioFormat() throws Exception {
-       /* assertEquals(true, this.configuration.setAudioFormat(Configuration.AUDIO_FORMAT));
+        assertEquals(true, this.configuration.setAudioFormat(Configuration.AUDIO_FORMAT));
         assertEquals(true, this.configuration.setAudioFormat(AudioFormat.ENCODING_PCM_16BIT));
-        assertEquals(false, this.configuration.setAudioFormat(AudioFormat.ENCODING_PCM_8BIT));*/
-
-    }
-
-    @Test
-    public void testGetAudioRecordBufferSize() throws Exception {
-        /*assertEquals(AudioRecord.getMinBufferSize(
-                configuration.getSampleRate(),
-                configuration.getChannelConfig(),
-                configuration.getAudioFormat() / 2), this.configuration.getAudioRecordBufferSize());*/
-    }
-
-    @Test
-    public void testGetMinimumAudioRecordBufferSize() throws Exception {
-
-    }
-
-    @Test
-    public void testSetAudioRecordBufferSize() throws Exception {
-
-    }
-
-    @Test
-    public void testGetSampleBufferSize() throws Exception {
-    }
-
-    @Test
-    public void testSetSampleBufferSize() throws Exception {
-
-    }
-
-    @Test
-    public void testGetOverlappingFactor() throws Exception {
-
-    }
-
-    @Test
-    public void testSetOverlappingFactor() throws Exception {
-
-    }
-
-    @Test
-    public void testGetWindowFunction() throws Exception {
-
-    }
-
-    @Test
-    public void testSetWindowFunction() throws Exception {
-
-    }
-
-    @Test
-    public void testNewUltrasonicConfiguration() throws Exception {
-
+        assertEquals(false, this.configuration.setAudioFormat(AudioFormat.ENCODING_PCM_8BIT));
     }
 }
