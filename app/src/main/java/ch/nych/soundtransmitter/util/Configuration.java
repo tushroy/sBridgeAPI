@@ -5,6 +5,8 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
 
+import java.util.concurrent.locks.Condition;
+
 /**
  * Created by nych on 4/13/16.
  */
@@ -37,7 +39,13 @@ public class Configuration {
     /*
      *
      */
-    public final static int DEFAULT_TONE_SIZE = 480;
+    public final static int MIN_TONE_SIZE = 480;
+
+
+    public final static int MAX_TONE_SIZE = 48000;
+
+
+    public final static double DEFAULT_FREQUENCY_RESOLUTION_FACTOR = 1;
 
     /*
      *
@@ -139,7 +147,15 @@ public class Configuration {
     }
 
     public boolean setToneSize(final int toneSize) {
-        // TODO: 4/12/16 argument validation
+        if(toneSize < Configuration.MIN_TONE_SIZE) {
+            Log.w(Configuration.LOG_TAG, "Tone size can't be smaller than " +
+                    Configuration.MIN_TONE_SIZE + " samples");
+            return false;
+        } else if(toneSize > Configuration.MAX_TONE_SIZE) {
+            Log.w(Configuration.LOG_TAG, "Tone sizes over " + Configuration.MAX_TONE_SIZE +
+                    " samples are not allowed");
+            return false;
+        }
         this.toneSize = toneSize;
         return true;
     }
@@ -157,7 +173,6 @@ public class Configuration {
         if(sampleRate == Configuration.SAMPLE_RATE_48KHZ ||
                 sampleRate == Configuration.SAMPLE_RATE_44KHZ) {
             this.sampleRate = sampleRate;
-            this.frequencyResolution = this.sampleRate / this.windowSize;
             this.calcBaseFrequency(this.baseFrequency);
             return true;
         } else {
@@ -185,16 +200,99 @@ public class Configuration {
         return this.windowSize;
     }
 
+    /**
+     *
+     * @param windowSize
+     * @return
+     */
     public boolean setWindowSize(final int windowSize) {
         if(windowSize < Configuration.MIN_WINDOW_SIZE) {
             Log.w(Configuration.LOG_TAG, "Invalid Window size. Minimal size is: " +
                     Configuration.MIN_WINDOW_SIZE);
             return false;
+        } else if(windowSize > this.sampleRate) {
+            Log.w(Configuration.LOG_TAG, "Invalid Window size. Maximal size is: " +
+                    this.getSampleRate());
+            return false;
         }
         this.windowSize = windowSize;
-        this.frequencyResolution = this.sampleRate / this.windowSize;
         this.calcBaseFrequency(this.baseFrequency);
         return true;
+    }
+
+    /**
+     * The method returns the calculated frequency factor. The frequency factor is the delta between
+     * the single carrier frequencies.
+     * @return The frequency factor or frequency delta
+     */
+    public double getFrequencyResolution() {
+        return (double) this.sampleRate / this.windowSize;
+    }
+
+    /**
+     *
+     */
+    private double frequencyResolutionFactor = 0.0;
+
+    /**
+     *
+     * @return
+     */
+    public double getFrequencyResolutionFactor() {
+        return this.frequencyResolutionFactor;
+    }
+
+    /**
+     *
+     * @param frequencyResolutionFactor
+     * @return
+     */
+    public boolean setFrequencyResolutionFactor(final double frequencyResolutionFactor) {
+        if(frequencyResolutionFactor < 1) {
+            Log.w(Configuration.LOG_TAG, "Minimum for the resolution factor is 1");
+            return false;
+        }
+
+        double frequencyDelta = frequencyResolutionFactor * this.getFrequencyResolution();
+
+        if((frequencyDelta * this.transmissionMode + this.baseFrequency) >
+                this.getNyquistFrequency()) {
+            Log.w(Configuration.LOG_TAG, "Reduce the factor, nyquist frequency exceeded.");
+            return false;
+        }
+
+        this.frequencyResolutionFactor = frequencyResolutionFactor;
+        return true;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public double getFrequencyDelta() {
+        return frequencyResolutionFactor * this.getFrequencyResolution();
+    }
+
+    /**
+     * The method calculated the base frequency upon an approximation value. Because the base
+     * frequency and the resulting carrier frequencies should be integer multiples of the
+     * frequency factor, it is useful to use this method. The reason lays in the maths of the
+     * Goertzel algorithm, respectively the Discrete Fourier transform.
+     * @param approximationValue The approximate frequency you want as base frequency.
+     * @return The calculated base frequency based on your approximation value or -1 if the
+     * approximationValue parameter was zero or below. If the base frequency and the carrier
+     * frequencies above, exceed the nyquist frequency of (SAMPLE_RATE / 2), the return value is -2.
+     */
+    public double calcBaseFrequency(final double approximationValue) {
+        if(approximationValue <= 0) {
+            Log.w(Configuration.LOG_TAG, "A calculation of a base frequency of zero or below is" +
+                    "not allowed");
+            return -1;
+        }
+        double baseFrequency;
+        baseFrequency = (int) (approximationValue / this.getFrequencyResolution());
+        baseFrequency *= this.getFrequencyResolution();
+        return baseFrequency;
     }
 
     /**
@@ -238,7 +336,7 @@ public class Configuration {
         if(baseFrequency <= 0) {
             Log.w(Configuration.LOG_TAG, "Base frequency can't be zero or less");
             return false;
-        } else if(baseFrequency >= nyquistLimit) {
+        } else if(baseFrequency > nyquistLimit) {
             Log.w(Configuration.LOG_TAG, "Base frequency can't be higher than the nyquist" +
                     "frequency of: " + nyquistLimit);
             return false;
@@ -252,94 +350,17 @@ public class Configuration {
     }
 
     /**
-     * The method calculated the base frequency upon an approximation value. Because the base
-     * frequency and the resulting carrier frequencies should be integer multiples of the
-     * frequency factor, it is useful to use this method. The reason lays in the maths of the
-     * Goertzel algorithm, respectively the Discrete Fourier transform.
-     * @param approximationValue The approximate frequency you want as base frequency.
-     * @return The calculated base frequency based on your approximation value or -1 if the
-     * approximationValue parameter was zero or below. If the base frequency and the carrier
-     * frequencies above, exceed the nyquist frequency of (SAMPLE_RATE / 2), the return value is -2.
-     */
-    public double calcBaseFrequency(final double approximationValue) {
-        double nyquistLimit = this.getNyquistFrequency() -
-                (this.transmissionMode * this.getFrequencyDelta());
-
-        if(baseFrequency <= 0) {
-            Log.w(Configuration.LOG_TAG, "A calculation of a base frequency of zero or below is" +
-                    "not allowed");
-            return -1;
-        } else if(baseFrequency >= nyquistLimit) {
-            Log.w(Configuration.LOG_TAG, "A calculation of a base frequency higher than the" +
-                    "nyquist frequency of: " + nyquistLimit + " is not allowed.");
-            return -2;
-        }
-
-        double baseFrequency;
-        baseFrequency = (int) approximationValue / this.frequencyResolution;
-        baseFrequency *= this.frequencyResolution;
-        return baseFrequency;
-    }
-
-    /**
-     * The frequency factor is the delta between the single carrier frequencies. It should be
-     * calculated by the formula SAMPLE_RATE / WINDOW_SIZE.
-     */
-    private double frequencyResolution = 0.0;
-
-    /**
-     * The method returns the calculated frequency factor. The frequency factor is the delta between
-     * the single carrier frequencies.
-     * @return The frequency factor or frequency delta
-     */
-    public double getFrequencyResolution() {
-        return this.sampleRate / this.windowSize;
-    }
-
-    private double frequencyResolutionFactor = 0.0;
-
-    public double getFrequencyResolutionFactor() {
-        return this.frequencyResolutionFactor;
-    }
-
-    public boolean setFrequencyResolutionFactor(final int frequencyResolutionFactor) {
-        if(frequencyResolutionFactor < 1) {
-            Log.w(Configuration.LOG_TAG, "Minimum for the resolution factor is 1");
-            return false;
-        }
-
-        double frequencyDelta = frequencyResolutionFactor * this.getFrequencyResolution();
-
-        if((frequencyDelta * this.transmissionMode + this.baseFrequency) >
-                this.getNyquistFrequency()) {
-            Log.w(Configuration.LOG_TAG, "Reduce the factor, nyquist frequency exceeded.");
-            return false;
-        }
-
-        this.frequencyResolutionFactor = frequencyResolutionFactor;
-        return true;
-    }
-
-    public double getFrequencyDelta() {
-        return frequencyResolutionFactor * this.getFrequencyResolution();
-    }
-
-    /**
      *
+     * @return
      */
-    private double[] frequencySet = null;
-
     public double[] getFrequencies() {
-        if(this.frequencySet == null) {
-
-            this.frequencySet = new double[this.transmissionMode];
-            double frequencyDelta = this.getFrequencyDelta();
-            for (int i = 0; i < this.transmissionMode; i++) {
-                frequencySet[i] = this.baseFrequency;
-                frequencySet[i] += i * frequencyDelta;
-            }
+        double[] frequencySet = new double[this.transmissionMode];
+        double frequencyDelta = this.getFrequencyDelta();
+        for (int i = 0; i < this.transmissionMode; i++) {
+            frequencySet[i] = this.baseFrequency;
+            frequencySet[i] += i * frequencyDelta;
         }
-        return this.frequencySet;
+        return frequencySet;
     }
 
     /**
@@ -492,12 +513,14 @@ public class Configuration {
     public static Configuration newUltrasonicConfiguration() {
         Configuration configuration = new Configuration();
         configuration.transmissionMode = Configuration.FOUR_STATE_TRANSMISSION;
+
         configuration.toneType = Configuration.SINE_TONE;
-        configuration.toneSize = Configuration.DEFAULT_TONE_SIZE;
+        configuration.toneSize = Configuration.MIN_TONE_SIZE;
         configuration.sampleRate = Configuration.SAMPLE_RATE_48KHZ;
         configuration.baseFrequency = Configuration.ULTRASONIC_BASE_FREQUENCY;
         configuration.windowSize = Configuration.MIN_WINDOW_SIZE;
-        configuration.frequencyResolution = configuration.getFrequencyResolution();
+        configuration.frequencyResolutionFactor = Configuration.DEFAULT_FREQUENCY_RESOLUTION_FACTOR;
+
         configuration.audioSource = Configuration.AUDIO_SOURCE;
         configuration.channelConfig = Configuration.CHANNEL_CONFIG;
         configuration.audioFormat = Configuration.AUDIO_FORMAT;
