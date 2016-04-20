@@ -17,12 +17,12 @@ public class Configuration {
     /*
      *
      */
-    public final static int TWO_STATE_TRANSMISSION= 2;
+    public final static int TWO_STATE_TRANSMISSION= 5;
 
     /*
      *
      */
-    public final static int FOUR_STATE_TRANSMISSION = 4;
+    public final static int FOUR_STATE_TRANSMISSION = 9;
 
     /*
      *
@@ -157,7 +157,7 @@ public class Configuration {
         if(sampleRate == Configuration.SAMPLE_RATE_48KHZ ||
                 sampleRate == Configuration.SAMPLE_RATE_44KHZ) {
             this.sampleRate = sampleRate;
-            this.frequencyFactor = this.sampleRate / this.windowSize;
+            this.frequencyResolution = this.sampleRate / this.windowSize;
             this.calcBaseFrequency(this.baseFrequency);
             return true;
         } else {
@@ -165,11 +165,22 @@ public class Configuration {
         }
     }
 
+    public double getNyquistFrequency() {
+        return this.sampleRate / 2;
+    }
+
     /**
-     *
+     * The window size.
      */
     private int windowSize = 0;
 
+    /**
+     * Getter method for the window size. The window size defines the number of samples being
+     * analyzed per time. This is an important value as in combination with the sample rate it
+     * defines the resolution of the transformed data. The higher the resolution, the more
+     * frequencies can be distinguished.
+     * @return
+     */
     public int getWindowSize() {
         return this.windowSize;
     }
@@ -181,7 +192,7 @@ public class Configuration {
             return false;
         }
         this.windowSize = windowSize;
-        this.frequencyFactor = this.sampleRate / this.windowSize;
+        this.frequencyResolution = this.sampleRate / this.windowSize;
         this.calcBaseFrequency(this.baseFrequency);
         return true;
     }
@@ -222,8 +233,8 @@ public class Configuration {
      * False otherwise.
      */
     public boolean setBaseFrequency(final double baseFrequency, final boolean secureFlag) {
-        double nyquistLimit = this.sampleRate / 2;
-        nyquistLimit -= this.getFrequencies().length * this.frequencyFactor;
+        double nyquistLimit = this.getNyquistFrequency() -
+                (this.getTransmissionMode() * this.getFrequencyDelta());
         if(baseFrequency <= 0) {
             Log.w(Configuration.LOG_TAG, "Base frequency can't be zero or less");
             return false;
@@ -251,8 +262,8 @@ public class Configuration {
      * frequencies above, exceed the nyquist frequency of (SAMPLE_RATE / 2), the return value is -2.
      */
     public double calcBaseFrequency(final double approximationValue) {
-        double nyquistLimit = this.sampleRate / 2;
-        nyquistLimit -= this.getFrequencies().length * this.frequencyFactor;
+        double nyquistLimit = this.getNyquistFrequency() -
+                (this.transmissionMode * this.getFrequencyDelta());
 
         if(baseFrequency <= 0) {
             Log.w(Configuration.LOG_TAG, "A calculation of a base frequency of zero or below is" +
@@ -265,8 +276,8 @@ public class Configuration {
         }
 
         double baseFrequency;
-        baseFrequency = (int) approximationValue / this.frequencyFactor;
-        baseFrequency *= this.frequencyFactor;
+        baseFrequency = (int) approximationValue / this.frequencyResolution;
+        baseFrequency *= this.frequencyResolution;
         return baseFrequency;
     }
 
@@ -274,39 +285,43 @@ public class Configuration {
      * The frequency factor is the delta between the single carrier frequencies. It should be
      * calculated by the formula SAMPLE_RATE / WINDOW_SIZE.
      */
-    private double frequencyFactor = 0.0;
+    private double frequencyResolution = 0.0;
 
     /**
      * The method returns the calculated frequency factor. The frequency factor is the delta between
      * the single carrier frequencies.
      * @return The frequency factor or frequency delta
      */
-    public double getFrequencyFactor() {
-        if(this.frequencyFactor <= 0.0) {
-           this.frequencyFactor = this.sampleRate / this.windowSize;
-        }
-        return this.frequencyFactor;
+    public double getFrequencyResolution() {
+        return this.sampleRate / this.windowSize;
     }
 
-    /**
-     * If you don't exactly what you are doing, don't set the frequency factor manually. This
-     * factor or delta between the single carrier frequencies is calculated with the formula
-     * SAMPLE_RATE / WINDOW_SIZE. For the Goertzel algorithm, respectively the Discrete Fourier
-     * transform, it is important, that the carrier frequencies are a integer multiple of this
-     * factor.
-     * By setting the force flag, the frequencyFactor is only checked against zero. It is not
-     * guaranteed that the application will work successfully.
-     *
-     * @param frequencyFactor The delta between the single carrier frequencies
-     * @return  True if the force flag is set and the frequencyFactor is bigger than zero. Otherwise
-     * the return value is false.
-     */
-    public boolean setFrequencyFactor(final double frequencyFactor, final boolean force) {
-        if(force && frequencyFactor > 0) {
-            this.frequencyFactor = frequencyFactor;
-            return true;
+    private double frequencyResolutionFactor = 0.0;
+
+    public double getFrequencyResolutionFactor() {
+        return this.frequencyResolutionFactor;
+    }
+
+    public boolean setFrequencyResolutionFactor(final int frequencyResolutionFactor) {
+        if(frequencyResolutionFactor < 1) {
+            Log.w(Configuration.LOG_TAG, "Minimum for the resolution factor is 1");
+            return false;
         }
-        return false;
+
+        double frequencyDelta = frequencyResolutionFactor * this.getFrequencyResolution();
+
+        if((frequencyDelta * this.transmissionMode + this.baseFrequency) >
+                this.getNyquistFrequency()) {
+            Log.w(Configuration.LOG_TAG, "Reduce the factor, nyquist frequency exceeded.");
+            return false;
+        }
+
+        this.frequencyResolutionFactor = frequencyResolutionFactor;
+        return true;
+    }
+
+    public double getFrequencyDelta() {
+        return frequencyResolutionFactor * this.getFrequencyResolution();
     }
 
     /**
@@ -316,12 +331,12 @@ public class Configuration {
 
     public double[] getFrequencies() {
         if(this.frequencySet == null) {
-            int numberOfStates = this.transmissionMode * 2 + 1;
-            this.frequencySet = new double[numberOfStates];
 
-            for (int i = 0; i < numberOfStates; i++) {
+            this.frequencySet = new double[this.transmissionMode];
+            double frequencyDelta = this.getFrequencyDelta();
+            for (int i = 0; i < this.transmissionMode; i++) {
                 frequencySet[i] = this.baseFrequency;
-                frequencySet[i] += i * this.frequencyFactor;
+                frequencySet[i] += i * frequencyDelta;
             }
         }
         return this.frequencySet;
@@ -482,7 +497,7 @@ public class Configuration {
         configuration.sampleRate = Configuration.SAMPLE_RATE_48KHZ;
         configuration.baseFrequency = Configuration.ULTRASONIC_BASE_FREQUENCY;
         configuration.windowSize = Configuration.MIN_WINDOW_SIZE;
-        configuration.frequencyFactor = configuration.getFrequencyFactor();
+        configuration.frequencyResolution = configuration.getFrequencyResolution();
         configuration.audioSource = Configuration.AUDIO_SOURCE;
         configuration.channelConfig = Configuration.CHANNEL_CONFIG;
         configuration.audioFormat = Configuration.AUDIO_FORMAT;
