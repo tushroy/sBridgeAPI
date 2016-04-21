@@ -20,21 +20,43 @@ import ch.nych.soundtransmitter.util.Configuration;
  * Created by nych on 4/6/16.
  */
 public class Transmitter {
-
+    /**
+     *
+     */
     private final String logTag = Configuration.LOG_TAG;
+
     private boolean ready = false;
+
+    /**
+     *
+     */
     private Configuration configuration = null;
+
+    /**
+     *
+     */
     private Tone[] toneSet = null;
-    private ExecutorService[] executorServices = null;
+
+    /**
+     *
+     */
     private AudioTrack audioTrack = null;
 
-    public int initTransmitter(Configuration configuration) {
+    /**
+     *
+     */
+    private ExecutorService[] executorServices = null;
+
+
+
+
+    public boolean initTransmitter(Configuration configuration) {
 
         Log.i(this.logTag, "Initialize Transmitter");
 
         if(configuration == null) {
             Log.e(this.logTag, "Invalid Configuration, Transmitter is not ready");
-            return -1;
+            return false;
         } else {
             this.configuration = configuration;
         }
@@ -49,11 +71,11 @@ public class Transmitter {
         };
 
         if(!this.initAudioTrack()) {
-            return -2;
+            return false;
         }
 
         this.ready = true;
-        return 0;
+        return true;
     }
 
     private boolean initAudioTrack() {

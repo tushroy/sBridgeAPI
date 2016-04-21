@@ -324,7 +324,7 @@ public class ConfigurationTest {
 
     @Test
     public void testSetChannelConfig() throws Exception {
-        assertEquals(true, this.configuration.setChannelConfig(Configuration.CHANNEL_CONFIG));
+        assertEquals(true, this.configuration.setChannelConfig(Configuration.CHANNEL_IN_MONO));
         assertEquals(true, this.configuration.setChannelConfig(AudioFormat.CHANNEL_IN_MONO));
         assertEquals(false, this.configuration.setChannelConfig(AudioFormat.CHANNEL_IN_BACK));
     }

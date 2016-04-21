@@ -2,10 +2,7 @@ package ch.nych.soundtransmitter.util;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.media.MediaRecorder;
 import android.util.Log;
-
-import java.util.concurrent.locks.Condition;
 
 /**
  * Created by nych on 4/13/16.
@@ -56,24 +53,6 @@ public class Configuration {
      *
      */
     public final static int SINE_TONE = 1;
-
-    /* -------------------------------------------------------------------------------------------*/
-    /*                                         AudioRecord                                        */
-
-    /**
-     *
-     */
-    public final static int AUDIO_SOURCE = MediaRecorder.AudioSource.MIC;
-
-    /**
-     *
-     */
-    public final static int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
-
-    /**
-     *
-     */
-    public final static int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
 
     /* -------------------------------------------------------------------------------------------*/
 
@@ -363,107 +342,32 @@ public class Configuration {
         return frequencySet;
     }
 
-    /**
-     *
-     */
-    private int audioSource = 0;
-
-    public int getAudioSource() {
-        return this.audioSource;
-    }
-
-    public boolean setAudioSource(final int audioSource) {
-        // TODO: 4/19/16  Validate if there are other possible audio source for our purpose
-        if(audioSource != MediaRecorder.AudioSource.MIC) {
-            Log.w(Configuration.LOG_TAG, "Invalid AudioSource");
-            return false;
-        }
-        this.audioSource = audioSource;
-        return true;
-    }
 
     /**
      *
      */
-    private int channelConfig = 0;
-
-    public int getChannelConfig() {
-        return this.channelConfig;
-    }
-
-    public boolean setChannelConfig(final int channelConfig) {
-        // TODO: 4/13/16 Validate if there are other possible channel configurations for our purpose
-        if(channelConfig != AudioFormat.CHANNEL_IN_MONO) {
-            Log.w(Configuration.LOG_TAG, "Invalid ChannelConfig");
-            return false;
-        }
-        this.channelConfig = channelConfig;
-        return true;
-    }
-
-    /**
-     *
-     */
-    private int audioFormat = 0;
-
-    public int getAudioFormat() {
-        return this.audioFormat;
-    }
-
-    public boolean setAudioFormat(final int audioFormat) {
-        if(audioFormat != AudioFormat.ENCODING_PCM_16BIT) {
-            Log.w(Configuration.LOG_TAG, "Invalid AudioFormat, only 16 Bit PCM accepted");
-            return false;
-        }
-        this.audioFormat = audioFormat;
-        return true;
-    }
-
-    /**
-     *
-     */
-    private int audioRecordBufferSize = 0;
-
-    public int getAudioRecordBufferSize() {
-        return this.audioRecordBufferSize;
-    }
-
-    public int getMinimumAudioRecordBufferSize() {
-        int size = AudioRecord.getMinBufferSize(
-                this.sampleRate,
-                this.channelConfig,
-                this.audioFormat);
-        /*
-         * division is necessary because getMinBufferSize() returns the minBufferSize in bytes
-         * instead of shorts
-         */
-        return size / 2;
-    }
-
-    public boolean setAudioRecordBufferSize(final int audioRecordBufferSize) {
-        if(audioRecordBufferSize < this.getMinimumAudioRecordBufferSize()) {
-            Log.w(Configuration.LOG_TAG, "Invalid AudioRecord Buffer size. Minimal size is: " +
-                    this.getMinimumAudioRecordBufferSize());
-            return false;
-        }
-        // TODO: 4/19/16 This argument should also be checked against a max value
-        // TODO: 4/19/16 If buffersize is raised, the samplebuffersize also needs to be resized
-        this.audioRecordBufferSize = audioRecordBufferSize;
-        return true;
-    }
+    private int minBufferSize = 0;
 
     /**
      *
      */
     private int sampleBufferSize = 0;
 
+    /**
+     *
+     * @return
+     */
     public int getSampleBufferSize() {
         return this.sampleBufferSize;
     }
 
+    /**
+     *
+     * @param sampleBufferSize
+     * @return
+     */
     public boolean setSampleBufferSize(final int sampleBufferSize) {
-        int minBufferSize = this.audioRecordBufferSize * 10;
-        if(sampleBufferSize < minBufferSize) {
+        if(sampleBufferSize < this.minBufferSize) {
             Log.w(Configuration.LOG_TAG, "Invalid sampleBuffer size. Minimal size is: " +
                     minBufferSize);
             return false;
@@ -520,12 +424,11 @@ public class Configuration {
         configuration.baseFrequency = Configuration.ULTRASONIC_BASE_FREQUENCY;
         configuration.windowSize = Configuration.MIN_WINDOW_SIZE;
         configuration.frequencyResolutionFactor = Configuration.DEFAULT_FREQUENCY_RESOLUTION_FACTOR;
-
-        configuration.audioSource = Configuration.AUDIO_SOURCE;
-        configuration.channelConfig = Configuration.CHANNEL_CONFIG;
-        configuration.audioFormat = Configuration.AUDIO_FORMAT;
-        configuration.audioRecordBufferSize = configuration.getMinimumAudioRecordBufferSize();
-        configuration.sampleBufferSize = configuration.getAudioRecordBufferSize() * 10;
+        configuration.minBufferSize = AudioRecord.getMinBufferSize(
+                configuration.getSampleRate(),
+                AudioFormat.CHANNEL_IN_MONO,
+                AudioFormat.ENCODING_PCM_16BIT) * 10;
+        configuration.sampleBufferSize = configuration.minBufferSize;
 
         configuration.overlappingFactor = Configuration.DEFAULT_OVERLAPPING_FACTOR;
         configuration.windowFunction = Configuration.HANN_WINDOW;

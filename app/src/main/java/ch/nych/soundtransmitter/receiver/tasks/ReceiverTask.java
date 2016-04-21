@@ -8,17 +8,44 @@ import ch.nych.soundtransmitter.util.Configuration;
  */
 public abstract class ReceiverTask implements Runnable {
 
+    /**
+     *
+     */
     protected final String logTag = Configuration.LOG_TAG;
 
+    /**
+     *
+     */
     protected Receiver receiver = null;
+
+    /**
+     *
+     */
     protected Configuration configuration = null;
+
+    /**
+     *
+     */
     protected boolean shutdown = false;
 
+    /**
+     *
+     * @param receiver
+     */
     public ReceiverTask(final Receiver receiver) {
         this.receiver = receiver;
         this.configuration = this.receiver.getConfiguration();
     }
 
+    /**
+     *
+     * @return
+     */
+    public abstract boolean initTask();
+
+    /**
+     *
+     */
     public void shutdown() {
         this.shutdown = true;
     }

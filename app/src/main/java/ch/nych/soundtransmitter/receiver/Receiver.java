@@ -18,7 +18,12 @@ public class Receiver {
 
     private final String logTag = Configuration.LOG_TAG;
     private Configuration configuration = null;
+
+    /**
+     * The SampleBuffer instance is shared between the recording ant the transformation task
+     */
     private SampleBuffer sampleBuffer = null;
+
     private ConcurrentLinkedQueue<double[]> magnitudeBuffer = new ConcurrentLinkedQueue<double[]>();
     private ReceiverTask[] receiverTasks = null;
     private Thread[] workingThreads = null;
