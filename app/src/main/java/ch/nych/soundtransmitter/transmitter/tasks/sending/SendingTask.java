@@ -1,5 +1,7 @@
 package ch.nych.soundtransmitter.transmitter.tasks.sending;
 
+import android.media.AudioTrack;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import ch.nych.soundtransmitter.transmitter.Transmitter;
@@ -34,16 +36,23 @@ public class SendingTask extends TransmissionTask {
     @Override
     public void run() {
         Log.d("MyTag", "sending tone sequence");
-        int samplesSent = 0;
+        AudioTrack audioTrack = this.transmitter.getAudioTrack();
+        Tone[] toneSequence = this.message.getToneSequence(true);
+
+        int totalSamplesSent = 0;
         try {
-            this.transmitter.getAudioTrack().play();
+            audioTrack.play();
             this.message.setState(Message.STATE_SENDING);
-            for(Tone tone : this.message.getToneSequence(true)) {
+            int sent = 0;
+            for(Tone tone : toneSequence) {
                 Log.d(this.logTag, "Sending tone: " + tone.getFrequency());
-                samplesSent += this.transmitter.getAudioTrack().write(
-                        tone.getSamples(),
-                        0,
-                        (int) tone.getLength());
+                sent = audioTrack.write(tone.getSamples(), 0, (int) tone.getLength());
+                if(sent <= 0) {
+                    Log.e(this.logTag, "Error during message playing. AudioTrack error code is: " +
+                            sent);
+                    break;
+                }
+                totalSamplesSent += sent;
             }
         } catch (IllegalStateException e) {
             Log.e(this.logTag, e.getMessage());
@@ -51,6 +60,6 @@ public class SendingTask extends TransmissionTask {
         }
         this.message.setState(Message.STATE_SENT);
         this.transmitter.getAudioTrack().stop();
-        Log.i("MyTag", "sent a total of " + samplesSent + " samples");
+        Log.i("MyTag", "sent a total of " + totalSamplesSent + " samples");
     }
 }
