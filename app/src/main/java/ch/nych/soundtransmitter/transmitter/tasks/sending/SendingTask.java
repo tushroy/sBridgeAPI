@@ -1,20 +1,28 @@
-package ch.nych.soundtransmitter.transmitter.tasks;
+package ch.nych.soundtransmitter.transmitter.tasks.sending;
 
 import android.util.Log;
 
 import ch.nych.soundtransmitter.transmitter.Transmitter;
-import ch.nych.soundtransmitter.transmitter.message.Message;
-import ch.nych.soundtransmitter.transmitter.tone.Tone;
+import ch.nych.soundtransmitter.transmitter.tasks.Message;
+import ch.nych.soundtransmitter.transmitter.tasks.TransmissionTask;
+import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.Tone;
 import ch.nych.soundtransmitter.util.Configuration;
 
 /**
  * Created by nych on 4/6/16.
  */
 public class SendingTask extends TransmissionTask {
-
+    /**
+     *
+     */
     private final String logTag = Configuration.LOG_TAG;
 
-    public SendingTask(Transmitter transmitter, Message message) {
+    /**
+     *
+     * @param transmitter
+     * @param message
+     */
+    public SendingTask(final Transmitter transmitter, final Message message) {
         super(transmitter, message, TransmissionTask.SENDING_TASK);
     }
 
@@ -25,7 +33,7 @@ public class SendingTask extends TransmissionTask {
 
     @Override
     public void run() {
-        Log.i("MyTag", "sending tone sequence");
+        Log.d("MyTag", "sending tone sequence");
         int samplesSent = 0;
         this.transmitter.getAudioTrack().play();
         for(Tone tone : this.message.getToneSequence()) {

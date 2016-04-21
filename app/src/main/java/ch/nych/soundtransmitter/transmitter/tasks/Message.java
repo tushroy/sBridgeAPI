@@ -1,6 +1,6 @@
-package ch.nych.soundtransmitter.transmitter.message;
+package ch.nych.soundtransmitter.transmitter.tasks;
 
-import ch.nych.soundtransmitter.transmitter.tone.Tone;
+import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.Tone;
 
 /**
  * Created by nych on 4/6/16.

@@ -1,9 +1,9 @@
-package ch.nych.soundtransmitter.transmitter.tasks;
-
-import android.util.Log;
+package ch.nych.soundtransmitter.transmitter.tasks.preparation;
 
 import ch.nych.soundtransmitter.transmitter.Transmitter;
-import ch.nych.soundtransmitter.transmitter.message.Message;
+import ch.nych.soundtransmitter.transmitter.tasks.Message;
+import ch.nych.soundtransmitter.transmitter.tasks.TransmissionTask;
+import ch.nych.soundtransmitter.transmitter.tasks.modulation.ModulationTask;
 import ch.nych.soundtransmitter.util.Configuration;
 
 /**

@@ -1,6 +1,8 @@
-package ch.nych.soundtransmitter.transmitter.tone;
+package ch.nych.soundtransmitter.transmitter.tasks.modulation.tone;
 
 import android.util.Log;
+
+import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.AbstractTone;
 
 /**
  * Created by nych on 4/6/16.

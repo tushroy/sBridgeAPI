@@ -1,14 +1,11 @@
 package ch.nych.soundtransmitter.receiver.tasks.transformation;
 
-import android.graphics.Bitmap;
 import android.util.Log;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import ch.nych.soundtransmitter.receiver.Receiver;
+import ch.nych.soundtransmitter.receiver.tasks.Frame;
 import ch.nych.soundtransmitter.receiver.tasks.ReceiverTask;
 import ch.nych.soundtransmitter.receiver.tasks.SampleBuffer;
-import ch.nych.soundtransmitter.util.Configuration;
 
 /**
  * This class implements the signal transformation from the time domain to the frequency domain.

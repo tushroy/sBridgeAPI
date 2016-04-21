@@ -1,4 +1,4 @@
-package ch.nych.soundtransmitter.receiver.tasks.transformation;
+package ch.nych.soundtransmitter.receiver.tasks;
 
 import android.util.Log;
 

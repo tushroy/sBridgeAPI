@@ -9,11 +9,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import ch.nych.soundtransmitter.transmitter.message.Message;
-import ch.nych.soundtransmitter.transmitter.tasks.PreparationTask;
+import ch.nych.soundtransmitter.transmitter.tasks.Message;
+import ch.nych.soundtransmitter.transmitter.tasks.preparation.PreparationTask;
 import ch.nych.soundtransmitter.transmitter.tasks.TransmissionTask;
-import ch.nych.soundtransmitter.transmitter.tone.Tone;
-import ch.nych.soundtransmitter.transmitter.tone.ToneFactory;
+import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.Tone;
+import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.ToneFactory;
 import ch.nych.soundtransmitter.util.Configuration;
 
 /**

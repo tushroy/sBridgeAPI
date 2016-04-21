@@ -1,10 +1,10 @@
-package ch.nych.soundtransmitter.transmitter.tasks;
-
-import android.util.Log;
+package ch.nych.soundtransmitter.transmitter.tasks.modulation;
 
 import ch.nych.soundtransmitter.transmitter.Transmitter;
-import ch.nych.soundtransmitter.transmitter.message.Message;
-import ch.nych.soundtransmitter.transmitter.tone.Tone;
+import ch.nych.soundtransmitter.transmitter.tasks.Message;
+import ch.nych.soundtransmitter.transmitter.tasks.sending.SendingTask;
+import ch.nych.soundtransmitter.transmitter.tasks.TransmissionTask;
+import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.Tone;
 import ch.nych.soundtransmitter.util.Configuration;
 
 /**
@@ -12,10 +12,18 @@ import ch.nych.soundtransmitter.util.Configuration;
  */
 public class ModulationTask extends TransmissionTask {
 
-    public ModulationTask(Transmitter transmitter, Message message) {
+    /**
+     *
+     * @param transmitter
+     * @param message
+     */
+    public ModulationTask(final Transmitter transmitter, final Message message) {
         super(transmitter, message, TransmissionTask.MODULATION_TASK);
     }
 
+    /**
+     *
+     */
     protected void fourStateModulation() {
         Tone[] toneSet = this.transmitter.getToneSet();
         byte[] preparedData = this.message.getPreparedData();

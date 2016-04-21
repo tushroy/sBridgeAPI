@@ -2,6 +2,8 @@ package ch.nych.soundtransmitter.transmitter.tone;
 
 import org.junit.Test;
 
+import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.ToneFactory;
+import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.Tone;
 import ch.nych.soundtransmitter.util.Configuration;
 
 import static org.junit.Assert.*;

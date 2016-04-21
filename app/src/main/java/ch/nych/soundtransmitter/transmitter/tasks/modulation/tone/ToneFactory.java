@@ -1,4 +1,4 @@
-package ch.nych.soundtransmitter.transmitter.tone;
+package ch.nych.soundtransmitter.transmitter.tasks.modulation.tone;
 
 import android.util.Log;
 
