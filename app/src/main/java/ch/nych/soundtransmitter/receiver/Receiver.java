@@ -137,18 +137,17 @@ public class Receiver {
      */
     public void stopReceiver() {
         Log.i(this.logTag, "Stop receiver");
+        this.recordingTask.shutdown();
+        this.transformationTask.shutdown();
         this.shutdownAndAwaitTermination();
     }
 
     /**
-     * This method tries to shutdown all tasks and await their termination. Before the executors
-     * trying to shutdown their running tasks, the {@link RecordingTask} and the
-     * {@link TransformationTask} need to be shutdown manually.
+     * This method tries to shutdown all tasks and await their termination.
      */
     private void shutdownAndAwaitTermination() {
         Log.d(this.logTag, "Shutdown Receiver");
-        this.recordingTask.shutdown();
-        this.transformationTask.shutdown();
+
         for(ExecutorService executor : this.executorServices) {
             Log.d(this.logTag, "Shutdown executor");
             executor.shutdown();
