@@ -1,6 +1,5 @@
 package ch.nych.soundtransmitter.receiver.tasks;
 
-import android.graphics.Bitmap;
 import android.util.Log;
 
 import java.util.Arrays;

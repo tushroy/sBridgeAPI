@@ -21,7 +21,7 @@ import ch.nych.soundtransmitter.receiver.tasks.SampleBuffer;
 public class RecordingTask extends ReceiverTask {
 
     /**
-     * Reference to the shared sampleBuffer object
+     * Local reference to the shared sampleBuffer object
      */
     private SampleBuffer sampleBuffer = null;
 
