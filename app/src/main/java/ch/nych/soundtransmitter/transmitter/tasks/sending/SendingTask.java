@@ -35,13 +35,19 @@ public class SendingTask extends TransmissionTask {
     public void run() {
         Log.d("MyTag", "sending tone sequence");
         int samplesSent = 0;
-        this.transmitter.getAudioTrack().play();
-        for(Tone tone : this.message.getToneSequence()) {
-            Log.d(this.logTag, "Sending tone: " + tone.getFrequency());
-            samplesSent +=this.transmitter.getAudioTrack().write(
-                    tone.getSamples(),
-                    0,
-                    (int) tone.getLength());
+        try {
+            this.transmitter.getAudioTrack().play();
+            this.message.setState(Message.STATE_SENDING);
+            for(Tone tone : this.message.getToneSequence(true)) {
+                Log.d(this.logTag, "Sending tone: " + tone.getFrequency());
+                samplesSent += this.transmitter.getAudioTrack().write(
+                        tone.getSamples(),
+                        0,
+                        (int) tone.getLength());
+            }
+        } catch (IllegalStateException e) {
+            Log.e(this.logTag, e.getMessage());
+            this.message.setState(Message.STATE_ABORT);
         }
         this.message.setState(Message.STATE_SENT);
         this.transmitter.getAudioTrack().stop();
