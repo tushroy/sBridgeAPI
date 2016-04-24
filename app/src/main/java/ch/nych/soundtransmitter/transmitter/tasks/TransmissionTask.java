@@ -24,6 +24,11 @@ public abstract class TransmissionTask implements Runnable {
     /**
      *
      */
+    public final static int NOTIFICATION_TASK = 3;
+
+    /**
+     *
+     */
     protected int taskType = -1;
 
     /**
@@ -35,6 +40,14 @@ public abstract class TransmissionTask implements Runnable {
      *
      */
     protected Message message = null;
+
+    /**
+     *
+     * @return
+     */
+    public Message getMessage() {
+        return this.message;
+    }
 
     /**
      *

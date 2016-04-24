@@ -13,6 +13,11 @@ public class AnalyzationTask extends ReceiverTask {
     }
 
     @Override
+    public boolean initTask() {
+        return false;
+    }
+
+    @Override
     public void run() {
 
     }

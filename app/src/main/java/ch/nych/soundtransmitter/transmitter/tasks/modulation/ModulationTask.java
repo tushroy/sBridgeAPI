@@ -24,20 +24,35 @@ public class ModulationTask extends TransmissionTask {
     /**
      *
      */
-    protected void fourStateModulation() {
+    private void twoStateModulation() {
         Tone[] toneSet = this.transmitter.getToneSet();
         byte[] preparedData = this.message.getPreparedData();
-        Tone[] toneSequence = new Tone[preparedData.length + 4];
+        Tone[] toneSequence = new Tone[preparedData.length + 2];
         int tone = 0;
-        // TODO: 4/19/16 this will be changed to a chirped tone from 19000-19300
+        toneSequence[0] = toneSet[2];
+        for(int i = 0; i < preparedData.length; i++) {
+            tone = preparedData[i];
+            tone += i % 2 == 0 ? 3 : 0;
+            toneSequence[i + 1] = toneSet[tone];
+        }
+        toneSequence[toneSequence.length - 1] = toneSet[4];
+        this.message.setToneSequence(toneSequence);
+    }
+
+    /**
+     *
+     */
+    private void fourStateModulation() {
+        Tone[] toneSet = this.transmitter.getToneSet();
+        byte[] preparedData = this.message.getPreparedData();
+        Tone[] toneSequence = new Tone[preparedData.length + 2];
+        int tone = 0;
         toneSequence[0] = toneSet[4];
-        toneSequence[1] = toneSet[4];
         for(int i = 0; i < preparedData.length; i++) {
             tone = preparedData[i] % 4;
             tone += i % 2 == 0 ? 5 : 0;
-            toneSequence[i + 2] = toneSet[tone];
+            toneSequence[i + 1] = toneSet[tone];
         }
-        toneSequence[toneSequence.length - 2] = toneSet[4];
         toneSequence[toneSequence.length - 1] = toneSet[4];
         this.message.setToneSequence(toneSequence);
     }

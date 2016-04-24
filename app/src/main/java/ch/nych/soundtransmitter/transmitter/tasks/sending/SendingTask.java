@@ -8,6 +8,7 @@ import ch.nych.soundtransmitter.transmitter.Transmitter;
 import ch.nych.soundtransmitter.transmitter.tasks.Message;
 import ch.nych.soundtransmitter.transmitter.tasks.TransmissionTask;
 import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.Tone;
+import ch.nych.soundtransmitter.transmitter.tasks.notification.NotificationTask;
 import ch.nych.soundtransmitter.util.Configuration;
 
 /**
@@ -30,7 +31,7 @@ public class SendingTask extends TransmissionTask {
 
     @Override
     protected TransmissionTask getNextTask() {
-        return null;
+        return new NotificationTask(this.transmitter, this.message);
     }
 
     @Override
@@ -61,5 +62,6 @@ public class SendingTask extends TransmissionTask {
         this.message.setState(Message.STATE_SENT);
         this.transmitter.getAudioTrack().stop();
         Log.i("MyTag", "sent a total of " + totalSamplesSent + " samples");
+        this.transmitterCallback();
     }
 }

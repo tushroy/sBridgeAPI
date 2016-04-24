@@ -65,8 +65,6 @@ public class PreparationTask extends TransmissionTask {
         } else if(this.transmitter.getConfiguration().getTransmissionMode() ==
                 Configuration.FOUR_STATE_TRANSMISSION) {
             this.fourStatePreparation();
-        } else {
-            //// TODO: 4/12/16
         }
         this.transmitterCallback();
     }

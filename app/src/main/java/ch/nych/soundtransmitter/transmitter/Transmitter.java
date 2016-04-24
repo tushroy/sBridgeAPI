@@ -5,10 +5,13 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import ch.nych.BridgeListener;
 import ch.nych.soundtransmitter.transmitter.tasks.Message;
 import ch.nych.soundtransmitter.transmitter.tasks.preparation.PreparationTask;
 import ch.nych.soundtransmitter.transmitter.tasks.TransmissionTask;
@@ -51,6 +54,12 @@ public class Transmitter {
      */
     private ExecutorService[] executorServices = null;
 
+
+    /**
+     * TODO: 4/24/16 comment
+     */
+    private final List<BridgeListener> bridgeListeners = new ArrayList<BridgeListener>();
+
     /**
      * Getter for the local {@link Configuration} instance. Be aware of changing the configuration
      * while the transmitter is running. You will need to shutdown and reinitialize the transmitter.
@@ -77,6 +86,10 @@ public class Transmitter {
      */
     public AudioTrack getAudioTrack() {
         return this.audioTrack;
+    }
+
+    public void addListener(final BridgeListener bridgeListener) {
+        this.bridgeListeners.add(bridgeListener);
     }
 
     /**
@@ -121,7 +134,6 @@ public class Transmitter {
                 Executors.newSingleThreadExecutor(),
                 Executors.newSingleThreadExecutor()
         };
-
         this.initialized = true;
         return true;
     }
@@ -160,6 +172,14 @@ public class Transmitter {
             this.executorServices[1].execute(task);
         } else if(task.getTaskType() == TransmissionTask.SENDING_TASK) {
             this.executorServices[2].execute(task);
+        } else if(task.getTaskType() == TransmissionTask.NOTIFICATION_TASK){
+            this.notifyBridgeListeners(task.getMessage());
+        }
+    }
+
+    private void notifyBridgeListeners(final Message message) {
+        for(BridgeListener bridgeListener : this.bridgeListeners) {
+            bridgeListener.messageSent(message);
         }
     }
 
