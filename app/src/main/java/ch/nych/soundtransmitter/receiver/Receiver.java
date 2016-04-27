@@ -135,11 +135,11 @@ public class Receiver {
      * @param frame
      */
     public void callback(final Frame frame) {
-       /* if(frame.getState() == Frame.IN_PROGRESS) {
+        if(frame.getState() == Frame.IN_PROGRESS) {
             this.executorServices[2].execute(new AnalyzationTask(this, frame));
         } else {
             this.notifiyBridgeListeners(frame);
-        }*/
+        }
     }
 
     /**
