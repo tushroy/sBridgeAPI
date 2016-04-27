@@ -21,7 +21,17 @@ public class Transmission extends AppCompatActivity implements BridgeListener{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transmission);
         final Transmitter transmitter = new Transmitter();
-        transmitter.initTransmitter(Configuration.newUltrasonicConfiguration());
+
+        if(!transmitter.initTransmitter(Configuration.newUltrasonicConfiguration())) {
+            this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast toast = Toast.makeText(getApplicationContext(), "Couldn't initialize Transmitter", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            });
+        }
+
         transmitter.addListener(this);
 
         final Button btn_send = (Button) this.findViewById(R.id.btn_send);
