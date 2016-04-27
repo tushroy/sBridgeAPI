@@ -8,55 +8,57 @@ import android.util.Log;
  * Created by nych on 4/13/16.
  */
 public class Configuration {
-    /*
+
+    /**
     *
     */
     public final static String LOG_TAG = "BridgeAPI";
 
-    /*
+    /**
      *
      */
     public final static int TWO_STATE_TRANSMISSION= 5;
 
-    /*
+    /**
      *
      */
     public final static int FOUR_STATE_TRANSMISSION = 9;
 
-    /*
+    /**
      *
      */
     public final static int SAMPLE_RATE_48KHZ = 48000;
 
-    /*
+    /**
      *
      */
     public final static int SAMPLE_RATE_44KHZ = 44100;
 
-    /*
+    /**
      *
      */
     public final static int MIN_TONE_SIZE = 480;
 
-
+    /**
+     *
+     */
     public final static int MAX_TONE_SIZE = 48000;
 
-
+    /**
+     *
+     */
     public final static double DEFAULT_FREQUENCY_RESOLUTION_FACTOR = 1;
 
-    /*
+    /**
      *
      */
     public final static double ULTRASONIC_BASE_FREQUENCY = 19000.0;
 
-    /*
+    /**
      *
      */
     public final static int SINE_TONE = 1;
 
-    /* -------------------------------------------------------------------------------------------*/
-
-    // TODO: 4/13/16 This might change with the usage of another transformation algorithm than goertzel
     /**
      *
      */
@@ -77,7 +79,10 @@ public class Configuration {
      */
     public final static int HANN_WINDOW = 2;
 
-    //--------------------------------------------------------------------------------------------//
+    /**
+     *
+     */
+    public final static int DEFAULT_FRAME_SIZE = 300;
 
     /**
      *
@@ -412,12 +417,24 @@ public class Configuration {
         return true;
     }
 
+    private int maxFrameSize = 0;
+
+    public boolean setMaxFrameSize(final int maxFrameSize) {
+        // TODO: 4/24/16 Validation and Testcase
+        this.maxFrameSize = maxFrameSize;
+        return true;
+    }
+
+    public int getMaxFrameSize() {
+        return this.maxFrameSize;
+    }
+
     private Configuration() {};
 
     public static Configuration newUltrasonicConfiguration() {
         Configuration configuration = new Configuration();
         configuration.transmissionMode = Configuration.FOUR_STATE_TRANSMISSION;
-
+        //configuration.transmissionMode = Configuration.TWO_STATE_TRANSMISSION;
         configuration.toneType = Configuration.SINE_TONE;
         configuration.toneSize = Configuration.MIN_TONE_SIZE;
         configuration.sampleRate = Configuration.SAMPLE_RATE_48KHZ;
@@ -432,6 +449,7 @@ public class Configuration {
 
         configuration.overlappingFactor = Configuration.DEFAULT_OVERLAPPING_FACTOR;
         configuration.windowFunction = Configuration.HANN_WINDOW;
+        configuration.maxFrameSize = Configuration.DEFAULT_FRAME_SIZE;
         return configuration;
     }
 }

@@ -35,7 +35,7 @@ public class ModulationTask extends TransmissionTask {
             tone += i % 2 == 0 ? 3 : 0;
             toneSequence[i + 1] = toneSet[tone];
         }
-        toneSequence[toneSequence.length - 1] = toneSet[4];
+        toneSequence[toneSequence.length - 1] = toneSet[2];
         this.message.setToneSequence(toneSequence);
     }
 
@@ -66,6 +66,7 @@ public class ModulationTask extends TransmissionTask {
     public void run() {
         if(this.transmitter.getConfiguration().getTransmissionMode() ==
                 Configuration.TWO_STATE_TRANSMISSION) {
+            this.twoStateModulation();
 
         } else if(this.transmitter.getConfiguration().getTransmissionMode() ==
                 Configuration.FOUR_STATE_TRANSMISSION) {

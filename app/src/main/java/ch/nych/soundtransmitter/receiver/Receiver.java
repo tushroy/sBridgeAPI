@@ -2,12 +2,17 @@ package ch.nych.soundtransmitter.receiver;
 
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import ch.nych.BridgeListener;
+import ch.nych.soundtransmitter.receiver.tasks.Frame;
 import ch.nych.soundtransmitter.receiver.tasks.ReceiverTask;
 import ch.nych.soundtransmitter.receiver.tasks.SampleBuffer;
+import ch.nych.soundtransmitter.receiver.tasks.analyzation.AnalyzationTask;
 import ch.nych.soundtransmitter.receiver.tasks.recording.RecordingTask;
 import ch.nych.soundtransmitter.receiver.tasks.transformation.TransformationTask;
 import ch.nych.soundtransmitter.util.Configuration;
@@ -55,6 +60,11 @@ public class Receiver {
     private ReceiverTask transformationTask = null;
 
     /**
+     *
+     */
+    private final List<BridgeListener> bridgeListeners = new ArrayList<BridgeListener>();
+
+    /**
      * Getter for the local {@link Configuration} instance. Be aware of changing the configuration
      * while the receiver is running. You will need to shutdown and reinitialize the receiver.
      * @return the {@link Configuration} instance
@@ -71,6 +81,14 @@ public class Receiver {
      */
     public SampleBuffer getSampleBuffer() {
         return this.sampleBuffer;
+    }
+
+    /**
+     *
+     * @param bridgeListener
+     */
+    public void addListener(final BridgeListener bridgeListener) {
+        this.bridgeListeners.add(bridgeListener);
     }
 
     /**
@@ -110,6 +128,28 @@ public class Receiver {
         }
         this.initialized = true;
         return true;
+    }
+
+    /**
+     *
+     * @param frame
+     */
+    public void callback(final Frame frame) {
+       /* if(frame.getState() == Frame.IN_PROGRESS) {
+            this.executorServices[2].execute(new AnalyzationTask(this, frame));
+        } else {
+            this.notifiyBridgeListeners(frame);
+        }*/
+    }
+
+    /**
+     *
+     * @param frame
+     */
+    private void notifiyBridgeListeners(final Frame frame) {
+        for(BridgeListener bridgeListener : this.bridgeListeners) {
+            bridgeListener.frameReceived(frame);
+        }
     }
 
     /**

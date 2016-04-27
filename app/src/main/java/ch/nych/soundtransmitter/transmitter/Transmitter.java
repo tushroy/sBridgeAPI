@@ -88,6 +88,10 @@ public class Transmitter {
         return this.audioTrack;
     }
 
+    /**
+     *
+     * @param bridgeListener
+     */
     public void addListener(final BridgeListener bridgeListener) {
         this.bridgeListeners.add(bridgeListener);
     }

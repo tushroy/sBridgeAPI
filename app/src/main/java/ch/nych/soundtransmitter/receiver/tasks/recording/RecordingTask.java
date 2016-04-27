@@ -51,7 +51,7 @@ public class RecordingTask extends ReceiverTask {
         this.buffer = new short[AudioRecord.getMinBufferSize(
                 this.configuration.getSampleRate(),
                 AudioFormat.CHANNEL_IN_MONO,
-                AudioFormat.ENCODING_PCM_16BIT)];
+                AudioFormat.ENCODING_PCM_16BIT) / 2];
         this.audioRecorder = new AudioRecord(
                 MediaRecorder.AudioSource.MIC,
                 this.configuration.getSampleRate(),
@@ -95,7 +95,7 @@ public class RecordingTask extends ReceiverTask {
                         "error code is " + samplesRecorded + "\nTerminate recording task.");
                 this.shutdown();
             } else {
-                Log.d(this.logTag, "Recorded " + samplesRecorded);
+                //Log.d(this.logTag, "Recorded " + samplesRecorded);
                 this.sampleBuffer.addSamples(this.buffer);
             }
         }

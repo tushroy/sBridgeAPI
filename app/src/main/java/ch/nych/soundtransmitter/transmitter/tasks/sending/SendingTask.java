@@ -36,7 +36,7 @@ public class SendingTask extends TransmissionTask {
 
     @Override
     public void run() {
-        Log.d("MyTag", "sending tone sequence");
+        Log.d(this.logTag, "sending tone sequence");
         AudioTrack audioTrack = this.transmitter.getAudioTrack();
         Tone[] toneSequence = this.message.getToneSequence(true);
 
@@ -51,6 +51,7 @@ public class SendingTask extends TransmissionTask {
                 if(sent <= 0) {
                     Log.e(this.logTag, "Error during message playing. AudioTrack error code is: " +
                             sent);
+                    this.message.setState(Message.STATE_ABORT);
                     break;
                 }
                 totalSamplesSent += sent;
@@ -61,7 +62,7 @@ public class SendingTask extends TransmissionTask {
         }
         this.message.setState(Message.STATE_SENT);
         this.transmitter.getAudioTrack().stop();
-        Log.i("MyTag", "sent a total of " + totalSamplesSent + " samples");
+        Log.d(this.logTag, "sent a total of " + totalSamplesSent + " samples");
         this.transmitterCallback();
     }
 }
