@@ -1,5 +1,7 @@
 package ch.nych.soundtransmitter.receiver.tasks;
 
+import android.util.Log;
+
 import java.util.Arrays;
 
 import ch.nych.soundtransmitter.util.Configuration;
@@ -12,16 +14,17 @@ public class Frame {
     public final static int ANALYZED_SUCCESSFULLY = 1;
     public final static int FRAME_CORRUPTED = -1;
 
+    /**
+     *
+     */
+    private final String logTag = Configuration.LOG_TAG + ":Frame";
+
     private int state = 0;
 
     /**
-     * Number of rows in the original data. This is used to for the frame sealing as well as for the
-     * the gap in front of the rows. The first two rows of processedData are initialized with
-     * zeroes. The reason for this is that the absorbEnergy() method of
-     * {@link ch.nych.soundtransmitter.receiver.tasks.analyzation.AnalyzationTask} doesn't have to
-     * check against the the data border.
+     * Number of rows in the original data. This index is used to for the frame sealing.
      */
-    private int index = 2;
+    private int index = 0;
 
     /**
      * The raw unprocessed data (magnitudes of the different frequencies). These data should never
@@ -81,12 +84,11 @@ public class Frame {
      *                transmissionMode).
      */
     public void addDataSet(final double[] dataSet) {
-        if(index < this.originalData.length) {
-            for(int i = 0; i < dataSet.length; i++) {
-                this.originalData[i][index] = dataSet[i];
-            }
-            index++;
+        //Log.d(this.logTag, "add to frame, index: " + index);
+        for(int i = 0; i < dataSet.length; i++) {
+            this.originalData[i][index] = dataSet[i];
         }
+        index++;
     }
 
     /**
@@ -97,13 +99,26 @@ public class Frame {
         this.processedData = new double[originalData.length][];
         if(this.index > 0) {
             for(int i = 0; i < this.originalData.length; i++) {
-                /*
-                  The additional space at the end is necessary, so the edges don't have to be
-                  checked all the time in AnalyzationTask.absorbEnergy()
-                 */
-                this.originalData[i] = Arrays.copyOf(this.originalData[i], index + 2);
+                this.originalData[i] = Arrays.copyOf(this.originalData[i], index);
                 this.processedData[i] = Arrays.copyOf(this.originalData[i], this.originalData[i].length);
             }
+        }
+    }
+
+    // TODO: 5/1/16 Remove when not longer necessary
+    public void printFrame(boolean original) {
+        double[][] data = null;
+        if(original) {
+            data = this.originalData;
+        } else {
+            data = this.processedData;
+        }
+        for(int i = 0; i < data[0].length; i++) {
+            System.out.print(i);
+            for(int j = 0; j < data.length; j++) {
+                System.out.print(", " + data[j][i]);
+            }
+            System.out.println();
         }
     }
 }

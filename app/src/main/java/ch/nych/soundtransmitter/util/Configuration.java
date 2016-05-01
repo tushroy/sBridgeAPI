@@ -87,6 +87,11 @@ public class Configuration {
     /**
      *
      */
+    public final static double DEFAULT_RECEIVER_THRESHOLD = 50000000.0;
+
+    /**
+     *
+     */
     private int transmissionMode = 0;
 
     public int getTransmissionMode() {
@@ -429,6 +434,18 @@ public class Configuration {
         return this.maxFrameSize;
     }
 
+    private double receiverThreshold = 0.0;
+
+    public boolean setReceiverThreshold(final double receiverThreshold) {
+        // TODO: 5/1/16 Validation and Testcase
+        this.receiverThreshold = receiverThreshold;
+        return true;
+    }
+
+    public double getReceiverThreshold() {
+        return this.receiverThreshold;
+    }
+
     private Configuration() {};
 
     public static Configuration newUltrasonicConfiguration() {
@@ -450,6 +467,7 @@ public class Configuration {
         configuration.overlappingFactor = Configuration.DEFAULT_OVERLAPPING_FACTOR;
         configuration.windowFunction = Configuration.HANN_WINDOW;
         configuration.maxFrameSize = Configuration.DEFAULT_FRAME_SIZE;
+        configuration.receiverThreshold = configuration.DEFAULT_RECEIVER_THRESHOLD;
         return configuration;
     }
 }
