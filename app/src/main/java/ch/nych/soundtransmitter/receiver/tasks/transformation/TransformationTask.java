@@ -65,11 +65,11 @@ public class TransformationTask extends ReceiverTask {
      * This method is still in progress
      */
     private double detectFrameBegin() {
-        Goertzel listener = this.goertzels[this.configuration.getTransmissionMode() / 2];
+        Goertzel listener = this.goertzels[0];
         double threshold = this.configuration.getReceiverThreshold();
-        double[] buffer = new double[2];
-        double temp = 0;
-
+        double[] buffer = new double[8];
+        double sum = 0.0;
+        double temp = 0.0;
         short[] window = null;
 
         while (!this.shutdown) {
@@ -80,11 +80,17 @@ public class TransformationTask extends ReceiverTask {
                 }
                 temp = listener.getMagnitudeSquared();
                 listener.resetGoertzel();
-                if(temp + buffer[0] + buffer[1] > threshold  && temp < buffer[0]) {
+                sum = temp;
+                for(double d : buffer) {
+                    sum += d;
+                }
+                if(sum > threshold  && temp < buffer[buffer.length - 1]) {
                     Log.d(this.logTag, "Frame detected");
-                    return (temp + buffer[0] + buffer[1]);
+                    return sum;
                 } else {
-                    buffer[1] = buffer[0];
+                    for(int i = (buffer.length - 1); i > 0 ; i--) {
+                        buffer[i] = buffer[i - 1];
+                    }
                     buffer[0] = temp;
                 }
             } else {
@@ -103,14 +109,14 @@ public class TransformationTask extends ReceiverTask {
      */
     private Frame recordFrame(final double volume) {
         Log.d(this.logTag, "Start recording frame");
-
-        double threshold = volume / 3;
+        double threshold = volume / 5;
         int maxFrameSize = this.configuration.getMaxFrameSize();
         Frame frame = new Frame(this.configuration);
         double[] magnitudes = new double[this.goertzels.length];
-        double[] buffer = new double[5];
+        double[] buffer = new double[8];
+        double sum = 0.0;
         short[] window = null;
-        int listener = this.configuration.getTransmissionMode() / 2;
+        int listener = 0;
 
         for(int i = 0; i < maxFrameSize;) {
             if((window = this.sampleBuffer.getNextWindow()) != null) {
@@ -123,27 +129,20 @@ public class TransformationTask extends ReceiverTask {
                     this.goertzels[j].resetGoertzel();
                 }
                 frame.addDataSet(magnitudes);
-                Log.d(this.logTag, "Sum:\t" + (magnitudes[listener] +
-                        buffer[4] +
-                        buffer[3] +
-                        buffer[2] +
-                        buffer[1] +
-                        buffer[0]));
-                Log.d(this.logTag, "thr:\t" + threshold);
-                if((magnitudes[listener] +
-                        buffer[4] +
-                        buffer[3] +
-                        buffer[2] +
-                        buffer[1] +
-                        buffer[0]) > threshold && i > 10) {
+                sum = magnitudes[listener];
+                for(double d : buffer) {
+                    System.out.println(d);
+                    sum += d;
+                }
+
+                if(sum > threshold) {
                     Log.d(this.logTag, "Detected end of frame");
                     break;
                 } else {
-                    buffer[4] = buffer[3];
-                    buffer[3] = buffer[2];
-                    buffer[2] = buffer[1];
-                    buffer[1] = buffer[0];
-                    buffer[0] = magnitudes[4];
+                    for(int j = (buffer.length - 1); j > 0 ; j--) {
+                        buffer[j] = buffer[j - 1];
+                    }
+                    buffer[0] = magnitudes[listener];
                 }
                 i++;
             } else {
@@ -155,7 +154,7 @@ public class TransformationTask extends ReceiverTask {
             }
         }
         //Inter frame gap
-        for(int i = 0; i < 20;) {
+        /*for(int i = 0; i < 20;) {
             if(this.sampleBuffer.getNextWindow() != null) {
                 i++;
             } else {
@@ -165,10 +164,9 @@ public class TransformationTask extends ReceiverTask {
                     Log.e(this.logTag, e.getMessage());
                 }
             }
-        }
+        }*/
         frame.sealFrame();
         Log.d(this.logTag, "Done recording frame. Size: " + frame.getOriginalData()[0].length);
-        frame.printFrame(true);
         return frame;
     }
 
