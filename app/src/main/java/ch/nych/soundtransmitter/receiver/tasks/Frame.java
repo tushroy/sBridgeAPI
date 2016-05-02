@@ -39,10 +39,27 @@ public class Frame {
 
     /**
      *
+     */
+    private byte[] dataBytes = null;
+
+    /**
+     *
      * @return
      */
     public int getState() {
         return this.state;
+    }
+
+    public void setState(final int state) {
+        this.state = state;
+    }
+
+    public byte[] getDataBytes() {
+        return this.dataBytes;
+    }
+
+    public void setDataBytes(final byte[] dataBytes) {
+        this.dataBytes = dataBytes;
     }
 
     /**
