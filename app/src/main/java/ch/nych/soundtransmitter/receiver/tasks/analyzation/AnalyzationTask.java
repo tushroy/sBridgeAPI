@@ -1,10 +1,15 @@
 package ch.nych.soundtransmitter.receiver.tasks.analyzation;
 
+import android.util.Log;
+
 import java.util.Arrays;
 
 import ch.nych.soundtransmitter.receiver.Receiver;
 import ch.nych.soundtransmitter.receiver.tasks.Frame;
 import ch.nych.soundtransmitter.receiver.tasks.ReceiverTask;
+import ch.nych.soundtransmitter.receiver.tasks.analyzation.interpreter.FourStateInterpreter;
+import ch.nych.soundtransmitter.receiver.tasks.analyzation.interpreter.Interpreter;
+import ch.nych.soundtransmitter.receiver.tasks.analyzation.interpreter.TwoStateInterpreter;
 import ch.nych.soundtransmitter.util.Configuration;
 
 /**
@@ -39,6 +44,8 @@ public class AnalyzationTask extends ReceiverTask {
      */
     private double[] tempBuffer = null;
 
+    private Interpreter interpreter = null;
+
     /**
      * Standard constructor for the AnalyzationTask class.
      * @param receiver reference of the receiver that initialized the analyzation task. Is used for
@@ -51,18 +58,26 @@ public class AnalyzationTask extends ReceiverTask {
         this.originalData = frame.getOriginalData();
         this.processedData = frame.getProcessedData();
         this.tempBuffer = new double[this.originalData[0].length];
+        if(this.configuration.getTransmissionMode() == Configuration.TWO_STATE_TRANSMISSION) {
+            this.interpreter = new TwoStateInterpreter(this.frame);
+        } else if(this.configuration.getTransmissionMode() ==
+                Configuration.FOUR_STATE_TRANSMISSION) {
+            this.interpreter = new FourStateInterpreter(this.frame);
+        }
+
     }
 
     /**
      * Calculated the threshold of the input data. The threshold is defined by the median of the
      * data set. As the data must be sorted for the median, a copy is done into the local
      * tempBuffer.
-     * @param data the magnitudes of a frequency (column of the processedData)
+     * @param columnIndex todo
      * @return the threshold (median) of the magnitudes
      */
-    private double getThreshold(final double[] data) {
-        double threshold = 0;
-        System.arraycopy(data, 0, this.tempBuffer, 0, data.length);
+    private double getThreshold(final int columnIndex) {
+        double threshold = 0.0;
+        System.arraycopy(this.originalData[columnIndex], 0, this.tempBuffer, 0,
+                this.originalData[columnIndex].length);
         Arrays.sort(this.tempBuffer);
         int m = this.tempBuffer.length / 2;
         if(this.tempBuffer.length % 2 == 0) {
@@ -78,19 +93,20 @@ public class AnalyzationTask extends ReceiverTask {
     /**
      * Search for the maximum magnitude in the column (frequency) passed in data. The detected local
      * maximum needs to be bigger than the threshold.
-     * @param data the magnitudes of a frequency over time (column of processedData)
+     * @param columnIndex todo
      * @param threshold the calculated threshold for the frequency to process
      * @return the index of the maximum magnitude above the threshold or -1 if no more values are
      * available.
      */
-    private int getMaxInColumn(final double[] data, final double threshold) {
+    private int getMaxInColumn(final int columnIndex, final double threshold) {
         int maxIndex = 0;
-        for(int i = 0; i < data.length; i++) {
-            if(data[i] > data[maxIndex]) {
+
+        for(int i = 0; i < this.processedData[columnIndex].length; i++) {
+            if(this.processedData[columnIndex][i] > this.processedData[columnIndex][maxIndex]) {
                 maxIndex = i;
             }
         }
-        if(data[maxIndex] < threshold) {
+        if(this.processedData[columnIndex][maxIndex] < threshold) {
             maxIndex = -1;
         }
         return maxIndex;
@@ -122,21 +138,42 @@ public class AnalyzationTask extends ReceiverTask {
      * process, only the values of the column at columnIndex (the frequency) are manipulated. All
      * changes are done in processedData.
      * @param columnIndex the frequency where the maximum was detected
-     * @param rowIndex the index of the maximum magnitude
+     * @param columnIndex the index of the maximum magnitude
      */
-    private void absorbEnergy(final int columnIndex, final int rowIndex) {
-        for(int i = 0; i < this.originalData.length; i++) {
-            this.processedData[columnIndex][rowIndex] += this.originalData[i][rowIndex];
+    private void absorbEnergy(final int columnIndex, final int rowIndex, final double threshold) {
+        int offset = 1;
+        while((rowIndex - offset) >= 0 &&
+                this.originalData[columnIndex][rowIndex - offset] >= threshold) {
+            this.processedData[columnIndex][rowIndex] +=
+                    this.originalData[columnIndex][rowIndex - offset];
+            this.processedData[columnIndex][rowIndex - offset] = 0;
+            offset++;
         }
-        this.processedData[columnIndex][rowIndex] += this.originalData[columnIndex][rowIndex - 1];
-        this.processedData[columnIndex][rowIndex] += this.originalData[columnIndex][rowIndex - 2];
-        this.processedData[columnIndex][rowIndex - 1] = 0.0;
-        this.processedData[columnIndex][rowIndex - 2] = 0.0;
-        this.processedData[columnIndex][rowIndex] += this.originalData[columnIndex][rowIndex + 1];
-        this.processedData[columnIndex][rowIndex] += this.originalData[columnIndex][rowIndex + 2];
-        this.processedData[columnIndex][rowIndex + 1] = 0.0;
-        this.processedData[columnIndex][rowIndex + 2] = 0.0;
-        this.processedData[columnIndex][rowIndex] = -this.processedData[columnIndex][rowIndex];
+        offset = 1;
+        while((rowIndex + offset) < this.originalData[columnIndex].length &&
+                this.originalData[columnIndex][rowIndex + offset] >= threshold) {
+            this.processedData[columnIndex][rowIndex] +=
+                    this.originalData[columnIndex][rowIndex + offset];
+            this.processedData[columnIndex][rowIndex + offset] = 0;
+            offset++;
+        }
+        this.processedData[columnIndex][rowIndex] = - this.processedData[columnIndex][rowIndex];
+    }
+
+    private void removePeak(final int columnIndex, final int rowIndex, final double threshold) {
+        int offset = 1;
+        this.processedData[columnIndex][rowIndex] = 0.0;
+        while((rowIndex - offset) >= 0 &&
+                this.originalData[columnIndex][rowIndex - offset] >= threshold) {
+            this.processedData[columnIndex][rowIndex - offset] = 0.0;
+            offset++;
+        }
+        offset = 1;
+        while((rowIndex + offset) < this.originalData[columnIndex].length &&
+                this.originalData[columnIndex][rowIndex + offset] >= threshold) {
+            this.processedData[columnIndex][rowIndex + offset] = 0.0;
+            offset++;
+        }
     }
 
     /**
@@ -147,20 +184,19 @@ public class AnalyzationTask extends ReceiverTask {
         int index = 0;
 
         for(int i = 0; i < this.processedData.length; i++) {
-            threshold = this.getThreshold(this.processedData[i]);
-            while((index = this.getMaxInColumn(this.processedData[i], threshold)) > 0) {
+            threshold = this.getThreshold(i);
+            while((index = this.getMaxInColumn(i, threshold)) > 0) {
                 if(this.isMaxInRow(i, index)) {
-                    this.absorbEnergy(i, index);
+                    this.absorbEnergy(i, index, threshold);
                 } else {
-                    this.processedData[i][index] = 0.0;
-                    this.processedData[i][index - 1] = 0.0;
-                    this.processedData[i][index + 1] = 0.0;
+                    this.removePeak(i, index, threshold);
                 }
             }
         }
 
         for(int i = 0; i < this.processedData.length; i++) {
             for(int j = 0; j < this.processedData[i].length; j++) {
+                // TODO: 5/2/16 Might be unecessary to set all values above zero to zero
                 if(this.processedData[i][j] >= 0.0) {
                     this.processedData[i][j] = 0.0;
                 } else {
@@ -179,6 +215,7 @@ public class AnalyzationTask extends ReceiverTask {
     @Override
     public void run() {
         this.processFrame();
+        this.interpreter.interpretData();
         this.receiver.callback(this.frame);
     }
 }
