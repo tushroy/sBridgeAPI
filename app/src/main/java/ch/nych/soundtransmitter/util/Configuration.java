@@ -96,6 +96,22 @@ public class Configuration {
     public final static double DEFAULT_RECEIVER_THRESHOLD = 10000000.0;
 
     /**
+     *
+     */
+    public final static int THRESHOLD_FUNCTION_ROOT_MEAN_SQUARE = 0;
+
+    /**
+     *
+     */
+    public final static int THRESHOLD_FUNCTION_ARITHMETIC_MEAN = 1;
+
+    /**
+     *
+     */
+    public final static int THRESHOLD_FUNCTION_MEDIAN = 2;
+
+
+    /**
      * The default preamble for a frame
      */
     public final static byte[] DEFAULT_PREAMBLE = new byte[]{0, 1, 0, 1, 1};
@@ -463,6 +479,23 @@ public class Configuration {
 
     public double getReceiverThreshold() {
         return this.receiverThreshold;
+    }
+
+    private int thresholdFunction = 0;
+
+    public boolean setThresholdFunction(final int thresholdFunction) {
+        if(thresholdFunction != Configuration.THRESHOLD_FUNCTION_ROOT_MEAN_SQUARE ||
+                thresholdFunction != Configuration.THRESHOLD_FUNCTION_ARITHMETIC_MEAN ||
+                thresholdFunction != Configuration.THRESHOLD_FUNCTION_MEDIAN) {
+            Log.w(this.logTag, "Invalid threshold function");
+            return false;
+        }
+        this.thresholdFunction = thresholdFunction;
+        return true;
+    }
+
+    public int getThresholdFunction() {
+        return this.thresholdFunction;
     }
 
     private byte[] preamble = null;

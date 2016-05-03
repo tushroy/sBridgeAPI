@@ -12,16 +12,42 @@ import ch.nych.soundtransmitter.util.Configuration;
  */
 public abstract class Interpreter {
 
+    /**
+     *
+     */
     protected final String logTag = Configuration.LOG_TAG + ":Interpreter";
 
+    /**
+     *
+     */
+    protected Configuration configuration;
+
+    /**
+     *
+     */
     protected Frame frame = null;
+
+    /**
+     *
+     */
     protected double[][] frameData = null;
 
-    public Interpreter(final Frame frame) {
+    /**
+     *
+     * @param frame
+     * @param configuration
+     */
+    public Interpreter(final Frame frame, final Configuration configuration) {
         this.frame = frame;
         this.frameData = this.frame.getProcessedData();
+        this.configuration = configuration;
     }
 
+    /**
+     *
+     * @param index
+     * @return
+     */
     protected int getMaxInRow(final int index) {
         int maxIndex = 0;
         for(int i = 0; i < this.frameData.length; i++) {
@@ -35,19 +61,35 @@ public abstract class Interpreter {
         return maxIndex;
     }
 
+    /**
+     *
+     * @param list
+     * @return
+     */
     private boolean frameValid(final List<Byte> list) {
-        if(list.get(0) != 0 ||
-                list.get(1) != 1 ||
-                list.get(2) != 0 ||
-                list.get(3) != 1 ||
-                list.get(4) != 1) {
+        byte[] preamble = this.configuration.getPreamble();
+        if(list.size() < preamble.length) {
             Log.d(this.logTag, "Detected Frame is not valid");
             return false;
+        }
+        for(int i = 0; i < preamble.length; i++) {
+            if(list.get(i) != preamble[i]) {
+                Log.d(this.logTag, "Detected Frame is not valid");
+                return false;
+            }
+        }
+        for(byte b : preamble) {
+            list.remove(0);
         }
         return true;
     }
 
-    private byte[] mergeBytes(List<Byte> list) {
+    /**
+     *
+     * @param list
+     * @return
+     */
+    private byte[] mergeBytes(final List<Byte> list) {
         byte[] bytes = new byte[list.size() / 8];
         int temp = 0;
         int j = 0;
@@ -64,8 +106,15 @@ public abstract class Interpreter {
         return bytes;
     }
 
+    /**
+     *
+     * @return
+     */
     protected abstract List<Byte> mapData();
 
+    /**
+     *
+     */
     public void interpretData() {
         List<Byte> list = this.mapData();
         if(this.frameValid(list)) {

@@ -1,5 +1,9 @@
 package ch.nych.soundtransmitter.receiver.tasks.transformation;
 
+import android.util.Log;
+
+import ch.nych.soundtransmitter.util.Configuration;
+
 /**
  * The Goertzel class can be used to perform the Goertzel algorithm. In
  * order to use this class, four primary steps should be executed:
@@ -20,16 +24,50 @@ package ch.nych.soundtransmitter.receiver.tasks.transformation;
  */
 public class Goertzel {
 
+    private final String logTag = Configuration.LOG_TAG + ":Goertzel";
+    /**
+     *
+     */
     private double sampleRate;
-    private double targetFrequency;
-    private int blockSize;
 
+    /**
+     *
+     */
+    private double targetFrequency;
+
+    /**
+     *
+     */
+    private int windowSize;
+
+    /**
+     *
+     */
     private double coeff;
+
+    /**
+     *
+     */
     private double Q1;
+
+    /**
+     *
+     */
     private double Q2;
+
+    /**
+     *
+     */
     private double sine;
+
+    /**
+     *
+     */
     private double cosine;
 
+    /**
+     *
+     */
     private double magnitudeSquared;
 
     /**
@@ -39,22 +77,25 @@ public class Goertzel {
      *                      is the sampling rate of the signal to be analyzed
      * @param targetFrequency
      *                      is the frequency that Goertzel will look for.
-     * @param blockSize
-     *                      is the block size to use with Goertzel
+     * @param windowSize
+     *                      is the window size to use with Goertzel
      */
-    public Goertzel(final double sampleRate, final double targetFrequency, final int blockSize){
+    public Goertzel(final double sampleRate, final double targetFrequency, final int windowSize){
         this.sampleRate = sampleRate;
         this.targetFrequency = targetFrequency;
-        this.blockSize = blockSize;
+        this.windowSize = windowSize;
         this.initGoertzel();
     }
 
+    /**
+     *
+     */
     public void initGoertzel() {
         int k;
         double omega;
 
-        k = (int) (0.5 + ((this.blockSize * this.targetFrequency) / this.sampleRate));
-        omega = (2.0 * Math.PI * k) / this.blockSize;
+        k = (int) (0.5 + ((this.windowSize * this.targetFrequency) / this.sampleRate));
+        omega = (2.0 * Math.PI * k) / this.windowSize;
         this.sine = Math.sin(omega);
         this.cosine = Math.cos(omega);
         this.coeff = 2.0 * cosine;
@@ -62,12 +103,19 @@ public class Goertzel {
         this.resetGoertzel();
     }
 
+    /**
+     *
+     */
     public void resetGoertzel() {
         this.Q2 = 0;
         this.Q1 = 0;
         this.magnitudeSquared = -1;
     }
 
+    /**
+     *
+     * @param sample
+     */
     public void processSample(double sample) {
         double Q0;
 
@@ -78,12 +126,34 @@ public class Goertzel {
         this.Q1 = Q0;
     }
 
+    /**
+     *
+     * @param samples
+     */
+    public void processSamples(final short[] samples) {
+        if(samples == null) {
+            Log.w(this.logTag, "called processSamples with null value");
+            return;
+        }
+        for(int i = 0; i < samples.length; i++) {
+            this.processSample(samples[i]);
+        }
+    }
+
+    /**
+     *
+     * @return
+     */
     public double[] getRealImag() {
         double real = this.Q1 - this.Q2 * this.cosine;
         double imag = this.Q2 * this.sine;
         return new double[]{real, imag};
     }
 
+    /**
+     *
+     * @return
+     */
     public double getMagnitudeSquared() {
         if (this.magnitudeSquared < 0) {
             this.magnitudeSquared = this.Q1 * this.Q1;
@@ -93,6 +163,10 @@ public class Goertzel {
         return this.magnitudeSquared;
     }
 
+    /**
+     *
+     * @return
+     */
     public double getTargetFrequency() {
         return this.targetFrequency;
     }

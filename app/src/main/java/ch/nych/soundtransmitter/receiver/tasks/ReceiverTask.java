@@ -11,11 +11,6 @@ public abstract class ReceiverTask implements Runnable {
     /**
      *
      */
-    protected final String logTag = Configuration.LOG_TAG;
-
-    /**
-     *
-     */
     protected Receiver receiver = null;
 
     /**

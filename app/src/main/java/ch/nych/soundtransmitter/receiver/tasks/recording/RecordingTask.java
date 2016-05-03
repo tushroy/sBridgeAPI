@@ -8,6 +8,7 @@ import android.util.Log;
 import ch.nych.soundtransmitter.receiver.Receiver;
 import ch.nych.soundtransmitter.receiver.tasks.ReceiverTask;
 import ch.nych.soundtransmitter.receiver.tasks.SampleBuffer;
+import ch.nych.soundtransmitter.util.Configuration;
 
 /**
  *  This class implements the audio recording task. The recorded samples are buffered locally and
@@ -19,6 +20,11 @@ import ch.nych.soundtransmitter.receiver.tasks.SampleBuffer;
  *  wanted, or through an error in the native library.
  */
 public class RecordingTask extends ReceiverTask {
+
+    /**
+     *
+     */
+    private final String logTag = Configuration.LOG_TAG + "recTask";
 
     /**
      * Local reference to the shared sampleBuffer object

@@ -23,7 +23,11 @@ import ch.nych.soundtransmitter.util.Configuration;
  */
 public class TransformationTask extends ReceiverTask {
 
-    private final String logTag = Configuration.LOG_TAG + ".TransTask";
+    /**
+     *
+     */
+    private final String logTag = Configuration.LOG_TAG + ":TransTask";
+
     /**
      * Local reference to the shared sampleBuffer object
      */
@@ -75,14 +79,12 @@ public class TransformationTask extends ReceiverTask {
         while (!this.shutdown) {
             if ((window = this.sampleBuffer.getNextWindow()) != null) {
                 this.preprocessWindow(window);
-                for (short sample : window) {
-                    listener.processSample(sample);
-                }
+                listener.processSamples(window);
                 temp = listener.getMagnitudeSquared();
                 listener.resetGoertzel();
                 sum = temp;
-                for(double d : buffer) {
-                    sum += d;
+                for(int i = 0; i < buffer.length; i++) {
+                    sum += buffer[i];
                 }
                 if(sum > threshold  && temp < buffer[buffer.length - 1]) {
                     Log.d(this.logTag, "Frame detected");
@@ -122,17 +124,14 @@ public class TransformationTask extends ReceiverTask {
             if((window = this.sampleBuffer.getNextWindow()) != null) {
                 this.preprocessWindow(window);
                 for(int j = 0; j < this.goertzels.length; j++) {
-                    for(short sample : window) {
-                        this.goertzels[j].processSample(sample);
-                    }
+                    this.goertzels[j].processSamples(window);
                     magnitudes[j] = this.goertzels[j].getMagnitudeSquared();
                     this.goertzels[j].resetGoertzel();
                 }
                 frame.addDataSet(magnitudes);
                 sum = magnitudes[listener];
-                for(double d : buffer) {
-                    System.out.println(d);
-                    sum += d;
+                for(int j = 0; j < buffer.length; j++) {
+                    sum += buffer[j];
                 }
 
                 if(sum > threshold) {
@@ -154,7 +153,7 @@ public class TransformationTask extends ReceiverTask {
             }
         }
         //Inter frame gap
-        /*for(int i = 0; i < 20;) {
+        for(int i = 0; i < 20;) {
             if(this.sampleBuffer.getNextWindow() != null) {
                 i++;
             } else {
@@ -164,7 +163,7 @@ public class TransformationTask extends ReceiverTask {
                     Log.e(this.logTag, e.getMessage());
                 }
             }
-        }*/
+        }
         frame.sealFrame();
         Log.d(this.logTag, "Done recording frame. Size: " + frame.getOriginalData()[0].length);
         return frame;

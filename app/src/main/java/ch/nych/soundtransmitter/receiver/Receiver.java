@@ -138,6 +138,8 @@ public class Receiver {
         if(frame.getState() == Frame.IN_PROGRESS) {
             this.executorServices[2].execute(new AnalyzationTask(this, frame));
         } else {
+            //frame.printFrame(true);
+            //frame.printFrame(false);
             this.notifiyBridgeListeners(frame);
         }
     }

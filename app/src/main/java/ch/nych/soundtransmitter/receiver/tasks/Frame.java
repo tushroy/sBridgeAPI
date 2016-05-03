@@ -10,8 +10,20 @@ import ch.nych.soundtransmitter.util.Configuration;
  * Created by nych on 4/20/16.
  */
 public class Frame {
+
+    /**
+     *
+     */
     public final static int IN_PROGRESS = 0;
+
+    /**
+     *
+     */
     public final static int ANALYZED_SUCCESSFULLY = 1;
+
+    /**
+     *
+     */
     public final static int FRAME_CORRUPTED = -1;
 
     /**
@@ -19,6 +31,9 @@ public class Frame {
      */
     private final String logTag = Configuration.LOG_TAG + ":Frame";
 
+    /**
+     *
+     */
     private int state = 0;
 
     /**
@@ -50,14 +65,26 @@ public class Frame {
         return this.state;
     }
 
+    /**
+     *
+     * @param state
+     */
     public void setState(final int state) {
         this.state = state;
     }
 
+    /**
+     *
+     * @return
+     */
     public byte[] getDataBytes() {
         return this.dataBytes;
     }
 
+    /**
+     *
+     * @param dataBytes
+     */
     public void setDataBytes(final byte[] dataBytes) {
         this.dataBytes = dataBytes;
     }
@@ -101,7 +128,6 @@ public class Frame {
      *                transmissionMode).
      */
     public void addDataSet(final double[] dataSet) {
-        //Log.d(this.logTag, "add to frame, index: " + index);
         for(int i = 0; i < dataSet.length; i++) {
             this.originalData[i][index] = dataSet[i];
         }

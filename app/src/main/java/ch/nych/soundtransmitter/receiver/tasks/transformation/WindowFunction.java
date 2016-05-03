@@ -7,8 +7,16 @@ import ch.nych.soundtransmitter.util.Configuration;
  */
 public class WindowFunction {
 
+    /**
+     *
+     */
     private WindowFunction() {}
 
+    /**
+     *
+     * @param configuration
+     * @return
+     */
     public static double[] getWindowFunction(final Configuration configuration) {
         if(configuration.getWindowFunction() == Configuration.HAMMING_WINDOW) {
             return WindowFunction.getHammingWindow(configuration.getWindowSize());
@@ -20,6 +28,11 @@ public class WindowFunction {
         }
     }
 
+    /**
+     *
+     * @param size
+     * @return
+     */
     private static double[] getHammingWindow(final int size) {
         double[] window = new double[size];
         double alpha = 0.54;
@@ -31,6 +44,11 @@ public class WindowFunction {
         return window;
     }
 
+    /**
+     *
+     * @param size
+     * @return
+     */
     private static double[] getHanningWindow(final int size) {
         double[] window = new double[size];
         for(int i = 0; i < size; i++) {

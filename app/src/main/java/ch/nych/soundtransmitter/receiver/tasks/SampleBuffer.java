@@ -13,25 +13,42 @@ import ch.nych.soundtransmitter.util.Configuration;
  */
 public class SampleBuffer {
 
-    //API Log Tag
-    private final String logTag = Configuration.LOG_TAG;
+    /**
+     *
+     */
+    private final String logTag = Configuration.LOG_TAG + ":sBuffer";
 
     //this is just a temporary flag until the class has proven
     private final boolean log = false;
 
-
+    /**
+     *
+     */
     private int head = 0;
+
+    /**
+     *
+     */
     private int tail = 0;
 
-    //Number of samples to return
+    /**
+     * Number of samples to return
+     */
     private int windowSize = 0;
 
-    //Number of positions the head is shifted
+    /**
+     * Number of positions the head is shifted
+     */
     private int overlappingValue = 0;
 
-    //Array containing the sample values
+    /**
+     * Array containing the sample values
+     */
     private short[] sampleBuffer = null;
 
+    /**
+     *
+     */
     private Lock lock = null;
 
     /**
@@ -48,7 +65,7 @@ public class SampleBuffer {
         this.sampleBuffer = new short[configuration.getSampleBufferSize()];
         this.lock = new ReentrantLock(true);
         Log.d(this.logTag, "Initialize new SampleBuffer with the size of: " +
-                configuration.getSampleBufferSize() + "\n\twindowSize:\t\t" + this.windowSize +
+                this.sampleBuffer.length + "\n\twindowSize:\t\t" + this.windowSize +
                 "\n\toverlappingValue:\t" + this.overlappingValue);
     }
 
@@ -88,6 +105,10 @@ public class SampleBuffer {
         }
     }
 
+    /**
+     *
+     * @param samples
+     */
     public void addSamples(final short[] samples) {
         this.lock.lock();
         if(this.log) {
@@ -115,6 +136,10 @@ public class SampleBuffer {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public short[] getNextWindow() {
         this.lock.lock();
         short[] window = null;
