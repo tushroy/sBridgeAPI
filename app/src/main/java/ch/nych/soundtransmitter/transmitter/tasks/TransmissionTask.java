@@ -1,30 +1,27 @@
 package ch.nych.soundtransmitter.transmitter.tasks;
 
 import ch.nych.soundtransmitter.transmitter.Transmitter;
+import ch.nych.soundtransmitter.util.Configuration;
 
 /**
  * Created by nych on 4/6/16.
  */
 public abstract class TransmissionTask implements Runnable {
-    /**
-     *
-     */
-    public final static int PREPARATION_TASK = 0;
 
     /**
      *
      */
-    public final static int MODULATION_TASK = 1;
+    public final static int MODULATION_TASK = 0;
 
     /**
      *
      */
-    public final static int SENDING_TASK = 2;
+    public final static int SENDING_TASK = 1;
 
     /**
      *
      */
-    public final static int NOTIFICATION_TASK = 3;
+    public final static int NOTIFICATION_TASK = 2;
 
     /**
      *
@@ -35,6 +32,11 @@ public abstract class TransmissionTask implements Runnable {
      *
      */
     protected Transmitter transmitter = null;
+
+    /**
+     *
+     */
+    protected Configuration configuration = null;
 
     /**
      *
@@ -60,6 +62,7 @@ public abstract class TransmissionTask implements Runnable {
             final Message message,
             final int taskType) {
         this.transmitter = transmitter;
+        this.configuration = transmitter.getConfiguration();
         this.message = message;
         this.taskType = taskType;
     }

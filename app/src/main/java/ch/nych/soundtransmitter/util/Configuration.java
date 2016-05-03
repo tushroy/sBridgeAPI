@@ -15,14 +15,20 @@ public class Configuration {
     public final static String LOG_TAG = "BridgeAPI";
 
     /**
-     *
+     * Uses two different frequencies for the transmission. Should only be used in combination with
+     * a form of encoding like Manchester.
      */
-    public final static int TWO_STATE_TRANSMISSION= 5;
+    public final static int SINGLE_CHANNEL_TRANSMISSION = 3;
 
     /**
-     *
+     * Uses a total of four different frequencies for the transmission (two per state).
      */
-    public final static int FOUR_STATE_TRANSMISSION = 9;
+    public final static int TWO_CHANNEL_TRANSMISSION = 5;
+
+    /**
+     * Uses a total of six different frequencies for the transmission (three per state).
+     */
+    public final static int THREE_CHANNEL_TRANSMISSION = 9;
 
     /**
      *
@@ -35,12 +41,12 @@ public class Configuration {
     public final static int SAMPLE_RATE_44KHZ = 44100;
 
     /**
-     *
+     * Minimum size of a tone impulse in samples.
      */
-    public final static int MIN_TONE_SIZE = 480;
+    public final static int MIN_TONE_SIZE = 60;
 
     /**
-     *
+     * Maximum size of a tone impulse in samples.
      */
     public final static int MAX_TONE_SIZE = 48000;
 
@@ -52,7 +58,7 @@ public class Configuration {
     /**
      *
      */
-    public final static double ULTRASONIC_BASE_FREQUENCY = 19000.0;
+    public final static double ULTRASONIC_BASE_FREQUENCY = 18000.0;
 
     /**
      *
@@ -60,9 +66,9 @@ public class Configuration {
     public final static int SINE_TONE = 1;
 
     /**
-     *
+     * Minimum window size for the Goertzel algorithm.
      */
-    public final static int MIN_WINDOW_SIZE = 480;
+    public final static int MIN_WINDOW_SIZE = 60;
 
     /**
      *
@@ -80,14 +86,24 @@ public class Configuration {
     public final static int HANN_WINDOW = 2;
 
     /**
-     *
+     * Number of windows per frame
      */
-    public final static int DEFAULT_FRAME_SIZE = 300;
+    public final static int DEFAULT_FRAME_SIZE = 1500;
 
     /**
-     *
+     * Static threshold for the detection of a frame
      */
-    public final static double DEFAULT_RECEIVER_THRESHOLD = 50000000.0;
+    public final static double DEFAULT_RECEIVER_THRESHOLD = 10000000.0;
+
+    /**
+     * The default preamble for a frame
+     */
+    public final static byte[] DEFAULT_PREAMBLE = new byte[]{0, 1, 0, 1, 1};
+
+    /**
+     * Local log tag
+     */
+    private final String logTag = Configuration.LOG_TAG + ":Config";
 
     /**
      *
@@ -99,8 +115,9 @@ public class Configuration {
     }
 
     public boolean setTransmissionMode(final int transmissionMode) {
-        if(transmissionMode == Configuration.TWO_STATE_TRANSMISSION ||
-                transmissionMode == Configuration.FOUR_STATE_TRANSMISSION) {
+        if(transmissionMode == Configuration.SINGLE_CHANNEL_TRANSMISSION ||
+                transmissionMode == Configuration.TWO_CHANNEL_TRANSMISSION ||
+                transmissionMode == Configuration.THREE_CHANNEL_TRANSMISSION) {
             this.transmissionMode = transmissionMode;
             return true;
         } else {
@@ -137,11 +154,11 @@ public class Configuration {
 
     public boolean setToneSize(final int toneSize) {
         if(toneSize < Configuration.MIN_TONE_SIZE) {
-            Log.w(Configuration.LOG_TAG, "Tone size can't be smaller than " +
+            Log.w(this.logTag, "Tone size can't be smaller than " +
                     Configuration.MIN_TONE_SIZE + " samples");
             return false;
         } else if(toneSize > Configuration.MAX_TONE_SIZE) {
-            Log.w(Configuration.LOG_TAG, "Tone sizes over " + Configuration.MAX_TONE_SIZE +
+            Log.w(this.logTag, "Tone sizes over " + Configuration.MAX_TONE_SIZE +
                     " samples are not allowed");
             return false;
         }
@@ -169,6 +186,10 @@ public class Configuration {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public double getNyquistFrequency() {
         return this.sampleRate / 2;
     }
@@ -196,11 +217,11 @@ public class Configuration {
      */
     public boolean setWindowSize(final int windowSize) {
         if(windowSize < Configuration.MIN_WINDOW_SIZE) {
-            Log.w(Configuration.LOG_TAG, "Invalid Window size. Minimal size is: " +
+            Log.w(this.logTag, "Invalid Window size. Minimal size is: " +
                     Configuration.MIN_WINDOW_SIZE);
             return false;
         } else if(windowSize > this.sampleRate) {
-            Log.w(Configuration.LOG_TAG, "Invalid Window size. Maximal size is: " +
+            Log.w(this.logTag, "Invalid Window size. Maximal size is: " +
                     this.getSampleRate());
             return false;
         }
@@ -238,7 +259,7 @@ public class Configuration {
      */
     public boolean setFrequencyResolutionFactor(final double frequencyResolutionFactor) {
         if(frequencyResolutionFactor < 1) {
-            Log.w(Configuration.LOG_TAG, "Minimum for the resolution factor is 1");
+            Log.w(this.logTag, "Minimum for the resolution factor is 1");
             return false;
         }
 
@@ -246,7 +267,7 @@ public class Configuration {
 
         if((frequencyDelta * this.transmissionMode + this.baseFrequency) >
                 this.getNyquistFrequency()) {
-            Log.w(Configuration.LOG_TAG, "Reduce the factor, nyquist frequency exceeded.");
+            Log.w(this.logTag, "Reduce the factor, nyquist frequency exceeded.");
             return false;
         }
 
@@ -274,8 +295,7 @@ public class Configuration {
      */
     public double calcBaseFrequency(final double approximationValue) {
         if(approximationValue <= 0) {
-            Log.w(Configuration.LOG_TAG, "A calculation of a base frequency of zero or below is" +
-                    "not allowed");
+            Log.w(this.logTag, "A calculation of a base frequency of zero or below is not allowed");
             return -1;
         }
         double baseFrequency;
@@ -323,10 +343,10 @@ public class Configuration {
         double nyquistLimit = this.getNyquistFrequency() -
                 (this.getTransmissionMode() * this.getFrequencyDelta());
         if(baseFrequency <= 0) {
-            Log.w(Configuration.LOG_TAG, "Base frequency can't be zero or less");
+            Log.w(this.logTag, "Base frequency can't be zero or less");
             return false;
         } else if(baseFrequency > nyquistLimit) {
-            Log.w(Configuration.LOG_TAG, "Base frequency can't be higher than the nyquist" +
+            Log.w(this.logTag, "Base frequency can't be higher than the nyquist" +
                     "frequency of: " + nyquistLimit);
             return false;
         }
@@ -378,8 +398,7 @@ public class Configuration {
      */
     public boolean setSampleBufferSize(final int sampleBufferSize) {
         if(sampleBufferSize < this.minBufferSize) {
-            Log.w(Configuration.LOG_TAG, "Invalid sampleBuffer size. Minimal size is: " +
-                    minBufferSize);
+            Log.w(this.logTag, "Invalid sampleBuffer size. Minimal size is: " + minBufferSize);
             return false;
         }
         this.sampleBufferSize = sampleBufferSize;
@@ -398,7 +417,7 @@ public class Configuration {
 
     public boolean setOverlappingFactor(final int overlappingFactor) {
         if(overlappingFactor < 1) {
-            Log.w(Configuration.LOG_TAG, "Invalid Overlapping factor. Can not be smaller than one");
+            Log.w(this.logTag, "Invalid Overlapping factor. Can not be smaller than one");
             return false;
         }
         this.overlappingFactor = overlappingFactor;
@@ -414,8 +433,8 @@ public class Configuration {
     public boolean setWindowFunction(final int windowFunction) {
         if(windowFunction != Configuration.HAMMING_WINDOW ||
                 windowFunction != Configuration.HANN_WINDOW) {
-            Log.w(Configuration.LOG_TAG, "Invalid window function. (If implemented a new one, you" +
-                    "need to update the Configuration class");
+            Log.w(this.logTag, "Invalid window function. (If implemented a new one, you need to " +
+                    "update the Configuration class");
             return false;
         }
         this.windowFunction = windowFunction;
@@ -446,28 +465,57 @@ public class Configuration {
         return this.receiverThreshold;
     }
 
+    private byte[] preamble = null;
+
+    /**
+     * Only zero or one
+     * @param preamble
+     * @return
+     */
+    public boolean setPreamble(final byte[] preamble) {
+        // TODO: 5/2/16 Validation and Testcase
+        if(preamble == null) {
+            Log.w(this.logTag, "Your preamble shouldn't be null. If no preamble is used, init" +
+                    "with new byte[0]");
+            this.preamble = new byte[0];
+        }
+        for(int i = 0; i < preamble.length; i++) {
+            if(preamble[i] > 1) {
+                Log.w(this.logTag, "Your preamble contains values unequal to zero or one");
+                return false;
+            }
+        }
+        this.preamble = preamble;
+        return true;
+    }
+
+    public byte[] getPreamble() {
+        return this.preamble;
+    }
+
     private Configuration() {};
 
     public static Configuration newUltrasonicConfiguration() {
         Configuration configuration = new Configuration();
-        configuration.transmissionMode = Configuration.FOUR_STATE_TRANSMISSION;
-        //configuration.transmissionMode = Configuration.TWO_STATE_TRANSMISSION;
+        configuration.transmissionMode = Configuration.SINGLE_CHANNEL_TRANSMISSION;
+        //configuration.transmissionMode = Configuration.TWO_CHANNEL_TRANSMISSION;
+        //configuration.transmissionMode = Configuration.THREE_CHANNEL_TRANSMISSION;
         configuration.toneType = Configuration.SINE_TONE;
-        configuration.toneSize = Configuration.MIN_TONE_SIZE;
+        configuration.toneSize = 240;
         configuration.sampleRate = Configuration.SAMPLE_RATE_48KHZ;
         configuration.baseFrequency = Configuration.ULTRASONIC_BASE_FREQUENCY;
-        configuration.windowSize = Configuration.MIN_WINDOW_SIZE;
+        configuration.windowSize = 120;
         configuration.frequencyResolutionFactor = Configuration.DEFAULT_FREQUENCY_RESOLUTION_FACTOR;
         configuration.minBufferSize = AudioRecord.getMinBufferSize(
                 configuration.getSampleRate(),
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT) * 10;
         configuration.sampleBufferSize = configuration.minBufferSize;
-
         configuration.overlappingFactor = Configuration.DEFAULT_OVERLAPPING_FACTOR;
-        configuration.windowFunction = Configuration.HANN_WINDOW;
+        configuration.windowFunction = Configuration.HAMMING_WINDOW;
         configuration.maxFrameSize = Configuration.DEFAULT_FRAME_SIZE;
         configuration.receiverThreshold = configuration.DEFAULT_RECEIVER_THRESHOLD;
+        configuration.preamble = configuration.DEFAULT_PREAMBLE;
         return configuration;
     }
 }

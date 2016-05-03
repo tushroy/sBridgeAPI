@@ -32,7 +32,7 @@ public class Message {
     /**
      * Stores the original data bytes.
      */
-    private byte[] originalData = null;
+    private byte[] dataBytes = null;
 
     /**
      * Stores the data prepared for the modulation task.
@@ -44,7 +44,7 @@ public class Message {
      * {@link ch.nych.soundtransmitter.transmitter.Transmitter}. Therefore it is important, that
      * this objects are not accessed from outside the transmission module.
      */
-    private Tone[] toneSequence = null;
+    private Tone[] modulatedData = null;
 
     /**
      * The local message state indicates the current state / phase the message is in. During the
@@ -58,7 +58,7 @@ public class Message {
      * @param data a byte array of the data to transmit
      */
     public Message(final byte[] data) {
-        this.originalData = data;
+        this.dataBytes = data;
         this.state = Message.STATE_PENDING;
     }
 
@@ -67,8 +67,8 @@ public class Message {
      * module.
      * @return a byte array containing the data
      */
-    public byte[] getOriginalData() {
-        return this.originalData;
+    public byte[] getDataBytes() {
+        return this.dataBytes;
     }
 
     /**
@@ -100,9 +100,9 @@ public class Message {
     public Tone[] getToneSequence(final boolean internal) {
         Tone[] toneSequence = null;
         if(internal) {
-            toneSequence = this.toneSequence;
+            toneSequence = this.modulatedData;
         } else {
-            toneSequence = Arrays.copyOf(this.toneSequence, this.toneSequence.length);
+            toneSequence = Arrays.copyOf(this.modulatedData, this.modulatedData.length);
         }
         return toneSequence;
     }
@@ -110,10 +110,10 @@ public class Message {
     /**
      * This method is only intended for internal usage and should not be accessed from outside the
      * module.
-     * @param toneSequence an array of tones
+     * @param modulatedData an array of tones
      */
-    public void setToneSequence(final Tone[] toneSequence) {
-        this.toneSequence = toneSequence;
+    public void setModulatedData(final Tone[] modulatedData) {
+        this.modulatedData = modulatedData;
     }
 
     /**

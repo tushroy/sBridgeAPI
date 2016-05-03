@@ -13,8 +13,9 @@ import java.util.concurrent.TimeUnit;
 
 import ch.nych.BridgeListener;
 import ch.nych.soundtransmitter.transmitter.tasks.Message;
-import ch.nych.soundtransmitter.transmitter.tasks.preparation.PreparationTask;
+import ch.nych.soundtransmitter.transmitter.tasks.encoding.EncodingTask;
 import ch.nych.soundtransmitter.transmitter.tasks.TransmissionTask;
+import ch.nych.soundtransmitter.transmitter.tasks.modulation.ModulationTask;
 import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.Tone;
 import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.ToneFactory;
 import ch.nych.soundtransmitter.util.Configuration;
@@ -135,7 +136,6 @@ public class Transmitter {
         }
         this.executorServices = new ExecutorService[]{
                 Executors.newSingleThreadExecutor(),
-                Executors.newSingleThreadExecutor(),
                 Executors.newSingleThreadExecutor()
         };
         this.initialized = true;
@@ -157,7 +157,7 @@ public class Transmitter {
             Log.w(this.logTag, "Transmitter not initialized. Couldn't transmit data");
         } else if(data != null && data.length > 0) {
             message = new Message(data);
-            this.executorServices[0].execute(new PreparationTask(this, message));
+            this.executorServices[0].execute(new ModulationTask(this, message));
         } else {
             Log.w(this.logTag, "Invalid arguments on transmitData(), could not transmit message");
         }
@@ -165,6 +165,7 @@ public class Transmitter {
     }
 
     /**
+     *
      * This is the callback() method for the single tasks. The abstract {@link TransmissionTask}
      * class always return another transmission task. The callback() method is responsible for the
      * control of the single transmission jobs. This allows to easily exceed the process of data
@@ -172,10 +173,8 @@ public class Transmitter {
      * @param task the next task to execute
      */
     public void callback(TransmissionTask task) {
-        if(task.getTaskType() == TransmissionTask.MODULATION_TASK) {
+        if(task.getTaskType() == TransmissionTask.SENDING_TASK) {
             this.executorServices[1].execute(task);
-        } else if(task.getTaskType() == TransmissionTask.SENDING_TASK) {
-            this.executorServices[2].execute(task);
         } else if(task.getTaskType() == TransmissionTask.NOTIFICATION_TASK){
             this.notifyBridgeListeners(task.getMessage());
         }
