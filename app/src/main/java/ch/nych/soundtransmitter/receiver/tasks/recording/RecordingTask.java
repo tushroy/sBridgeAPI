@@ -24,7 +24,7 @@ public class RecordingTask extends ReceiverTask {
     /**
      *
      */
-    private final String logTag = Configuration.LOG_TAG + "recTask";
+    private final String logTag = Configuration.LOG_TAG + ":recTask";
 
     /**
      * Local reference to the shared sampleBuffer object

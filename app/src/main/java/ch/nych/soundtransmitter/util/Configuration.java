@@ -390,7 +390,8 @@ public class Configuration {
 
 
     /**
-     *
+     * Is only used for the minimum of the sample buffer. The RecordingTask calculates its minimum
+     * buffer size independently.
      */
     private int minBufferSize = 0;
 
@@ -530,25 +531,23 @@ public class Configuration {
 
     public static Configuration newUltrasonicConfiguration() {
         Configuration configuration = new Configuration();
-        configuration.transmissionMode = Configuration.SINGLE_CHANNEL_TRANSMISSION;
-        //configuration.transmissionMode = Configuration.TWO_CHANNEL_TRANSMISSION;
-        //configuration.transmissionMode = Configuration.THREE_CHANNEL_TRANSMISSION;
-        configuration.toneType = Configuration.SINE_TONE;
-        configuration.toneSize = 240;
+        configuration.transmissionMode = Configuration.TWO_CHANNEL_TRANSMISSION;
         configuration.sampleRate = Configuration.SAMPLE_RATE_48KHZ;
-        configuration.baseFrequency = Configuration.ULTRASONIC_BASE_FREQUENCY;
         configuration.windowSize = 120;
-        configuration.frequencyResolutionFactor = Configuration.DEFAULT_FREQUENCY_RESOLUTION_FACTOR;
+        configuration.toneSize = 240;
+        configuration.toneType = Configuration.SINE_TONE;
+        configuration.baseFrequency = Configuration.ULTRASONIC_BASE_FREQUENCY;
+        configuration.windowFunction = Configuration.HAMMING_WINDOW;
         configuration.minBufferSize = AudioRecord.getMinBufferSize(
                 configuration.getSampleRate(),
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT) * 10;
         configuration.sampleBufferSize = configuration.minBufferSize;
+        configuration.frequencyResolutionFactor = Configuration.DEFAULT_FREQUENCY_RESOLUTION_FACTOR;
         configuration.overlappingFactor = Configuration.DEFAULT_OVERLAPPING_FACTOR;
-        configuration.windowFunction = Configuration.HAMMING_WINDOW;
+        configuration.preamble = configuration.DEFAULT_PREAMBLE;
         configuration.maxFrameSize = Configuration.DEFAULT_FRAME_SIZE;
         configuration.receiverThreshold = configuration.DEFAULT_RECEIVER_THRESHOLD;
-        configuration.preamble = configuration.DEFAULT_PREAMBLE;
         return configuration;
     }
 }

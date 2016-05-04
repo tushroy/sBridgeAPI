@@ -207,6 +207,8 @@ public class Transmitter {
                 Log.w(this.logTag, e.getMessage());
                 executor.shutdownNow();
                 Thread.currentThread().interrupt();
+            } finally {
+                this.audioTrack.release();
             }
         }
     }

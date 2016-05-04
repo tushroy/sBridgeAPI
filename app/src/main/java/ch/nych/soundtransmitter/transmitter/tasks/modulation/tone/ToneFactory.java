@@ -16,7 +16,7 @@ public class ToneFactory {
     public static Tone[] getToneSet(Configuration configuration) {
         Log.d(ToneFactory.logTag,
                 "Generate ToneSet\n" +
-                        "\tStateMachine:\t" + configuration.getTransmissionMode() + "States\n" +
+                        "\tChannels:\t" + configuration.getTransmissionMode() + "channels\n" +
                         "\tBaseFrequeny:\t" + configuration.getBaseFrequency() + "Hz\n" +
                         "\tToneSize:\t\t" + configuration.getToneSize() + " Samples\n" +
                         "\tFrequencyDelta:\t" + configuration.getFrequencyDelta() + "Hz\n" +
@@ -24,18 +24,20 @@ public class ToneFactory {
 
         double[] frequencies = configuration.getFrequencies();
         Tone[] toneSet = new Tone[frequencies.length];
-        toneSet[0] = new SineTone(
-                frequencies[0],
-                // TODO: 5/3/16 this is dangerous
-                configuration.getToneSize() * 2,
-                configuration.getSampleRate(),
-                Tone.DEFAULT_VOLUME);
-        for(int i = 1; i < frequencies.length; i++) {
-            toneSet[i] = new SineTone(
-                    frequencies[i],
-                    configuration.getToneSize(),
+        if(configuration.getToneType() == Configuration.SINE_TONE) {
+            toneSet[0] = new SineTone(
+                    frequencies[0],
+                    // TODO: 5/3/16 this is dangerous
+                    configuration.getToneSize() * 2,
                     configuration.getSampleRate(),
                     Tone.DEFAULT_VOLUME);
+            for (int i = 1; i < frequencies.length; i++) {
+                toneSet[i] = new SineTone(
+                        frequencies[i],
+                        configuration.getToneSize(),
+                        configuration.getSampleRate(),
+                        Tone.DEFAULT_VOLUME);
+            }
         }
         return toneSet;
     }
