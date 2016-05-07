@@ -11,18 +11,22 @@ import ch.nych.soundtransmitter.transmitter.tasks.notification.NotificationTask;
 import ch.nych.soundtransmitter.util.Configuration;
 
 /**
+ * This class is responsible for the transmission of the message, by playing the modulated audio
+ * signal.
  * Created by nych on 4/6/16.
  */
 public class SendingTask extends TransmissionTask {
-    /**
-     *
-     */
-    private final String logTag = Configuration.LOG_TAG;
 
     /**
-     *
-     * @param transmitter
-     * @param message
+     * Local log tag
+     */
+    private final String logTag = Configuration.LOG_TAG + ":sendTask";
+
+    /**
+     * Default constructor
+     * @param transmitter    the reference to the calling {@link Transmitter} instance is used for
+     *                       the shared resources and the callback.
+     * @param message        The {@link Message} instance, containing the data to modulate
      */
     public SendingTask(final Transmitter transmitter, final Message message) {
         super(transmitter, message, TransmissionTask.SENDING_TASK);

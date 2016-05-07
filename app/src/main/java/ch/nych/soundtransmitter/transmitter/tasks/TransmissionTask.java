@@ -65,11 +65,11 @@ public abstract class TransmissionTask implements Runnable {
 
     /**
      * Default constructor of the TransmissionTask super class
-     * @param transmitter the reference to the calling {@link Transmitter} instance is used for the
-     *                    shared resources and the callback.
-     * @param message the message to transmit.
-     * @param taskType specifies whether the task is from type MODULATION_TASK, SENDING_TASK or
-     *                 NOTIFICATION_TASK
+     * @param transmitter    the reference to the calling {@link Transmitter} instance is used for
+     *                       the shared resources and the callback.
+     * @param message        the message to transmit.
+     * @param taskType       specifies whether the task is from type MODULATION_TASK, SENDING_TASK
+     *                       or NOTIFICATION_TASK
      */
     public TransmissionTask(
             final Transmitter transmitter,

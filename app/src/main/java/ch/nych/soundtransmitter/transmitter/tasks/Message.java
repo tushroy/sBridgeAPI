@@ -59,7 +59,7 @@ public class Message {
     /**
      * The default constructor for the {@link Message} class takes the data bytes and sets the
      * message state to pending.
-     * @param data a byte array of the data to transmit
+     * @param data    A byte array of the data to transmit
      */
     public Message(final byte[] data) {
         this.dataBytes = data;
@@ -87,7 +87,7 @@ public class Message {
     /**
      * This method is only intended for internal usage and should not be accessed from outside the
      * module.
-     * @param preparedData a byte array containing the information prepared to send
+     * @param preparedData    A byte array containing the information prepared to send
      */
     public void setPreparedData(final byte[] preparedData) {
         this.preparedData = preparedData;
@@ -96,8 +96,8 @@ public class Message {
     /**
      * For accessing the modulated signal from outside the transmission module, set the internal
      * flag to false.
-     * @param internal indicates whether the array is accessed from an internal or an external
-     *                 method.
+     * @param internal    Indicates whether the array is accessed from an internal or an external
+     *                    method.
      * @return if the internal flag is true, the return value is a reference to the original data.
      * Otherwise, the method will return a copy of the tone set.
      */
@@ -114,7 +114,7 @@ public class Message {
     /**
      * This method is only intended for internal usage and should not be accessed from outside the
      * module.
-     * @param modulatedData an array of tones
+     * @param modulatedData     An array of tones
      */
     public void setModulatedData(final Tone[] modulatedData) {
         this.modulatedData = modulatedData;
@@ -133,7 +133,7 @@ public class Message {
     /**
      * This method is only intended for internal usage and should not be accessed from outside the
      * module.
-     * @param state the state to set, see static variables of the {@link Message} class.
+     * @param state    The state to set, see static variables of the {@link Message} class.
      */
     public void setState(final int state) {
         this.state = state;

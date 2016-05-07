@@ -10,39 +10,43 @@ import ch.nych.soundtransmitter.transmitter.tasks.TransmissionTask;
 import ch.nych.soundtransmitter.util.Configuration;
 
 /**
- * Map bits of the dataBytes to the tones.
+ * This class is responsible for the modulation of the dataBytes. The modulation happens through the
+ * mapping of the single bits to the corresponding tone. As there are different transmission modes,
+ * there are multiple modulation implementations.
  */
 public class ModulationTask extends TransmissionTask {
 
     /**
-     *
+     * The local log tag
      */
     private final String logTag = Configuration.LOG_TAG + ":Mod";
 
     /**
-     * 10000000
+     * The mask is used to get the single bits out of a byte
+     * 0000 0000 1000 0000
      */
     private short mask = 128;
 
     /**
-     *
+     * The local reference to the shared toneSet resource
      */
     private Tone[] toneSet = null;
 
     /**
-     *
+     * The preamble of the message
      */
     private byte[] preamble = null;
 
     /**
-     *
+     * The bytes to modulate
      */
     private byte[] dataBytes = null;
 
     /**
-     *
-     * @param transmitter
-     * @param message
+     * Default constructor
+     * @param transmitter    the reference to the calling {@link Transmitter} instance is used for
+     *                       the shared resources and the callback.
+     * @param message        The {@link Message} instance, containing the data to modulate
      */
     public ModulationTask(final Transmitter transmitter, final Message message) {
         super(transmitter, message, TransmissionTask.MODULATION_TASK);
@@ -52,8 +56,8 @@ public class ModulationTask extends TransmissionTask {
     }
 
     /**
-     *
-     * @return
+     * This modulation maps a frequency to the corresponding state.
+     * @return an array of tones, representing the modulated data
      */
     private Tone[] singleChannelModulation() {
         int size = this.dataBytes.length * 8 + this.preamble.length + 2;
@@ -86,7 +90,8 @@ public class ModulationTask extends TransmissionTask {
     }
 
     /**
-     *
+     * This modulation switches between to frequencies per state.
+     * @return an array of tones, representing the modulated data
      */
     private Tone[] twoChannelModulation() {
         int size = this.dataBytes.length * 8 + this.preamble.length + 2;
@@ -124,8 +129,8 @@ public class ModulationTask extends TransmissionTask {
     }
 
     /**
-     *
-     * @return
+     * This modulation switches between three frequencies per state.
+     * @return an array of tones, representing the modulated data
      */
     private Tone[] threeChannelModulation() {
         int size = this.dataBytes.length * 8 + this.preamble.length + 2;
