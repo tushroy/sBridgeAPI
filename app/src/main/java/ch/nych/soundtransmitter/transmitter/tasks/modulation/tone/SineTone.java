@@ -2,30 +2,40 @@ package ch.nych.soundtransmitter.transmitter.tasks.modulation.tone;
 
 import android.util.Log;
 
-import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.AbstractTone;
+import ch.nych.soundtransmitter.util.Configuration;
 
 /**
+ * Because it should possible to transmit the data inaudible, the transition between the single
+ * tones needs to be faded. SineTone uses a sine function for the fade in and fade out.
  * Created by nych on 4/6/16.
  */
-public class SineTone extends AbstractTone {
+public class SineTone extends Tone {
 
-    public SineTone(double frequency, int length, int sampleRate, double volume) {
+    /**
+     * Local log tag
+     */
+    private final String logTag = Configuration.LOG_TAG + ":sTone";
+
+    /**
+     * Default constructor
+     * @param frequency     tone frequency in hertz
+     * @param length        tone length in samples
+     * @param sampleRate    sample rate in hertz
+     * @param volume        volume in percent
+     */
+    public SineTone(final double frequency,
+                final int length,
+                final int sampleRate,
+                final double volume) {
         super(frequency, length, sampleRate, volume);
         Log.d(this.logTag, "Create new SineTone Object\n" +
                 "\tFrequency:\t\t" + frequency);
     }
 
-    @Override
-    public short[] getSamples() {
-        if(this.samples == null) {
-            this.generateTone();
-        }
-        return this.samples;
-    }
-
     /**
-     * Generates a tone of frequency f with a fade sine in/out of frequency
-     * length / samplerate
+     * This method calculates the single sample values of the tone. The frequency of the sine
+     * function, used for the fade in and fade out, is calculated by the division of tone length
+     * and the sample rate.
      */
     private void generateTone() {
         Log.d(this.logTag, "Generate Tone Samples for SineTone of: " + this.frequency + "Hz");
@@ -36,5 +46,13 @@ public class SineTone extends AbstractTone {
 
         for(int i = 0; i < this.length; i++)
             this.samples[i] = (short) (Math.sin(i * const1) * Math.sin(i * const2) * volume);
+    }
+
+    @Override
+    public short[] getSamples() {
+        if(this.samples == null) {
+            this.generateTone();
+        }
+        return this.samples;
     }
 }

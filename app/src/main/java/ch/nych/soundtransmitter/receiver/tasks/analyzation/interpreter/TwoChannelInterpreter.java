@@ -1,11 +1,10 @@
 package ch.nych.soundtransmitter.receiver.tasks.analyzation.interpreter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import ch.nych.soundtransmitter.receiver.Receiver;
 import ch.nych.soundtransmitter.receiver.tasks.Frame;
-import ch.nych.soundtransmitter.util.Configuration;
+import ch.nych.soundtransmitter.receiver.tasks.analyzation.Interpreter;
 
 /**
  * Created by nych on 5/1/16.

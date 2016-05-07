@@ -1,7 +1,6 @@
 package ch.nych.soundtransmitter.transmitter.tasks.sending;
 
 import android.media.AudioTrack;
-import android.provider.MediaStore;
 import android.util.Log;
 
 import ch.nych.soundtransmitter.transmitter.Transmitter;

@@ -5,10 +5,6 @@ import java.util.Arrays;
 import ch.nych.soundtransmitter.receiver.Receiver;
 import ch.nych.soundtransmitter.receiver.tasks.Frame;
 import ch.nych.soundtransmitter.receiver.tasks.ReceiverTask;
-import ch.nych.soundtransmitter.receiver.tasks.analyzation.interpreter.Interpreter;
-import ch.nych.soundtransmitter.receiver.tasks.analyzation.interpreter.SingleChannelInterpreter;
-import ch.nych.soundtransmitter.receiver.tasks.analyzation.interpreter.ThreeChannelInterpreter;
-import ch.nych.soundtransmitter.receiver.tasks.analyzation.interpreter.TwoChannelInterpreter;
 import ch.nych.soundtransmitter.util.Configuration;
 
 /**
@@ -64,7 +60,7 @@ public class AnalyzationTask extends ReceiverTask {
         this.frame = frame;
         this.originalData = frame.getOriginalData();
         this.processedData = frame.getProcessedData();
-        if(this.configuration.getTransmissionMode() == Configuration.SINGLE_CHANNEL_TRANSMISSION) {
+       /* if(this.configuration.getTransmissionMode() == Configuration.SINGLE_CHANNEL_TRANSMISSION) {
             this.interpreter = new SingleChannelInterpreter(this.frame, this.configuration);
         } else if(this.configuration.getTransmissionMode() ==
                 Configuration.TWO_CHANNEL_TRANSMISSION) {
@@ -76,7 +72,7 @@ public class AnalyzationTask extends ReceiverTask {
         if((this.thresholdFunction = this.configuration.getThresholdFunction()) ==
                 Configuration.THRESHOLD_FUNCTION_MEDIAN) {
             this.tempBuffer = new double[this.originalData[0].length];
-        }
+        }*/
     }
 
     /**

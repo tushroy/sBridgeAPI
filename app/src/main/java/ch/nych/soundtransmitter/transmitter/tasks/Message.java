@@ -5,9 +5,13 @@ import java.util.Arrays;
 import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.Tone;
 
 /**
+ * This class is a container for the dataBytes to transmit. It stores the original bytes, as well as
+ * the data in modulated form. Besides, the Message class also contains a state, indicates if the
+ * message was sent successfully or if it is still in the sending process.
  * Created by nych on 4/6/16.
  */
 public class Message {
+
     /**
      * Indicates that there was a problem during the sending task.
      */

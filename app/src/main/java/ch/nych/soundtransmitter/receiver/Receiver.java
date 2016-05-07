@@ -145,7 +145,7 @@ public class Receiver {
                 this.executorServices[2].execute(new TwoChannelInterpreter(this, frame));
             } else if(this.configuration.getTransmissionMode() ==
                     Configuration.THREE_CHANNEL_TRANSMISSION) {
-                // TODO: 5/7/16  
+                // TODO: 5/7/16
             }
 
         } else if(frame.getState() == Frame.FRAME_CORRUPTED){

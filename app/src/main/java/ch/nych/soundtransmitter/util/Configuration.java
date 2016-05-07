@@ -647,6 +647,10 @@ public class Configuration {
      */
     private Configuration() {};
 
+    /**
+     *
+     * @return
+     */
     private static Configuration defaultBaseConfiguration() {
         Configuration configuration = new Configuration();
         configuration.transmissionMode = Configuration.TWO_CHANNEL_TRANSMISSION;

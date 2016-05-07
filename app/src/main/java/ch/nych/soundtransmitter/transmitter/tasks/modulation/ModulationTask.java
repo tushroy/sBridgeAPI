@@ -4,9 +4,9 @@ import android.util.Log;
 
 import ch.nych.soundtransmitter.transmitter.Transmitter;
 import ch.nych.soundtransmitter.transmitter.tasks.Message;
+import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.Tone;
 import ch.nych.soundtransmitter.transmitter.tasks.sending.SendingTask;
 import ch.nych.soundtransmitter.transmitter.tasks.TransmissionTask;
-import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.Tone;
 import ch.nych.soundtransmitter.util.Configuration;
 
 /**

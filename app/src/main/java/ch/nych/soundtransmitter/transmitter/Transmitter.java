@@ -20,6 +20,14 @@ import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.ToneFactory;
 import ch.nych.soundtransmitter.util.Configuration;
 
 /**
+ * This class is the sending interface of the sBridgeAPI. It is responsible for the modulation and
+ * sending of the data bytes passed in transmitData(). The class offers the possibility to register
+ * yourself as a listener for transmission events. If you registered yourself with the addListener()
+ * method, you will receive a notification if the message was sent.
+ * Before messages can be sent, the transmitter needs to be initialized successfully with
+ * initTransmitter(). If this is not possible, there might be a fault in the {@link Configuration}
+ * or the {@link AudioTrack} can't be initialized.
+ *
  * Created by nych on 4/6/16.
  */
 public class Transmitter {
