@@ -2,15 +2,18 @@ package ch.nych.soundtransmitter.receiver.tasks.analyzation.interpreter;
 
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import ch.nych.soundtransmitter.receiver.Receiver;
 import ch.nych.soundtransmitter.receiver.tasks.Frame;
+import ch.nych.soundtransmitter.receiver.tasks.ReceiverTask;
 import ch.nych.soundtransmitter.util.Configuration;
 
 /**
  * Created by nych on 5/1/16.
  */
-public abstract class Interpreter {
+public abstract class Interpreter extends ReceiverTask {
 
     /**
      *
@@ -20,27 +23,76 @@ public abstract class Interpreter {
     /**
      *
      */
-    protected Configuration configuration;
-
-    /**
-     *
-     */
     protected Frame frame = null;
 
     /**
      *
      */
-    protected double[][] frameData = null;
+    protected double[][] processedData = null;
 
     /**
      *
-     * @param frame
-     * @param configuration
      */
-    public Interpreter(final Frame frame, final Configuration configuration) {
+    protected double[] thresholds = null;
+
+    /**
+     *
+     */
+    protected byte[] preamble = null;
+
+    /**
+     * @param receiver
+     */
+    public Interpreter(final Receiver receiver, final Frame frame) {
+        super(receiver);
         this.frame = frame;
-        this.frameData = this.frame.getProcessedData();
-        this.configuration = configuration;
+        this.processedData = this.frame.getProcessedData();
+        this.thresholds = new double[this.processedData.length];
+        this.filterData();
+        for(int i = 0; i < this.thresholds.length; i++) {
+            this.thresholds[i] = this.getRootMeanSquare(this.processedData[i]);
+        }
+        this.preamble = this.configuration.getPreamble();
+    }
+
+    @Override
+    public boolean initTask() {
+        return false;
+    }
+
+    /**
+     *
+     */
+    protected void filterData() {
+        // TODO: 5/7/16 validation and dynamic
+        double[] coefficients = configuration.getFilterCoefficients();
+        double[][] originalData = this.frame.getOriginalData();
+        int from = (coefficients.length / 2) + 1;
+        int to = this.processedData[0].length - from;
+        for(int i = 0; i < (this.processedData.length); i++) {
+            for(int j = from; j < to; j++) {
+                this.processedData[i][j] += originalData[i][j - 2] * coefficients[0];
+                this.processedData[i][j] += originalData[i][j - 1] * coefficients[1];
+                this.processedData[i][j] *= coefficients[2];
+                this.processedData[i][j] += originalData[i][j + 1] * coefficients[3];
+                this.processedData[i][j] += originalData[i][j + 2] * coefficients[4];
+            }
+
+        }
+    }
+
+    /**
+     *
+     * @param data
+     * @return
+     */
+    public double getRootMeanSquare(final double[] data) {
+        double average = 0;
+        for(double d : data) {
+            average += Math.pow(d, 2);
+        }
+        average /= data.length;
+        return Math.sqrt(average);
     }
 
     /**
@@ -50,37 +102,27 @@ public abstract class Interpreter {
      */
     protected int getMaxInRow(final int index) {
         int maxIndex = 0;
-        for(int i = 0; i < this.frameData.length; i++) {
-            if(this.frameData[i][index] > this.frameData[maxIndex][index]) {
+        for(int i = 0; i < this.processedData.length; i++) {
+            if(this.processedData[i][index] > this.processedData[maxIndex][index]) {
                 maxIndex = i;
             }
         }
-        if(this.frameData[maxIndex][index] <= 0) {
+        if(this.processedData[maxIndex][index] <= 0) {
             maxIndex = -1;
         }
         return maxIndex;
     }
 
-    /**
-     *
-     * @param list
-     * @return
-     */
-    private boolean frameValid(final List<Byte> list) {
-        byte[] preamble = this.configuration.getPreamble();
-        if(list.size() < preamble.length) {
-            Log.d(this.logTag, "Detected Frame is not valid");
+    private boolean compareAgainstPreamble(List<Byte> dataBytes) {
+        if(this.preamble.length != dataBytes.size()) {
             return false;
         }
-        for(int i = 0; i < preamble.length; i++) {
-            if(list.get(i) != preamble[i]) {
-                Log.d(this.logTag, "Detected Frame is not valid");
+        for(int i = 0; i < this.preamble.length; i++) {
+            if(dataBytes.get(i) != this.preamble[i]) {
                 return false;
             }
         }
-        for(byte b : preamble) {
-            list.remove(0);
-        }
+        dataBytes.clear();
         return true;
     }
 
@@ -110,18 +152,27 @@ public abstract class Interpreter {
      *
      * @return
      */
-    protected abstract List<Byte> mapData();
+    protected abstract int mapData(final List<Byte> list, final int from, final int size);
 
     /**
      *
      */
-    public void interpretData() {
-        List<Byte> list = this.mapData();
-        if(this.frameValid(list)) {
-            this.frame.setDataBytes(this.mergeBytes(list));
-            this.frame.setState(Frame.ANALYZED_SUCCESSFULLY);
-        } else {
-            this.frame.setState(Frame.FRAME_CORRUPTED);
+    public boolean interpretData() {
+
+        return true;
+    }
+
+    @Override
+    public void run() {
+        List<Byte> dataBytes = new ArrayList<Byte>();
+        int index = this.mapData(dataBytes, 0, this.preamble.length);
+        if(!this.compareAgainstPreamble(dataBytes)) {
+            Log.d(this.logTag, "Frame unequal to preamble");
+            return;
         }
+        this.mapData(dataBytes, index, Integer.MAX_VALUE);
+        this.frame.setDataBytes(this.mergeBytes(dataBytes));
+        this.frame.setState(Frame.ANALYZED_SUCCESSFULLY);
+        this.receiver.callback(this.frame);
     }
 }

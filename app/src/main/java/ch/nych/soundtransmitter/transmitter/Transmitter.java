@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 
 import ch.nych.BridgeListener;
 import ch.nych.soundtransmitter.transmitter.tasks.Message;
-import ch.nych.soundtransmitter.transmitter.tasks.encoding.EncodingTask;
 import ch.nych.soundtransmitter.transmitter.tasks.TransmissionTask;
 import ch.nych.soundtransmitter.transmitter.tasks.modulation.ModulationTask;
 import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.Tone;

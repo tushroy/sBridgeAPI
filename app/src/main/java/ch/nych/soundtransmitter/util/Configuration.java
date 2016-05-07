@@ -58,11 +58,6 @@ public class Configuration {
     /**
      *
      */
-    public final static double ULTRASONIC_BASE_FREQUENCY = 18000.0;
-
-    /**
-     *
-     */
     public final static int SINE_TONE = 1;
 
     /**
@@ -86,7 +81,7 @@ public class Configuration {
     public final static int HANN_WINDOW = 2;
 
     /**
-     * Number of windows per frame
+     * Maximum number of windows per frame
      */
     public final static int DEFAULT_FRAME_SIZE = 1500;
 
@@ -114,7 +109,7 @@ public class Configuration {
     /**
      * The default preamble for a frame
      */
-    public final static byte[] DEFAULT_PREAMBLE = new byte[]{0, 1, 0, 1, 1};
+    public final static byte[] DEFAULT_PREAMBLE = new byte[]{0, 1, 1};
 
     /**
      * Local log tag
@@ -126,10 +121,19 @@ public class Configuration {
      */
     private int transmissionMode = 0;
 
+    /**
+     * Getter for transmission mode.
+     * @return
+     */
     public int getTransmissionMode() {
         return this.transmissionMode;
     }
 
+    /**
+     * Setter for transmission mode
+     * @param transmissionMode
+     * @return
+     */
     public boolean setTransmissionMode(final int transmissionMode) {
         if(transmissionMode == Configuration.SINGLE_CHANNEL_TRANSMISSION ||
                 transmissionMode == Configuration.TWO_CHANNEL_TRANSMISSION ||
@@ -146,10 +150,19 @@ public class Configuration {
      */
     private int toneType = 0;
 
+    /**
+     * Getter for tone type
+     * @return
+     */
     public int getToneType() {
         return this.toneType;
     }
 
+    /**
+     * Setter for tone type
+     * @param toneType
+     * @return
+     */
     public boolean setToneType(final int toneType) {
         if(toneType == Configuration.SINE_TONE) {
             this.toneType = toneType;
@@ -164,10 +177,19 @@ public class Configuration {
      */
     private int toneSize = 0;
 
+    /**
+     * Getter for tone size
+     * @return
+     */
     public int getToneSize() {
         return this.toneSize;
     }
 
+    /**
+     * Setter for tone size
+     * @param toneSize
+     * @return
+     */
     public boolean setToneSize(final int toneSize) {
         if(toneSize < Configuration.MIN_TONE_SIZE) {
             Log.w(this.logTag, "Tone size can't be smaller than " +
@@ -185,12 +207,45 @@ public class Configuration {
     /**
      *
      */
+    private int controlToneSize = 0;
+
+    /**
+     * Getter for control tone size
+     * @return
+     */
+    public int getControlToneSize() {
+        return this.controlToneSize;
+    }
+
+    /**
+     * Setter for control tone size
+     * @param controlToneSize
+     * @return
+     */
+    public boolean setControlToneSize(final int controlToneSize) {
+        // TODO: 5/7/16 validation
+        this.controlToneSize = controlToneSize;
+        return true;
+    }
+
+    /**
+     *
+     */
     private int sampleRate = 0;
 
+    /**
+     * Getter for sample rate
+     * @return
+     */
     public int getSampleRate() {
         return this.sampleRate;
     }
 
+    /**
+     * Setter for sample rate
+     * @param sampleRate
+     * @return
+     */
     public boolean setSampleRate(final int sampleRate) {
         if(sampleRate == Configuration.SAMPLE_RATE_48KHZ ||
                 sampleRate == Configuration.SAMPLE_RATE_44KHZ) {
@@ -227,7 +282,7 @@ public class Configuration {
     }
 
     /**
-     *
+     * Setter for window size
      * @param windowSize
      * @return
      */
@@ -261,7 +316,7 @@ public class Configuration {
     private double frequencyResolutionFactor = 0.0;
 
     /**
-     *
+     * Getter for frequency resolution factor
      * @return
      */
     public double getFrequencyResolutionFactor() {
@@ -269,7 +324,7 @@ public class Configuration {
     }
 
     /**
-     *
+     * Setter for frequency resolution factor
      * @param frequencyResolutionFactor
      * @return
      */
@@ -292,7 +347,7 @@ public class Configuration {
     }
 
     /**
-     *
+     * Getter for frequency delta
      * @return
      */
     public double getFrequencyDelta() {
@@ -375,7 +430,7 @@ public class Configuration {
     }
 
     /**
-     *
+     * Getter for frequency set
      * @return
      */
     public double[] getFrequencies() {
@@ -401,7 +456,7 @@ public class Configuration {
     private int sampleBufferSize = 0;
 
     /**
-     *
+     * Getter for sample buffer size
      * @return
      */
     public int getSampleBufferSize() {
@@ -409,7 +464,7 @@ public class Configuration {
     }
 
     /**
-     *
+     * Setter for sample buffer size
      * @param sampleBufferSize
      * @return
      */
@@ -428,10 +483,19 @@ public class Configuration {
      */
     private int overlappingFactor = 0;
 
+    /**
+     * Getter for overlapping factor
+     * @return
+     */
     public int getOverlappingFactor() {
         return this.overlappingFactor;
     }
 
+    /**
+     * Setter for overlapping factor
+     * @param overlappingFactor
+     * @return
+     */
     public boolean setOverlappingFactor(final int overlappingFactor) {
         if(overlappingFactor < 1) {
             Log.w(this.logTag, "Invalid Overlapping factor. Can not be smaller than one");
@@ -443,10 +507,19 @@ public class Configuration {
 
     private int windowFunction = 0;
 
+    /**
+     * Getter for window function
+     * @return
+     */
     public int getWindowFunction() {
         return this.windowFunction;
     }
 
+    /**
+     * Getter for window function
+     * @param windowFunction
+     * @return
+     */
     public boolean setWindowFunction(final int windowFunction) {
         if(windowFunction != Configuration.HAMMING_WINDOW ||
                 windowFunction != Configuration.HANN_WINDOW) {
@@ -460,30 +533,53 @@ public class Configuration {
 
     private int maxFrameSize = 0;
 
+    /**
+     * Setter for maximum frame size
+     * @param maxFrameSize
+     * @return
+     */
     public boolean setMaxFrameSize(final int maxFrameSize) {
         // TODO: 4/24/16 Validation and Testcase
         this.maxFrameSize = maxFrameSize;
         return true;
     }
 
+    /**
+     * Getter for maximum frame size
+     * @return
+     */
     public int getMaxFrameSize() {
         return this.maxFrameSize;
     }
 
     private double receiverThreshold = 0.0;
 
+    /**
+     * Setter for receiver threshold
+     * @param receiverThreshold
+     * @return
+     */
     public boolean setReceiverThreshold(final double receiverThreshold) {
         // TODO: 5/1/16 Validation and Testcase
         this.receiverThreshold = receiverThreshold;
         return true;
     }
 
+    /**
+     * Getter for receiver threshold
+     * @return
+     */
     public double getReceiverThreshold() {
         return this.receiverThreshold;
     }
 
     private int thresholdFunction = 0;
 
+    /**
+     * Setter for threshold function
+     * @param thresholdFunction
+     * @return
+     */
     public boolean setThresholdFunction(final int thresholdFunction) {
         if(thresholdFunction != Configuration.THRESHOLD_FUNCTION_ROOT_MEAN_SQUARE ||
                 thresholdFunction != Configuration.THRESHOLD_FUNCTION_ARITHMETIC_MEAN ||
@@ -495,8 +591,23 @@ public class Configuration {
         return true;
     }
 
+    /**
+     * Setter for threshold function
+     * @return
+     */
     public int getThresholdFunction() {
         return this.thresholdFunction;
+    }
+
+    private double[] filterCoefficients = null;
+
+    public double[] getFilterCoefficients() {
+        return this.filterCoefficients;
+    }
+
+    public boolean setFilterCoefficients(final double[] filterCoeffizients) {
+        this.filterCoefficients = filterCoeffizients;
+        return true;
     }
 
     private byte[] preamble = null;
@@ -523,20 +634,24 @@ public class Configuration {
         return true;
     }
 
+    /**
+     * Getter for the preamble
+     * @return
+     */
     public byte[] getPreamble() {
         return this.preamble;
     }
 
+    /**
+     *
+     */
     private Configuration() {};
 
-    public static Configuration newUltrasonicConfiguration() {
+    private static Configuration defaultBaseConfiguration() {
         Configuration configuration = new Configuration();
         configuration.transmissionMode = Configuration.TWO_CHANNEL_TRANSMISSION;
         configuration.sampleRate = Configuration.SAMPLE_RATE_48KHZ;
-        configuration.windowSize = 120;
-        configuration.toneSize = 240;
         configuration.toneType = Configuration.SINE_TONE;
-        configuration.baseFrequency = Configuration.ULTRASONIC_BASE_FREQUENCY;
         configuration.windowFunction = Configuration.HAMMING_WINDOW;
         configuration.minBufferSize = AudioRecord.getMinBufferSize(
                 configuration.getSampleRate(),
@@ -546,8 +661,35 @@ public class Configuration {
         configuration.frequencyResolutionFactor = Configuration.DEFAULT_FREQUENCY_RESOLUTION_FACTOR;
         configuration.overlappingFactor = Configuration.DEFAULT_OVERLAPPING_FACTOR;
         configuration.preamble = configuration.DEFAULT_PREAMBLE;
+        configuration.filterCoefficients = new double[]{0.083,0.167, 0.5, 0.167, 0.083};
         configuration.maxFrameSize = Configuration.DEFAULT_FRAME_SIZE;
         configuration.receiverThreshold = configuration.DEFAULT_RECEIVER_THRESHOLD;
+        return configuration;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public static Configuration newUltrasonicConfiguration() {
+        Configuration configuration = Configuration.defaultBaseConfiguration();
+        configuration.windowSize = 120;
+        configuration.toneSize = 240;
+        configuration.controlToneSize = 480;
+        configuration.baseFrequency = configuration.calcBaseFrequency(18000);
+        return configuration;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public static Configuration newAudibleConfiguration() {
+        Configuration configuration = Configuration.defaultBaseConfiguration();
+        configuration.windowSize = 2400;
+        configuration.toneSize = 4800;
+        configuration.controlToneSize = 9600;
+        configuration.baseFrequency = configuration.calcBaseFrequency(500);
         return configuration;
     }
 }

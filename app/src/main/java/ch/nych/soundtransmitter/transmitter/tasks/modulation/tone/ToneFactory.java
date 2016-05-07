@@ -27,8 +27,7 @@ public class ToneFactory {
         if(configuration.getToneType() == Configuration.SINE_TONE) {
             toneSet[0] = new SineTone(
                     frequencies[0],
-                    // TODO: 5/3/16 this is dangerous
-                    configuration.getToneSize() * 2,
+                    configuration.getControlToneSize(),
                     configuration.getSampleRate(),
                     Tone.DEFAULT_VOLUME);
             for (int i = 1; i < frequencies.length; i++) {

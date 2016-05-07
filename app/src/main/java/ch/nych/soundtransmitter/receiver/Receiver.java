@@ -13,6 +13,7 @@ import ch.nych.soundtransmitter.receiver.tasks.Frame;
 import ch.nych.soundtransmitter.receiver.tasks.ReceiverTask;
 import ch.nych.soundtransmitter.receiver.tasks.SampleBuffer;
 import ch.nych.soundtransmitter.receiver.tasks.analyzation.AnalyzationTask;
+import ch.nych.soundtransmitter.receiver.tasks.analyzation.interpreter.TwoChannelInterpreter;
 import ch.nych.soundtransmitter.receiver.tasks.recording.RecordingTask;
 import ch.nych.soundtransmitter.receiver.tasks.transformation.TransformationTask;
 import ch.nych.soundtransmitter.util.Configuration;
@@ -136,10 +137,22 @@ public class Receiver {
      */
     public void callback(final Frame frame) {
         if(frame.getState() == Frame.IN_PROGRESS) {
-            this.executorServices[2].execute(new AnalyzationTask(this, frame));
-        } else {
+            if(this.configuration.getTransmissionMode() ==
+                    Configuration.SINGLE_CHANNEL_TRANSMISSION) {
+                // TODO: 5/7/16
+            } else if(this.configuration.getTransmissionMode() ==
+                    Configuration.TWO_CHANNEL_TRANSMISSION) {
+                this.executorServices[2].execute(new TwoChannelInterpreter(this, frame));
+            } else if(this.configuration.getTransmissionMode() ==
+                    Configuration.THREE_CHANNEL_TRANSMISSION) {
+                // TODO: 5/7/16  
+            }
+
+        } else if(frame.getState() == Frame.FRAME_CORRUPTED){
+            Log.d(this.logTag, "Frame corrupted");
             //frame.printFrame(true);
             //frame.printFrame(false);
+        } else {
             this.notifiyBridgeListeners(frame);
         }
     }
