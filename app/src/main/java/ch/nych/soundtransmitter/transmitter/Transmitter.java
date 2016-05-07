@@ -23,6 +23,7 @@ import ch.nych.soundtransmitter.util.Configuration;
  * Created by nych on 4/6/16.
  */
 public class Transmitter {
+
     /**
      * Local log tag
      */
@@ -56,7 +57,7 @@ public class Transmitter {
 
 
     /**
-     * TODO: 4/24/16 comment
+     * Stores all the registered listeners
      */
     private final List<BridgeListener> bridgeListeners = new ArrayList<BridgeListener>();
 
@@ -89,8 +90,8 @@ public class Transmitter {
     }
 
     /**
-     *
-     * @param bridgeListener
+     * This method register a {@link BridgeListener} instance for notifications.
+     * @param bridgeListener the {@link BridgeListener} instance to register
      */
     public void addListener(final BridgeListener bridgeListener) {
         this.bridgeListeners.add(bridgeListener);
@@ -108,7 +109,6 @@ public class Transmitter {
      * null, the method will return false.
      */
     public boolean initTransmitter(Configuration configuration) {
-
         Log.i(this.logTag, "Initialize Transmitter");
 
         if(configuration == null) {
@@ -168,8 +168,8 @@ public class Transmitter {
      * This is the callback() method for the single tasks. The abstract {@link TransmissionTask}
      * class always return another transmission task. The callback() method is responsible for the
      * control of the single transmission jobs. This allows to easily exceed the process of data
-     * transmission with another task.
-     * @param task the next task to execute
+     * transmission with other tasks.
+     * @param task    the next task to execute
      */
     public void callback(TransmissionTask task) {
         if(task.getTaskType() == TransmissionTask.SENDING_TASK) {
@@ -179,6 +179,11 @@ public class Transmitter {
         }
     }
 
+    /**
+     * This method notifies all registered {@link BridgeListener} about the state of the message
+     * transmission.
+     * @param message    the sent {@link Message}
+     */
     private void notifyBridgeListeners(final Message message) {
         for(BridgeListener bridgeListener : this.bridgeListeners) {
             bridgeListener.messageSent(message);
