@@ -677,10 +677,10 @@ public class Configuration {
      */
     public static Configuration newUltrasonicConfiguration() {
         Configuration configuration = Configuration.defaultBaseConfiguration();
-        configuration.windowSize = 480;
-        configuration.toneSize = 1200;
-        configuration.controlToneSize = 1200;
-        configuration.preamble = new byte[]{};
+        configuration.windowSize = 120;
+        configuration.toneSize = 240;
+        configuration.controlToneSize = 960;
+        configuration.preamble = Configuration.DEFAULT_PREAMBLE;
         configuration.baseFrequency = configuration.calcBaseFrequency(18000);
         configuration.receiverThreshold = 10000000.0;
         return configuration;

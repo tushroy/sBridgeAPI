@@ -21,7 +21,7 @@ public abstract class ReceiverTask implements Runnable {
     /**
      *
      */
-    protected boolean shutdown = false;
+    protected volatile boolean shutdown = false;
 
     /**
      *

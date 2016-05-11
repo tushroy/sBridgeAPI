@@ -26,7 +26,7 @@ public class TransformationTask extends ReceiverTask {
     /**
      *
      */
-    private final String logTag = Configuration.LOG_TAG + ":TransTask";
+    private final static String logTag = Configuration.LOG_TAG + ":TransTask";
 
     /**
      * Local reference to the shared sampleBuffer object
@@ -36,15 +36,22 @@ public class TransformationTask extends ReceiverTask {
     /**
      * The configured window function for the sample preprocessing
      */
-    private double[] windowFunction = null;
+    private double[] windowFunctionValues = null;
 
     /**
      * The Goertzel algorithm instances
      */
     private Goertzel[] goertzels = null;
 
+    /**
+     *
+     */
     private double[] buffer = null;
 
+    /**
+     *
+     * @param receiver
+     */
     public TransformationTask(final Receiver receiver) {
         super(receiver);
     }
@@ -54,13 +61,14 @@ public class TransformationTask extends ReceiverTask {
         Log.d(this.logTag, "Initialize TransformationTask");
 
         this.sampleBuffer = this.receiver.getSampleBuffer();
-        this.goertzels = new Goertzel[this.configuration.getTransmissionMode()];
-        // TODO: 4/21/16 If the concept of the window function is changed, don't forget to change
-        this.windowFunction = WindowFunction.getWindowFunction(this.configuration);
+        this.goertzels = new Goertzel[
+				this.configuration.getTransmissionMode().getNumOfChannels()];
+        this.windowFunctionValues =
+				WindowFunction.getWindowFunctionValues(this.configuration);
 
         for(int i = 0; i < this.goertzels.length; i++) {
             this.goertzels[i] = new Goertzel(
-                    this.configuration.getSampleRate(),
+                    this.configuration.getSampleRate().getSampleRate(),
                     this.configuration.getFrequencies()[i],
                     this.configuration.getWindowSize());
         }
@@ -68,8 +76,28 @@ public class TransformationTask extends ReceiverTask {
         int bufferSize = (this.configuration.getControlToneSize() /
                 this.configuration.getWindowSize()) *
                 this.configuration.getOverlappingFactor();
+
         this.buffer = new double[bufferSize];
+
         return true;
+    }
+
+	/**
+	 *
+	 */
+    private void skipWindows() {
+        int n = configuration.getInterFrameGap();
+        for(int i = 0; i < n;) {
+            if(this.sampleBuffer.getNextWindow() != null) {
+                i++;
+            } else {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    Log.e(this.logTag, e.getMessage());
+                }
+            }
+        }
     }
 
     /**
@@ -160,18 +188,10 @@ public class TransformationTask extends ReceiverTask {
                 }
             }
         }
-        //Inter frame gap
-        for(int i = 0; i < 20;) {
-            if(this.sampleBuffer.getNextWindow() != null) {
-                i++;
-            } else {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    Log.e(this.logTag, e.getMessage());
-                }
-            }
+        for(int i = 0; i < this.buffer.length; i++) {
+            this.buffer[i] = 0;
         }
+        this.skipWindows();
         frame.sealFrame();
         Log.d(this.logTag, "Done recording frame. Size: " + frame.getOriginalData()[0].length);
         return frame;
@@ -185,7 +205,7 @@ public class TransformationTask extends ReceiverTask {
      */
     private void preprocessWindow(final short[] window) {
         for(int i = 0; i < window.length; i++) {
-            window[i] *= this.windowFunction[i];
+            window[i] *= this.windowFunctionValues[i];
         }
     }
 

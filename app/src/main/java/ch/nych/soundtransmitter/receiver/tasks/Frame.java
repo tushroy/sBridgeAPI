@@ -1,7 +1,5 @@
 package ch.nych.soundtransmitter.receiver.tasks;
 
-import android.util.Log;
-
 import java.util.Arrays;
 
 import ch.nych.soundtransmitter.util.Configuration;
@@ -14,36 +12,28 @@ public class Frame {
     /**
      *
      */
-    public final static int IN_PROGRESS = 0;
+    private final static String LOG_TAG = Configuration.LOG_TAG + ":Frame";
+
+	/**
+	 *
+	 */
+	public enum FrameState {IN_PROGRESS, INTERPRETED_SUCCESSFULLY,
+		FRAME_CORRUPTED}
 
     /**
      *
      */
-    public final static int ANALYZED_SUCCESSFULLY = 1;
+    private FrameState frameState = null;
 
     /**
-     *
-     */
-    public final static int FRAME_CORRUPTED = -1;
-
-    /**
-     *
-     */
-    private final String logTag = Configuration.LOG_TAG + ":Frame";
-
-    /**
-     *
-     */
-    private int state = 0;
-
-    /**
-     * Number of rows in the original data. This index is used to for the frame sealing.
+     * Number of rows in the original data. This index is used to for the
+     * frame sealing.
      */
     private int index = 0;
 
     /**
-     * The raw unprocessed data (magnitudes of the different frequencies). These data should never
-     * be changed.
+     * The raw unprocessed data (magnitudes of the different frequencies).
+	 * These data should never be changed.
      */
     private double[][] originalData = null;
 
@@ -58,19 +48,31 @@ public class Frame {
     private byte[] dataBytes = null;
 
     /**
-     *
-     * @return
+     * The frame class represent a container class for the recorded frame
+	 * data. It contains the original magnitude values, the data reduced on
+	 * its peaks and the mapped bytes.
+     * @param configuration
      */
-    public int getState() {
-        return this.state;
+    public Frame(final Configuration configuration) {
+        this.originalData = new double[configuration.getTransmissionMode()
+				.getNumOfChannels()][configuration.getMaxFrameSize()];
+		this.frameState = FrameState.IN_PROGRESS;
     }
 
     /**
      *
-     * @param state
+     * @return
      */
-    public void setState(final int state) {
-        this.state = state;
+    public FrameState getFrameState() {
+        return this.frameState;
+    }
+
+    /**
+     *
+     * @param frameState
+     */
+    public void setFrameState(final FrameState frameState) {
+        this.frameState = frameState;
     }
 
     /**
@@ -90,42 +92,35 @@ public class Frame {
     }
 
     /**
-     * The frame class represent a container class for the recorded frame data. It contains the
-     * original magnitude values, the data reduced on its peaks and the mapped bytes.
-     * @param configuration
-     */
-    public Frame(final Configuration configuration) {
-        this.originalData =
-                new double[configuration.getTransmissionMode()][configuration.getMaxFrameSize()];
-    }
-
-    /**
-     * Getter for the original data set. This data are intended as read only and shouldn't be
-     * changed.
-     * @return The raw magnitudes of the different frequencies. Each column represents a frequency,
-     * whereas each raw represents the magnitude over time. orginialData[Frequency][Magnitudes]
+     * Getter for the original data set. This data are intended as read only
+	 * and shouldn't be changed.
+     * @return The raw magnitudes of the different frequencies. Each column
+	 * represents a frequency, whereas each raw represents the magnitude over
+	 * time. orginialData[Frequency][Magnitudes]
      */
     public double[][] getOriginalData() {
         return this.originalData;
     }
 
     /**
-     * Getter for the processed data set. This data are intended as read only and shouldn't be
-     * changed. This data are reduced to the frequency peaks.
-     * @return The peak magnitudes of the different frequencies. Each column represents a frequency,
-     * whereas each raw contains the magnitude peaks over time. orginialData[Frequency][Magnitudes]
+     * Getter for the processed data set. This data are intended as read only
+	 * and shouldn't be changed. This data are reduced to the frequency peaks.
+     * @return The peak magnitudes of the different frequencies. Each column
+	 * represents a frequency, whereas each raw contains the magnitude peaks
+	 * over time. orginialData[Frequency][Magnitudes]
      */
     public double[][] getProcessedData() {
         return this.processedData;
     }
 
     /**
-     * This method adds a set of magnitudes to the original data set. As the frame has a maximum
-     * size (Can be set in the {@link Configuration} class), the set is only added if there is
-     * space left.
-     * @param dataSet a double array of magnitudes. The length of this array needs to be equal to
-     *                the configured number of frequencies (see {@link Configuration}
-     *                transmissionMode).
+     * This method adds a set of magnitudes to the original data set. As the
+	 * frame has a maximum size (Can be set in the {@link Configuration}
+	 * class), the set is only added if there is space left.
+     * @param dataSet a double array of magnitudes. The length of this array
+	 *                   needs to be equal to the configured number of
+	 *                   frequencies (see {@link Configuration}
+	 *                   transmissionMode).
      */
     public void addDataSet(final double[] dataSet) {
         for(int i = 0; i < dataSet.length; i++) {
@@ -135,33 +130,20 @@ public class Frame {
     }
 
     /**
-     * The orginalData are reduced to the added magnitudes. From this reduced data a copy is done,
-     * so the processing of the data in processedData don't affect the originalData.
+     * The orginalData are reduced to the added magnitudes. From this reduced
+	 * data a copy is done,  so the processing of the data in processedData
+	 * don't affect the originalData.
      */
     public void sealFrame() {
         this.processedData = new double[originalData.length][];
         if(this.index > 0) {
             for(int i = 0; i < this.originalData.length; i++) {
-                this.originalData[i] = Arrays.copyOf(this.originalData[i], index);
-                this.processedData[i] = Arrays.copyOf(this.originalData[i], this.originalData[i].length);
+                this.originalData[i] =
+						Arrays.copyOf(this.originalData[i], index);
+                this.processedData[i] =
+						Arrays.copyOf(this.originalData[i],
+								this.originalData[i].length);
             }
-        }
-    }
-
-    // TODO: 5/1/16 Remove when not longer necessary
-    public void printFrame(boolean original) {
-        double[][] data = null;
-        if(original) {
-            data = this.originalData;
-        } else {
-            data = this.processedData;
-        }
-        for(int i = 0; i < data[0].length; i++) {
-            System.out.print(i);
-            for(int j = 0; j < data.length; j++) {
-                System.out.print(", " + data[j][i]);
-            }
-            System.out.println();
         }
     }
 }

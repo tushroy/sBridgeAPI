@@ -1,4 +1,4 @@
-package ch.nych.soundtransmitter.receiver.tasks.analyzation;
+package ch.nych.soundtransmitter.receiver.tasks.interpretation;
 
 import android.util.Log;
 
@@ -13,12 +13,12 @@ import ch.nych.soundtransmitter.util.Configuration;
 /**
  * Created by nych on 5/1/16.
  */
-public abstract class Interpreter extends ReceiverTask {
+public abstract class InterpretationTask extends ReceiverTask {
 
     /**
      *
      */
-    protected final String logTag = Configuration.LOG_TAG + ":Interpreter";
+    protected final String logTag = Configuration.LOG_TAG + ":IntTask";
 
     /**
      *
@@ -43,15 +43,13 @@ public abstract class Interpreter extends ReceiverTask {
     /**
      * @param receiver
      */
-    public Interpreter(final Receiver receiver, final Frame frame) {
+    public InterpretationTask(final Receiver receiver, final Frame frame) {
         super(receiver);
         this.frame = frame;
         this.processedData = this.frame.getProcessedData();
         this.thresholds = new double[this.processedData.length];
         this.filterData();
-        for(int i = 0; i < this.thresholds.length; i++) {
-            this.thresholds[i] = this.getRootMeanSquare(this.processedData[i]);
-        }
+        this.calcThresholds();
         this.preamble = this.configuration.getPreamble();
     }
 
@@ -83,16 +81,15 @@ public abstract class Interpreter extends ReceiverTask {
 
     /**
      *
-     * @param data
-     * @return
      */
-    public double getRootMeanSquare(final double[] data) {
-        double average = 0;
-        for(double d : data) {
-            average += Math.pow(d, 2);
+    private void calcThresholds() {
+        for(int i = 0; i < this.thresholds.length; i++) {
+            for(int j = 0; j < this.processedData[i].length; j++) {
+                this.thresholds[i] += Math.pow(this.processedData[i][j], 2);
+            }
+            this.thresholds[i] /= this.processedData[i].length;
+            this.thresholds[i] = Math.sqrt(this.thresholds[i]);
         }
-        average /= data.length;
-        return Math.sqrt(average);
     }
 
     /**
@@ -103,7 +100,8 @@ public abstract class Interpreter extends ReceiverTask {
     protected int getMaxInRow(final int index) {
         int maxIndex = 0;
         for(int i = 0; i < this.processedData.length; i++) {
-            if(this.processedData[i][index] > this.processedData[maxIndex][index]) {
+            if(this.processedData[i][index] >
+					this.processedData[maxIndex][index]) {
                 maxIndex = i;
             }
         }
@@ -131,7 +129,7 @@ public abstract class Interpreter extends ReceiverTask {
      * @param list
      * @return
      */
-    private byte[] mergeBytes(final List<Byte> list) {
+    private byte[] mergeBits(final List<Byte> list) {
         byte[] bytes = new byte[list.size() / 8];
         int temp = 0;
         int j = 0;
@@ -152,15 +150,9 @@ public abstract class Interpreter extends ReceiverTask {
      *
      * @return
      */
-    protected abstract int mapData(final List<Byte> list, final int from, final int size);
-
-    /**
-     *
-     */
-    public boolean interpretData() {
-
-        return true;
-    }
+    protected abstract int mapData(final List<Byte> list,
+                                   final int from,
+                                   final int size);
 
     @Override
     public void run() {
@@ -171,8 +163,8 @@ public abstract class Interpreter extends ReceiverTask {
             return;
         }
         this.mapData(dataBytes, index, Integer.MAX_VALUE);
-        this.frame.setDataBytes(this.mergeBytes(dataBytes));
-        this.frame.setState(Frame.ANALYZED_SUCCESSFULLY);
+        this.frame.setDataBytes(this.mergeBits(dataBytes));
+        this.frame.setFrameState(Frame.FrameState.INTERPRETED_SUCCESSFULLY);
         this.receiver.callback(this.frame);
     }
 }

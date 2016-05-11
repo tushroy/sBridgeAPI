@@ -34,12 +34,12 @@ public class RecordingTask extends ReceiverTask {
     /**
      * Local array to buffer the recorded samples
      */
-    short buffer[] = null;
+    private short buffer[] = null;
 
     /**
-     * Reference to the shared AudioRecord instance
+     *
      */
-    AudioRecord audioRecorder = null;
+    private AudioRecord audioRecord = null;
 
     /**
      *  The default constructor for the recording task.
@@ -55,17 +55,17 @@ public class RecordingTask extends ReceiverTask {
 
         this.sampleBuffer = this.receiver.getSampleBuffer();
         this.buffer = new short[AudioRecord.getMinBufferSize(
-                this.configuration.getSampleRate(),
+                this.configuration.getSampleRate().getSampleRate(),
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT) / 2];
-        this.audioRecorder = new AudioRecord(
+        this.audioRecord = new AudioRecord(
                 MediaRecorder.AudioSource.MIC,
-                this.configuration.getSampleRate(),
+                this.configuration.getSampleRate().getSampleRate(),
                 AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
                 this.buffer.length);
 
-        if(this.audioRecorder.getState() == AudioRecord.STATE_UNINITIALIZED) {
+        if(this.audioRecord.getState() == AudioRecord.STATE_UNINITIALIZED) {
             Log.e(this.logTag, "Could not initialize AudioRecord object");
             return false;
         }
@@ -81,7 +81,7 @@ public class RecordingTask extends ReceiverTask {
         Log.d(this.logTag, "Start Recording Task");
 
         try {
-            this.audioRecorder.startRecording();
+            this.audioRecord.startRecording();
         } catch (IllegalStateException e) {
             Log.e(this.logTag, e.getMessage() + "\t Terminate recording task.");
             this.shutdown();
@@ -96,12 +96,11 @@ public class RecordingTask extends ReceiverTask {
         int samplesRecorded = 0;
         while(!this.shutdown) {
             if((samplesRecorded =
-                    this.audioRecorder.read(this.buffer, 0, this.buffer.length)) <= 0) {
+                    this.audioRecord.read(this.buffer, 0, this.buffer.length)) <= 0) {
                 Log.e(this.logTag, "Error occured while reading from AudioRecord. AudioRecord" +
                         "error code is " + samplesRecorded + "\nTerminate recording task.");
                 this.shutdown();
             } else {
-                //Log.d(this.logTag, "Recorded " + samplesRecorded);
                 this.sampleBuffer.addSamples(this.buffer);
             }
         }
@@ -114,8 +113,8 @@ public class RecordingTask extends ReceiverTask {
     private void releaseAudioRecord() {
         Log.d(this.logTag, "Release native AudioRecord resources.");
 
-        this.audioRecorder.release();
-        this.audioRecorder = null;
+        this.audioRecord.release();
+        this.audioRecord = null;
     }
 
     @Override

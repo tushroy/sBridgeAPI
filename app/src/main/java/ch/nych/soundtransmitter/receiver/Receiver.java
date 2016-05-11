@@ -12,8 +12,10 @@ import ch.nych.BridgeListener;
 import ch.nych.soundtransmitter.receiver.tasks.Frame;
 import ch.nych.soundtransmitter.receiver.tasks.ReceiverTask;
 import ch.nych.soundtransmitter.receiver.tasks.SampleBuffer;
-import ch.nych.soundtransmitter.receiver.tasks.analyzation.AnalyzationTask;
-import ch.nych.soundtransmitter.receiver.tasks.analyzation.interpreter.TwoChannelInterpreter;
+import ch.nych.soundtransmitter.receiver.tasks.interpretation.InterpretationTask;
+import ch.nych.soundtransmitter.receiver.tasks.interpretation.interpreter.SingleChannelInterpretationTask;
+import ch.nych.soundtransmitter.receiver.tasks.interpretation.interpreter.ThreeChannelInterpretationTask;
+import ch.nych.soundtransmitter.receiver.tasks.interpretation.interpreter.TwoChannelInterpretationTask;
 import ch.nych.soundtransmitter.receiver.tasks.recording.RecordingTask;
 import ch.nych.soundtransmitter.receiver.tasks.transformation.TransformationTask;
 import ch.nych.soundtransmitter.util.Configuration;
@@ -26,7 +28,7 @@ public class Receiver {
     /**
      * Local log tag
      */
-    private final String logTag = Configuration.LOG_TAG;
+    private final static String logTag = Configuration.LOG_TAG + ":Receiver";
 
     /**
      * The Configuration instance is shared between all tasks
@@ -93,6 +95,11 @@ public class Receiver {
     }
 
     /**
+     * Default constructor
+     */
+    public Receiver() {}
+
+    /**
      * This method tries to initialize all required components of the {@link Receiver} module.
      * Therefore a {@link Configuration} instance is needed to load the corresponding preferences
      * for the sound analysis.
@@ -136,22 +143,21 @@ public class Receiver {
      * @param frame
      */
     public void callback(final Frame frame) {
-        if(frame.getState() == Frame.IN_PROGRESS) {
+        if(frame.getFrameState() == Frame.FrameState.IN_PROGRESS) {
+            InterpretationTask interpretationTask = null;
             if(this.configuration.getTransmissionMode() ==
-                    Configuration.SINGLE_CHANNEL_TRANSMISSION) {
-                // TODO: 5/7/16
+                    Configuration.TransmissionMode.SINGLE_CHANNEL) {
+                interpretationTask = new SingleChannelInterpretationTask(this, frame);
             } else if(this.configuration.getTransmissionMode() ==
-                    Configuration.TWO_CHANNEL_TRANSMISSION) {
-                this.executorServices[2].execute(new TwoChannelInterpreter(this, frame));
+                    Configuration.TransmissionMode.TWO_CHANNEL) {
+                interpretationTask = new TwoChannelInterpretationTask(this, frame);
             } else if(this.configuration.getTransmissionMode() ==
-                    Configuration.THREE_CHANNEL_TRANSMISSION) {
-                // TODO: 5/7/16
+                    Configuration.TransmissionMode.THREE_CHANNEL) {
+                interpretationTask = new ThreeChannelInterpretationTask(this, frame);
             }
-
-        } else if(frame.getState() == Frame.FRAME_CORRUPTED){
+            this.executorServices[2].execute(interpretationTask);
+        } else if(frame.getFrameState() == Frame.FrameState.FRAME_CORRUPTED){
             Log.d(this.logTag, "Frame corrupted");
-            //frame.printFrame(true);
-            //frame.printFrame(false);
         } else {
             this.notifiyBridgeListeners(frame);
         }

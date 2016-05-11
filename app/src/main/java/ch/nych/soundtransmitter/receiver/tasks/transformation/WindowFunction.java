@@ -17,15 +17,18 @@ public class WindowFunction {
      * @param configuration
      * @return
      */
-    public static double[] getWindowFunction(final Configuration configuration) {
-        if(configuration.getWindowFunction() == Configuration.HAMMING_WINDOW) {
-            return WindowFunction.getHammingWindow(configuration.getWindowSize());
-        } else if(configuration.getWindowFunction() == Configuration.HANN_WINDOW) {
-            return WindowFunction.getHanningWindow(configuration.getWindowSize());
-        } else {
-            // TODO: 4/14/16
-            return null;
+    public static double[] getWindowFunctionValues(final Configuration configuration) {
+        double[] windowFunctionValues = null;
+		if(configuration.getWindowFunction() ==
+                Configuration.WindowFunction.HAMMING_WINDOW) {
+            windowFunctionValues = WindowFunction.getHammingWindow(
+					configuration.getWindowSize());
+        } else if(configuration.getWindowFunction() ==
+				Configuration.WindowFunction.HANN_WINDOW) {
+            windowFunctionValues = WindowFunction.getHanningWindow(
+					configuration.getWindowSize());
         }
+		return windowFunctionValues;
     }
 
     /**

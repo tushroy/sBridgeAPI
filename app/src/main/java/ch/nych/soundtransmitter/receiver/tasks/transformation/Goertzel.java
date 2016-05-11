@@ -5,17 +5,16 @@ import android.util.Log;
 import ch.nych.soundtransmitter.util.Configuration;
 
 /**
- * The Goertzel class can be used to perform the Goertzel algorithm. In
- * order to use this class, four primary steps should be executed:
+ * The Goertzel class can be used to perform the Goertzel algorithm. In order to use this class,
+ * four primary steps should be executed:
  * initialize the Goertzel class and all its variables (initGoertzel),
  * process one sample of data at a time (processSample),
  * get the relative magnitude returned by the Goertzle algorithm after N
  * samples have been processed (getMagnitudeSquared, getRealImag),
  * and reset the Goertzel class and all its variables (resetGoertzel).
- * <p>
- * This class is based on a C program implemented by Kevin Banks of Embedded
- * Systems Programming.
- * <p>
+ *
+ * This class is based on a C program implemented by Kevin Banks of Embedded Systems Programming.
+ *
  * Brought it to the object oriented world.
  *
  * @author quantasy
@@ -24,7 +23,7 @@ import ch.nych.soundtransmitter.util.Configuration;
  */
 public class Goertzel {
 
-    private final String logTag = Configuration.LOG_TAG + ":Goertzel";
+    private final static String logTag = Configuration.LOG_TAG + ":Goertzel";
     /**
      *
      */
@@ -48,12 +47,12 @@ public class Goertzel {
     /**
      *
      */
-    private double Q1;
+    private double q1;
 
     /**
      *
      */
-    private double Q2;
+    private double q2;
 
     /**
      *
@@ -107,8 +106,8 @@ public class Goertzel {
      *
      */
     public void resetGoertzel() {
-        this.Q2 = 0;
-        this.Q1 = 0;
+        this.q2 = 0;
+        this.q1 = 0;
         this.magnitudeSquared = -1;
     }
 
@@ -119,11 +118,11 @@ public class Goertzel {
     public void processSample(double sample) {
         double Q0;
 
-        Q0 = this.coeff * this.Q1;
-        Q0 -= this.Q2;
+        Q0 = this.coeff * this.q1;
+        Q0 -= this.q2;
         Q0 += sample;
-        this.Q2 = this.Q1;
-        this.Q1 = Q0;
+        this.q2 = this.q1;
+        this.q1 = Q0;
     }
 
     /**
@@ -145,8 +144,8 @@ public class Goertzel {
      * @return
      */
     public double[] getRealImag() {
-        double real = this.Q1 - this.Q2 * this.cosine;
-        double imag = this.Q2 * this.sine;
+        double real = this.q1 - this.q2 * this.cosine;
+        double imag = this.q2 * this.sine;
         return new double[]{real, imag};
     }
 
@@ -156,9 +155,9 @@ public class Goertzel {
      */
     public double getMagnitudeSquared() {
         if (this.magnitudeSquared < 0) {
-            this.magnitudeSquared = this.Q1 * this.Q1;
-            this.magnitudeSquared += this.Q2 * this.Q2;
-            this.magnitudeSquared -= this.Q1 * this.Q2 * this.coeff;
+            this.magnitudeSquared = this.q1 * this.q1;
+            this.magnitudeSquared += this.q2 * this.q2;
+            this.magnitudeSquared -= this.q1 * this.q2 * this.coeff;
         }
         return this.magnitudeSquared;
     }
