@@ -17,28 +17,15 @@ import ch.nych.soundtransmitter.util.Configuration;
 public abstract class TransmissionTask implements Runnable {
 
     /**
-     * Identifier for the
-     * {@link ch.nych.soundtransmitter.transmitter.tasks.modulation.ModulationTask}
+     * Task types
      */
-    public final static int MODULATION_TASK = 0;
-
-    /**
-     * Identifier for the
-     * {@link ch.nych.soundtransmitter.transmitter.tasks.sending.SendingTask}
-     */
-    public final static int SENDING_TASK = 1;
-
-    /**
-     * Identifier for the
-     * {@link ch.nych.soundtransmitter.transmitter.tasks.notification.NotificationTask}
-     */
-    public final static int NOTIFICATION_TASK = 2;
+    public enum TaskType {MODULATION, SENDING, NOTIFICATION}
 
     /**
      * Specifies the task type which can either be MODULATION_TASK, SENDING_TASK or
      * NOTIFICATION_TASK
      */
-    protected int taskType = -1;
+    protected TaskType taskType = null;
 
     /**
      * The local reference to the calling {@link Transmitter} instance
@@ -56,14 +43,6 @@ public abstract class TransmissionTask implements Runnable {
     protected Message message = null;
 
     /**
-     * Getter for the {@link Message} instance
-     * @return the {@link Message} instance of the message to send
-     */
-    public Message getMessage() {
-        return this.message;
-    }
-
-    /**
      * Default constructor of the TransmissionTask super class
      * @param transmitter    the reference to the calling {@link Transmitter} instance is used for
      *                       the shared resources and the callback.
@@ -74,11 +53,27 @@ public abstract class TransmissionTask implements Runnable {
     public TransmissionTask(
             final Transmitter transmitter,
             final Message message,
-            final int taskType) {
+            final TaskType taskType) {
         this.transmitter = transmitter;
         this.configuration = transmitter.getConfiguration();
         this.message = message;
         this.taskType = taskType;
+    }
+
+    /**
+     * Getter for the {@link Message} instance
+     * @return the {@link Message} instance of the message to send
+     */
+    public Message getMessage() {
+        return this.message;
+    }
+
+    /**
+     * Getter method for the task type.
+     * @return either MODULATION_TASK, SENDING_TASK or NOTIFICATION_TASK
+     */
+    public TaskType getTaskType() {
+        return this.taskType;
     }
 
     /**
@@ -94,13 +89,5 @@ public abstract class TransmissionTask implements Runnable {
      */
     protected void transmitterCallback() {
         this.transmitter.callback(this.getNextTask());
-    }
-
-    /**
-     * Getter method for the task type.
-     * @return either MODULATION_TASK, SENDING_TASK or NOTIFICATION_TASK
-     */
-    public int getTaskType() {
-        return this.taskType;
     }
 }

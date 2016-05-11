@@ -1,5 +1,6 @@
 package ch.nych.soundtransmitter.transmitter;
 
+import android.graphics.Bitmap;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -15,6 +16,9 @@ import ch.nych.BridgeListener;
 import ch.nych.soundtransmitter.transmitter.tasks.Message;
 import ch.nych.soundtransmitter.transmitter.tasks.TransmissionTask;
 import ch.nych.soundtransmitter.transmitter.tasks.modulation.ModulationTask;
+import ch.nych.soundtransmitter.transmitter.tasks.modulation.SingleChannelModulationTask;
+import ch.nych.soundtransmitter.transmitter.tasks.modulation.ThreeChannelModulation;
+import ch.nych.soundtransmitter.transmitter.tasks.modulation.TwoChannelModulationTask;
 import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.Tone;
 import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.ToneFactory;
 import ch.nych.soundtransmitter.util.Configuration;
@@ -35,7 +39,7 @@ public class Transmitter {
     /**
      * Local log tag
      */
-    private final String logTag = Configuration.LOG_TAG;
+    private final static String logTag = Configuration.LOG_TAG + ":transmitter";
 
     /**
      * Indicates if the Transmitter is ready
@@ -116,7 +120,7 @@ public class Transmitter {
      * is not the case, the {@link Configuration} instance could be corrupted. If the argument is
      * null, the method will return false.
      */
-    public boolean initTransmitter(Configuration configuration) {
+    public boolean initTransmitter(final Configuration configuration) {
         Log.i(this.logTag, "Initialize Transmitter");
 
         if(configuration == null) {
@@ -164,7 +168,18 @@ public class Transmitter {
             Log.w(this.logTag, "Transmitter not initialized. Couldn't transmit data");
         } else if(data != null && data.length > 0) {
             message = new Message(data);
-            this.executorServices[0].execute(new ModulationTask(this, message));
+            ModulationTask modulationTask = null;
+            if(this.configuration.getTransmissionMode() ==
+                    Configuration.TransmissionMode.SINGLE_CHANNEL) {
+                modulationTask = new SingleChannelModulationTask(this, message);
+            } else if(this.configuration.getTransmissionMode() ==
+                    Configuration.TransmissionMode.TWO_CHANNEL) {
+                modulationTask = new TwoChannelModulationTask(this, message);
+            } else if(this.configuration.getTransmissionMode() ==
+                    Configuration.TransmissionMode.THREE_CHANNEL) {
+                modulationTask = new ThreeChannelModulation(this, message);
+            }
+            this.executorServices[0].execute(modulationTask);
         } else {
             Log.w(this.logTag, "Invalid arguments on transmitData(), could not transmit message");
         }
@@ -179,12 +194,13 @@ public class Transmitter {
      * transmission with other tasks.
      * @param task    the next task to execute
      */
-    public void callback(TransmissionTask task) {
-        if(task.getTaskType() == TransmissionTask.SENDING_TASK) {
+    public void callback(final TransmissionTask task) {
+        if(task.getTaskType() == TransmissionTask.TaskType.SENDING) {
             this.executorServices[1].execute(task);
-        } else if(task.getTaskType() == TransmissionTask.NOTIFICATION_TASK){
+        } else if(task.getTaskType() == TransmissionTask.TaskType.NOTIFICATION){
             this.notifyBridgeListeners(task.getMessage());
         }
+
     }
 
     /**

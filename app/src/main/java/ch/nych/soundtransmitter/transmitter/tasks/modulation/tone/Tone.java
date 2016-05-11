@@ -9,11 +9,6 @@ package ch.nych.soundtransmitter.transmitter.tasks.modulation.tone;
 public abstract class Tone {
 
     /**
-     *
-     */
-    public final static double DEFAULT_VOLUME = 1.0;
-
-    /**
      * Frequency of the tone
      */
     protected double frequency = 0;
@@ -56,12 +51,6 @@ public abstract class Tone {
     }
 
     /**
-     * This method returns the calculated samples of the specified tone.
-     * @return the sample values in short array
-     */
-    public abstract short[] getSamples();
-
-    /**
      * Getter for the tone frequency
      * @return the tone frequency
      */
@@ -76,4 +65,10 @@ public abstract class Tone {
     public double getLength() {
         return this.length;
     }
+
+    /**
+     * This method returns the calculated samples of the specified tone.
+     * @return the sample values in short array
+     */
+    public abstract short[] getSamples();
 }

@@ -6,7 +6,7 @@ import ch.nych.soundtransmitter.transmitter.tasks.TransmissionTask;
 
 /**
  * This class represents the final task of the transmission process. So far it is just used for the
- * callback and has no more functionality.
+ * final callback and has no more functionality.
  * Created by nych on 4/24/16.
  */
 public class NotificationTask extends TransmissionTask {
@@ -18,7 +18,7 @@ public class NotificationTask extends TransmissionTask {
      * @param message        The {@link Message} instance, containing the data to modulate
      */
     public NotificationTask(Transmitter transmitter, Message message) {
-        super(transmitter, message, TransmissionTask.NOTIFICATION_TASK);
+        super(transmitter, message, TaskType.NOTIFICATION);
     }
 
     @Override

@@ -5,8 +5,9 @@ import android.util.Log;
 import ch.nych.soundtransmitter.util.Configuration;
 
 /**
- * Because it should possible to transmit the data inaudible, the transition between the single
- * tones needs to be faded. SineTone uses a sine function for the fade in and fade out.
+ * Because it should possible to transmit the data inaudible, the transition
+ * between the single tones needs to be faded. SineTone uses a sine function
+ * for the fade in and fade out.
  * Created by nych on 4/6/16.
  */
 public class SineTone extends Tone {
@@ -14,7 +15,7 @@ public class SineTone extends Tone {
     /**
      * Local log tag
      */
-    private final String logTag = Configuration.LOG_TAG + ":sTone";
+    private final static String logTag = Configuration.LOG_TAG + ":SineTone";
 
     /**
      * Default constructor
@@ -33,19 +34,21 @@ public class SineTone extends Tone {
     }
 
     /**
-     * This method calculates the single sample values of the tone. The frequency of the sine
-     * function, used for the fade in and fade out, is calculated by the division of tone length
-     * and the sample rate.
+     * This method calculates the single sample values of the tone. The
+     * frequency of the sine function, used for the fade in and fade  out, is
+     * calculated by the division of tone length and the sample rate.
      */
     private void generateTone() {
-        Log.d(this.logTag, "Generate Tone Samples for SineTone of: " + this.frequency + "Hz");
+        Log.d(this.logTag, "Generate Tone Samples for SineTone of: " +
+                this.frequency + "Hz");
         this.samples = new short[(int) this.length];
         short volume = (short) (Short.MAX_VALUE * this.volume);
         double const1 = 2 * Math.PI * (1.0 / (this.length * 2));
         double const2 = 2 * Math.PI * (this.frequency / this.sampleRate);
 
         for(int i = 0; i < this.length; i++)
-            this.samples[i] = (short) (Math.sin(i * const1) * Math.sin(i * const2) * volume);
+            this.samples[i] = (short) (Math.sin(i * const1) *
+                    Math.sin(i * const2) * volume);
     }
 
     @Override

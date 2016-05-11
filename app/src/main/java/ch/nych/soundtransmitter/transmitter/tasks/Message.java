@@ -6,42 +6,21 @@ import ch.nych.soundtransmitter.transmitter.tasks.modulation.tone.Tone;
 
 /**
  * This class is a container for the dataBytes to transmit. It stores the original bytes, as well as
- * the data in modulated form. Besides, the Message class also contains a state, indicates if the
+ * the data in modulated form. Besides, the Message class also contains a messageState, indicates if the
  * message was sent successfully or if it is still in the sending process.
  * Created by nych on 4/6/16.
  */
 public class Message {
 
     /**
-     * Indicates that there was a problem during the sending task.
+     * Message states
      */
-    public final static int STATE_ABORT = -1;
-
-    /**
-     * Indicates that the message is in preparation or has to wait for an other message is played
-     * right now.
-     */
-    public final static int STATE_PENDING = 0;
-
-    /**
-     * Indicates that the message is currently played by the device.
-     */
-    public final static int STATE_SENDING = 1;
-
-    /**
-     * Indicates that the message has been sent successfully.
-     */
-    public final static int STATE_SENT = 2;
+    public enum MessageState {ABORT, PENDING, SENDING, SENT};
 
     /**
      * Stores the original data bytes.
      */
     private byte[] dataBytes = null;
-
-    /**
-     * Stores the data prepared for the modulation task.
-     */
-    private byte[] preparedData = null;
 
     /**
      * Stores the references to the shared tone set from the
@@ -51,19 +30,19 @@ public class Message {
     private Tone[] modulatedData = null;
 
     /**
-     * The local message state indicates the current state / phase the message is in. During the
+     * The local message messageState indicates the current messageState / phase the message is in. During the
      * transmission process, the message passes states.
      */
-    private volatile int state = -1;
+    private volatile MessageState messageState = null;
 
     /**
      * The default constructor for the {@link Message} class takes the data bytes and sets the
-     * message state to pending.
+     * message messageState to pending.
      * @param data    A byte array of the data to transmit
      */
     public Message(final byte[] data) {
         this.dataBytes = data;
-        this.state = Message.STATE_PENDING;
+        this.messageState = MessageState.PENDING;
     }
 
     /**
@@ -73,24 +52,6 @@ public class Message {
      */
     public byte[] getDataBytes() {
         return this.dataBytes;
-    }
-
-    /**
-     * This method is only intended for internal usage and should not be accessed from outside the
-     * module.
-     * @return a byte array containing the information prepared to send
-     */
-    public byte[] getPreparedData() {
-        return this.preparedData;
-    }
-
-    /**
-     * This method is only intended for internal usage and should not be accessed from outside the
-     * module.
-     * @param preparedData    A byte array containing the information prepared to send
-     */
-    public void setPreparedData(final byte[] preparedData) {
-        this.preparedData = preparedData;
     }
 
     /**
@@ -121,21 +82,21 @@ public class Message {
     }
 
     /**
-     * Getter for the Message state. The Message state indicates the transmission phase in which the
+     * Getter for the Message messageState. The Message messageState indicates the transmission phase in which the
      * message currently is.
      * @return either Message.STATE_PENDING, Message.STATE_SENDING, Message.STATE_SENT or
      * Message.STATE_ABORT
      */
-    public int getState() {
-        return this.state;
+    public MessageState getMessageState() {
+        return this.messageState;
     }
 
     /**
      * This method is only intended for internal usage and should not be accessed from outside the
      * module.
-     * @param state    The state to set, see static variables of the {@link Message} class.
+     * @param messageState    The messageState to set, see static variables of the {@link Message} class.
      */
-    public void setState(final int state) {
-        this.state = state;
+    public void setMessageState(final MessageState messageState) {
+        this.messageState = messageState;
     }
 }
