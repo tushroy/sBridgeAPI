@@ -132,12 +132,12 @@ public class Transmitter {
 
         this.toneSet = ToneFactory.getToneSet(this.configuration);
         int minBufferSize = AudioTrack.getMinBufferSize(
-                this.configuration.getSampleRate(),
+                this.configuration.getSampleRate().getSampleRate(),
                 AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT);
         this.audioTrack = new AudioTrack(
                 AudioManager.STREAM_MUSIC,
-                this.configuration.getSampleRate(),
+                this.configuration.getSampleRate().getSampleRate(),
                 AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT,
                 minBufferSize,

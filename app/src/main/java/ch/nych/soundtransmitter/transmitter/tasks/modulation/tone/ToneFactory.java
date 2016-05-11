@@ -41,17 +41,17 @@ public class ToneFactory {
 
         double[] frequencies = configuration.getFrequencies();
         Tone[] toneSet = new Tone[frequencies.length];
-        if(configuration.getToneType() == Configuration.SINE_TONE) {
+        if(configuration.getToneType() == Configuration.ToneType.SINE_TONE) {
             toneSet[0] = new SineTone(
                     frequencies[0],
                     configuration.getControlToneSize(),
-                    configuration.getSampleRate(),
+                    configuration.getSampleRate().getSampleRate(),
                     configuration.getToneVolume());
             for (int i = 1; i < frequencies.length; i++) {
                 toneSet[i] = new SineTone(
                         frequencies[i],
                         configuration.getToneSize(),
-                        configuration.getSampleRate(),
+                        configuration.getSampleRate().getSampleRate(),
                         configuration.getToneVolume());
             }
         }
