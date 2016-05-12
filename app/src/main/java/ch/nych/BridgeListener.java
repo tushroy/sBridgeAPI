@@ -1,7 +1,7 @@
 package ch.nych;
 
-import ch.nych.soundtransmitter.receiver.tasks.Frame;
-import ch.nych.soundtransmitter.transmitter.tasks.Message;
+import ch.nych.soundtransceiver.receiver.tasks.Frame;
+import ch.nych.soundtransceiver.transmitter.tasks.Message;
 
 /**
  * Created by nych on 4/24/16.
