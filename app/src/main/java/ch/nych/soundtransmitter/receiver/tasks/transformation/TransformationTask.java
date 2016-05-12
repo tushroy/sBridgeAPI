@@ -157,7 +157,8 @@ public class TransformationTask extends ReceiverTask {
         int listener = 0;
 
         for(int i = 0; i < maxFrameSize;) {
-            if((window = this.sampleBuffer.getNextWindow()) != null) {
+            if((window = this.sampleBuffer.getNextWindow()) != null &&
+					!this.shutdown) {
                 this.preprocessWindow(window);
                 for(int j = 0; j < this.goertzels.length; j++) {
                     this.goertzels[j].processSamples(window);
@@ -193,7 +194,9 @@ public class TransformationTask extends ReceiverTask {
         }
         this.skipWindows();
         frame.sealFrame();
-        Log.d(this.logTag, "Done recording frame. Size: " + frame.getOriginalData()[0].length);
+        Log.d(TransformationTask.logTag, "Done recording frame. Size: " +
+                frame.getOriginalData
+                ()[0].length);
         return frame;
     }
 
