@@ -1,4 +1,4 @@
-package ch.nych.soundtransceiver.transmitter.tasks;
+package ch.nych.soundtransceiver.util;
 
 import java.util.Arrays;
 
@@ -15,7 +15,8 @@ public class Message {
     /**
      * Message states
      */
-    public enum MessageState {ABORT, PENDING, SENDING, SENT};
+    public enum MessageState {SENDING_ABORT, WAIT_FOR_SENDING, SENDING,
+		SENT, IN_PROGRESS, INTERPRETED_SUCCESSFULLY, CORRUPTED};
 
     /**
      * Stores the original data bytes.
@@ -27,7 +28,12 @@ public class Message {
      * {@link ch.nych.soundtransceiver.transmitter.Transmitter}. Therefore it is important, that
      * this objects are not accessed from outside the transmission module.
      */
-    private Tone[] modulatedData = null;
+    private Tone[] timeDomainData = null;
+
+	/**
+	 *
+	 */
+	private double[][] frequencyDomainData = null;
 
     /**
      * The local message messageState indicates the current messageState / phase the message is in. During the
@@ -42,7 +48,7 @@ public class Message {
      */
     public Message(final byte[] data) {
         this.dataBytes = data;
-        this.messageState = MessageState.PENDING;
+        this.messageState = MessageState.WAIT_FOR_SENDING;
     }
 
     /**
@@ -54,6 +60,10 @@ public class Message {
         return this.dataBytes;
     }
 
+	public void setDataBytes(final byte[] dataBytes) {
+		this.dataBytes = dataBytes;
+	}
+
     /**
      * For accessing the modulated signal from outside the transmission module, set the internal
      * flag to false.
@@ -62,12 +72,12 @@ public class Message {
      * @return if the internal flag is true, the return value is a reference to the original data.
      * Otherwise, the method will return a copy of the tone set.
      */
-    public Tone[] getToneSequence(final boolean internal) {
+    public Tone[] getTimeDomainData(final boolean internal) {
         Tone[] toneSequence = null;
         if(internal) {
-            toneSequence = this.modulatedData;
+            toneSequence = this.timeDomainData;
         } else {
-            toneSequence = Arrays.copyOf(this.modulatedData, this.modulatedData.length);
+            toneSequence = Arrays.copyOf(this.timeDomainData, this.timeDomainData.length);
         }
         return toneSequence;
     }
@@ -75,11 +85,19 @@ public class Message {
     /**
      * This method is only intended for internal usage and should not be accessed from outside the
      * module.
-     * @param modulatedData     An array of tones
+     * @param timeDomainData     An array of tones
      */
-    public void setModulatedData(final Tone[] modulatedData) {
-        this.modulatedData = modulatedData;
+    public void setTimeDomainData(final Tone[] timeDomainData) {
+        this.timeDomainData = timeDomainData;
     }
+
+	public double[][] getFrequencyDomainData() {
+		return this.frequencyDomainData;
+	}
+
+	public void setFrequencyDomainData(final double[][] frequencyDomainData) {
+		this.frequencyDomainData = frequencyDomainData;
+	}
 
     /**
      * Getter for the Message messageState. The Message messageState indicates the transmission phase in which the
