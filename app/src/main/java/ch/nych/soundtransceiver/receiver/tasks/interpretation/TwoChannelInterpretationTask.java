@@ -1,28 +1,31 @@
-package ch.nych.soundtransceiver.receiver.tasks.interpretation.interpreter;
+package ch.nych.soundtransceiver.receiver.tasks.interpretation;
 
 import java.util.List;
 
 import ch.nych.soundtransceiver.receiver.Receiver;
-import ch.nych.soundtransceiver.receiver.tasks.Frame;
-import ch.nych.soundtransceiver.receiver.tasks.interpretation.InterpretationTask;
+import ch.nych.soundtransceiver.util.Message;
 
 /**
  * Created by nych on 5/1/16.
  */
 public class TwoChannelInterpretationTask extends InterpretationTask {
 
-    public TwoChannelInterpretationTask(final Receiver receiver, final Frame frame) {
-        super(receiver, frame);
+    public TwoChannelInterpretationTask(final Receiver receiver,
+                                        final Message message) {
+        super(receiver, message);
     }
 
     @Override
-    protected int mapData(final List<Byte> list, final int from, final int size) {
+    protected int mapData(final List<Byte> list,
+                          final int from,
+                          final int size) {
         int index = -1;
         int last = -1;
 
-        for (int i = from; i < this.processedData[0].length; i++) {
+        for (int i = from; i < this.frequencyDomainData[0].length; i++) {
             if ((index = getMaxInRow(i)) == last ||
-                    this.processedData[index][i] < this.thresholds[index]) {
+                    this.frequencyDomainData[index][i]
+                            < this.thresholds[index]) {
                 continue;
             }
             if (index == 1 || index == 3) {
@@ -40,7 +43,7 @@ public class TwoChannelInterpretationTask extends InterpretationTask {
             }
             last = index;
         }
-        return this.processedData[0].length;
+        return this.frequencyDomainData[0].length;
     }
 
 }

@@ -8,17 +8,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import ch.nych.BridgeListener;
-import ch.nych.soundtransceiver.receiver.tasks.Frame;
+import ch.nych.ReceiverListener;
 import ch.nych.soundtransceiver.receiver.tasks.ReceiverTask;
 import ch.nych.soundtransceiver.receiver.tasks.SampleBuffer;
 import ch.nych.soundtransceiver.receiver.tasks.interpretation.InterpretationTask;
-import ch.nych.soundtransceiver.receiver.tasks.interpretation.interpreter.SingleChannelInterpretationTask;
-import ch.nych.soundtransceiver.receiver.tasks.interpretation.interpreter.ThreeChannelInterpretationTask;
-import ch.nych.soundtransceiver.receiver.tasks.interpretation.interpreter.TwoChannelInterpretationTask;
+import ch.nych.soundtransceiver.receiver.tasks.interpretation.SingleChannelInterpretationTask;
+import ch.nych.soundtransceiver.receiver.tasks.interpretation.ThreeChannelInterpretationTask;
+import ch.nych.soundtransceiver.receiver.tasks.interpretation.TwoChannelInterpretationTask;
 import ch.nych.soundtransceiver.receiver.tasks.recording.RecordingTask;
 import ch.nych.soundtransceiver.receiver.tasks.transformation.TransformationTask;
 import ch.nych.soundtransceiver.util.Configuration;
+import ch.nych.soundtransceiver.util.Message;
 
 /**
  * Created by nych on 4/7/16.
@@ -66,7 +66,8 @@ public class Receiver {
     /**
      *
      */
-    private final List<BridgeListener> bridgeListeners = new ArrayList<BridgeListener>();
+    private final List<ReceiverListener> receiverListeners =
+			new ArrayList<ReceiverListener>();
 
     /**
      * Getter for the local {@link Configuration} instance. Be aware of changing the configuration
@@ -89,10 +90,10 @@ public class Receiver {
 
     /**
      *
-     * @param bridgeListener
+     * @param receiverListener
      */
-    public void addListener(final BridgeListener bridgeListener) {
-        this.bridgeListeners.add(bridgeListener);
+    public void addReceiverListener(final ReceiverListener receiverListener) {
+		this.receiverListeners.add(receiverListener);
     }
 
     /**
@@ -141,37 +142,40 @@ public class Receiver {
 
     /**
      *
-     * @param frame
+     * @param message
      */
-    public void callback(final Frame frame) {
-        if(frame.getFrameState() == Frame.FrameState.IN_PROGRESS) {
+    public void callback(final Message message) {
+        if(message.getMessageState() == Message.MessageState.IN_PROGRESS) {
             InterpretationTask interpretationTask = null;
             if(this.configuration.getTransmissionMode() ==
                     Configuration.TransmissionMode.SINGLE_CHANNEL) {
-                interpretationTask = new SingleChannelInterpretationTask(this, frame);
+                interpretationTask =
+                        new SingleChannelInterpretationTask(this, message);
             } else if(this.configuration.getTransmissionMode() ==
                     Configuration.TransmissionMode.TWO_CHANNEL) {
-                interpretationTask = new TwoChannelInterpretationTask(this, frame);
+                interpretationTask =
+                        new TwoChannelInterpretationTask(this, message);
             } else if(this.configuration.getTransmissionMode() ==
                     Configuration.TransmissionMode.THREE_CHANNEL) {
-                interpretationTask = new ThreeChannelInterpretationTask(this, frame);
+                interpretationTask =
+                        new ThreeChannelInterpretationTask(this, message);
             }
             this.executorServices[2].execute(interpretationTask);
-        } else if(frame.getFrameState() == Frame.FrameState.FRAME_CORRUPTED){
-            Log.d(Receiver.LOG_TAG, "Frame corrupted");
+        } else if(message.getMessageState() == Message.MessageState.CORRUPTED){
+            Log.d(Receiver.LOG_TAG, "Message corrupted");
         } else {
-            this.notifiyBridgeListeners(frame);
+            this.notifyReceiverListeners(message);
         }
     }
 
     /**
      *
-     * @param frame
+     * @param message
      */
-    private void notifiyBridgeListeners(final Frame frame) {
-        for(BridgeListener bridgeListener : this.bridgeListeners) {
-            bridgeListener.frameReceived(frame);
-        }
+    private void notifyReceiverListeners(final Message message) {
+        for(int i = 0; i < this.receiverListeners.size(); i++) {
+			this.receiverListeners.get(i).messageReceived(message);
+		}
     }
 
     /**

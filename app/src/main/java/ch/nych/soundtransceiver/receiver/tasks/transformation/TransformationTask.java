@@ -2,11 +2,13 @@ package ch.nych.soundtransceiver.receiver.tasks.transformation;
 
 import android.util.Log;
 
+import java.util.Arrays;
+
 import ch.nych.soundtransceiver.receiver.Receiver;
-import ch.nych.soundtransceiver.receiver.tasks.Frame;
 import ch.nych.soundtransceiver.receiver.tasks.ReceiverTask;
 import ch.nych.soundtransceiver.receiver.tasks.SampleBuffer;
 import ch.nych.soundtransceiver.util.Configuration;
+import ch.nych.soundtransceiver.util.Message;
 
 /**
  * This class implements the signal transformation from the time domain to the frequency domain.
@@ -101,6 +103,17 @@ public class TransformationTask extends ReceiverTask {
         }
     }
 
+	public void shrinkArray(final double[][] frequencyDomainData, final int
+			indexOfLastValue) {
+		if(indexOfLastValue >= this.configuration.getMaxFrameSize()) {
+			return;
+		}
+		for(int i = 0; i < frequencyDomainData.length; i++) {
+			frequencyDomainData[i] =
+				Arrays.copyOf(frequencyDomainData[i], indexOfLastValue + 1);
+		}
+	}
+
     /**
      * This method is still in progress
      */
@@ -122,7 +135,7 @@ public class TransformationTask extends ReceiverTask {
                     sum += this.buffer[i];
                 }
                 if(sum > threshold  && temp < this.buffer[this.buffer.length - 1]) {
-                    Log.d(TransformationTask.LOG_TAG, "Frame detected");
+                    Log.d(TransformationTask.LOG_TAG, "Message detected");
                     for(int i = 0; i < this.buffer.length; i++) {
                         this.buffer[i] = 0;
                     }
@@ -147,27 +160,32 @@ public class TransformationTask extends ReceiverTask {
     /**
      * This method is still in progress
      */
-    private Frame recordFrame(final double volume) {
+    private Message recordFrame(final double volume) {
         Log.d(TransformationTask.LOG_TAG, "Start recording frame");
         double threshold = volume / 5;
         int maxFrameSize = this.configuration.getMaxFrameSize();
-        Frame frame = new Frame(this.configuration);
-        double[] magnitudes = new double[this.goertzels.length];
+		Message message = new Message(null);
+		double[][] frequencyDomainData = new double[this.configuration
+				.getTransmissionMode().getNumOfChannels()][this.configuration
+				.getMaxFrameSize()];
         double sum = 0.0;
         short[] window = null;
         int listener = 0;
 
-        for(int i = 0; i < maxFrameSize;) {
+		int i = 0;
+		while(i < maxFrameSize) {
             if((window = this.sampleBuffer.getNextWindow()) != null &&
 					!this.shutdown) {
                 this.preprocessWindow(window);
                 for(int j = 0; j < this.goertzels.length; j++) {
                     this.goertzels[j].processSamples(window);
-                    magnitudes[j] = this.goertzels[j].getMagnitudeSquared();
+
+					frequencyDomainData[j][i] = this.goertzels[j]
+							.getMagnitudeSquared();
+
                     this.goertzels[j].resetGoertzel();
                 }
-                frame.addDataSet(magnitudes);
-                sum = magnitudes[listener];
+				sum = frequencyDomainData[listener][i];
                 for(int j = 0; j < this.buffer.length; j++) {
                     sum += this.buffer[j];
                 }
@@ -179,7 +197,7 @@ public class TransformationTask extends ReceiverTask {
                     for(int j = (this.buffer.length - 1); j > 0 ; j--) {
                         this.buffer[j] = this.buffer[j - 1];
                     }
-                    this.buffer[0] = magnitudes[listener];
+					this.buffer[0] = frequencyDomainData[listener][i];
                 }
                 i++;
             } else {
@@ -190,15 +208,16 @@ public class TransformationTask extends ReceiverTask {
                 }
             }
         }
-        for(int i = 0; i < this.buffer.length; i++) {
-            this.buffer[i] = 0;
+        for(int j = 0; j < this.buffer.length; j++) {
+            this.buffer[j] = 0;
         }
         this.skipWindows();
-        frame.sealFrame();
-        Log.d(TransformationTask.LOG_TAG, "Done recording frame. Size: " +
-                frame.getOriginalData
-                ()[0].length);
-        return frame;
+		this.shrinkArray(frequencyDomainData, i);
+		message.setFrequencyDomainData(frequencyDomainData);
+        Log.d(TransformationTask.LOG_TAG, "Done recording message. Size: " +
+                message.getFrequencyDomainData
+						()[0].length);
+        return message;
     }
 
     /**
@@ -217,12 +236,12 @@ public class TransformationTask extends ReceiverTask {
     @Override
     public void run() {
         double volume = 0.0;
-        Frame frame = null;
+        Message message = null;
         while(!this.shutdown) {
             volume = this.detectFrameBegin();
             if(volume > 0) {
-                frame = this.recordFrame(volume);
-                this.receiver.callback(frame);
+                message = this.recordFrame(volume);
+                this.receiver.callback(message);
             }
         }
     }

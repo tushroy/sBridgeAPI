@@ -201,7 +201,7 @@ public class Transmitter {
         if(task.getTaskType() == TransmissionTask.TaskType.SENDING) {
             this.executorServices[1].execute(task);
         } else if(task.getTaskType() == TransmissionTask.TaskType.NOTIFICATION){
-            this.notifySoundBridgeListeners(task.getMessage());
+            this.notifyTransmitterListeners(task.getMessage());
         }
 
     }
@@ -212,7 +212,7 @@ public class Transmitter {
      * transmission.
      * @param message    the sent {@link Message}
      */
-    private void notifySoundBridgeListeners(final Message message) {
+    private void notifyTransmitterListeners(final Message message) {
 		for(int i = 0; i < this.transmitterListeners.size(); i++) {
 			this.transmitterListeners.get(i).messageSent(message);
 		}

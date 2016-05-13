@@ -4,15 +4,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
+import ch.nych.ReceiverListener;
+import ch.nych.soundtransceiver.R;
+import ch.nych.soundtransceiver.receiver.Receiver;
+import ch.nych.soundtransceiver.util.Message;
+import ch.nych.soundtransceiver.util.Configuration;
 
-import ch.nych.BridgeListener;
-import ch.nych.soundtransmitter.R;
-import ch.nych.soundtransmitter.receiver.Receiver;
-import ch.nych.soundtransmitter.receiver.tasks.Frame;
-import ch.nych.soundtransmitter.transmitter.tasks.Message;
-import ch.nych.soundtransmitter.util.Configuration;
-
-public class Receiving extends AppCompatActivity implements BridgeListener {
+public class Receiving extends AppCompatActivity implements ReceiverListener {
 
     private TextView textView = null;
     private Receiver receiver = null;
@@ -20,9 +18,9 @@ public class Receiving extends AppCompatActivity implements BridgeListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_receiver);
+        this.setContentView(R.layout.activity_receiver);
         this.receiver = new Receiver();
-        receiver.addListener(this);
+        this.receiver.addReceiverListener(this);
         this.textView = (TextView) this.findViewById(R.id.textView);
     }
 
@@ -33,7 +31,9 @@ public class Receiving extends AppCompatActivity implements BridgeListener {
             this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast toast = Toast.makeText(getApplicationContext(), "Could not initialize Receiver", Toast.LENGTH_SHORT);
+                    Toast toast = Toast.makeText(getApplicationContext(),
+                            "Could not initialize Receiver",
+                            Toast.LENGTH_SHORT);
                     toast.show();
                 }
             });
@@ -46,35 +46,30 @@ public class Receiving extends AppCompatActivity implements BridgeListener {
         super.onStop();
         this.receiver.stopReceiver();
     }
-    @Override
-    public void messageSent(Message message) {
-
-    }
 
     @Override
-    public void frameReceived(final Frame frame) {
+    public void messageReceived(final Message message) {
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 Toast toast = null;
 
-                if(frame.getState() == Frame.ANALYZED_SUCCESSFULLY) {
+                if(message.getMessageState() ==
+                        Message.MessageState.INTERPRETED_SUCCESSFULLY) {
                     toast = Toast.makeText(
                             getApplicationContext(),
-                            "Frame received: ",
+                            "Message received: ",
                             Toast.LENGTH_SHORT);
-                    char[] message = new char[frame.getDataBytes().length];
-                    for (int i = 0; i < message.length; i++) {
-                        message[i] = (char) frame.getDataBytes()[i];
+
+                    char[] text = new char[message.getDataBytes().length];
+                    for (int i = 0; i < text.length; i++) {
+                        text[i] = (char) message.getDataBytes()[i];
                     }
-                    textView.setText(message, 0, message.length);
+                    textView.setText(text, 0, text.length);
+                    toast.show();
                 } else {
-                    toast = Toast.makeText(
-                            getApplicationContext(),
-                            "Received Frame is corrupted",
-                            Toast.LENGTH_SHORT);
+                    textView.setText("Message corrupted");
                 }
-                toast.show();
             }
         });
     }
