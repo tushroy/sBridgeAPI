@@ -11,8 +11,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import ch.nych.BridgeListener;
-import ch.nych.soundtransceiver.transmitter.tasks.Message;
+import ch.nych.TransmitterListener;
+import ch.nych.soundtransceiver.util.Message;
 import ch.nych.soundtransceiver.transmitter.tasks.TransmissionTask;
 import ch.nych.soundtransceiver.transmitter.tasks.modulation.ModulationTask;
 import ch.nych.soundtransceiver.transmitter.tasks.modulation.SingleChannelModulationTask;
@@ -71,7 +71,8 @@ public class Transmitter {
     /**
      * Stores all the registered listeners
      */
-    private final List<BridgeListener> bridgeListeners = new ArrayList<BridgeListener>();
+    private final List<TransmitterListener> transmitterListeners = new
+            ArrayList<TransmitterListener>();
 
     /**
      * Getter for the local {@link Configuration} instance. Be aware of changing the configuration
@@ -102,11 +103,13 @@ public class Transmitter {
     }
 
     /**
-     * This method register a {@link BridgeListener} instance for notifications.
-     * @param bridgeListener the {@link BridgeListener} instance to register
+     * This method register a {@link TransmitterListener} instance for notifications.
+     * @param  transmitterListener {@link TransmitterListener} instance
+	 *                                to register
      */
-    public void addListener(final BridgeListener bridgeListener) {
-        this.bridgeListeners.add(bridgeListener);
+    public void addTransmitterListener(
+            final TransmitterListener transmitterListener) {
+		this.transmitterListeners.add(transmitterListener);
     }
 
     /**
@@ -198,20 +201,21 @@ public class Transmitter {
         if(task.getTaskType() == TransmissionTask.TaskType.SENDING) {
             this.executorServices[1].execute(task);
         } else if(task.getTaskType() == TransmissionTask.TaskType.NOTIFICATION){
-            this.notifyBridgeListeners(task.getMessage());
+            this.notifySoundBridgeListeners(task.getMessage());
         }
 
     }
 
     /**
-     * This method notifies all registered {@link BridgeListener} about the state of the message
+     * This method notifies all registered {@link TransmitterListener} about the state of the
+	 * message
      * transmission.
      * @param message    the sent {@link Message}
      */
-    private void notifyBridgeListeners(final Message message) {
-        for(BridgeListener bridgeListener : this.bridgeListeners) {
-            bridgeListener.messageSent(message);
-        }
+    private void notifySoundBridgeListeners(final Message message) {
+		for(int i = 0; i < this.transmitterListeners.size(); i++) {
+			this.transmitterListeners.get(i).messageSent(message);
+		}
     }
 
     /**

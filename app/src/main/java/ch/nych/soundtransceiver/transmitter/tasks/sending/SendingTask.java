@@ -4,7 +4,7 @@ import android.media.AudioTrack;
 import android.util.Log;
 
 import ch.nych.soundtransceiver.transmitter.Transmitter;
-import ch.nych.soundtransceiver.transmitter.tasks.Message;
+import ch.nych.soundtransceiver.util.Message;
 import ch.nych.soundtransceiver.transmitter.tasks.TransmissionTask;
 import ch.nych.soundtransceiver.transmitter.tasks.modulation.tone.Tone;
 import ch.nych.soundtransceiver.transmitter.tasks.notification.NotificationTask;
@@ -42,7 +42,7 @@ public class SendingTask extends TransmissionTask {
     public void run() {
         Log.d(SendingTask.LOG_TAG, "sending tone sequence");
         AudioTrack audioTrack = this.transmitter.getAudioTrack();
-        Tone[] toneSequence = this.message.getToneSequence(true);
+        Tone[] toneSequence = this.message.getTimeDomainData(true);
 
         int totalSamplesSent = 0;
         try {
@@ -55,14 +55,14 @@ public class SendingTask extends TransmissionTask {
                 if(sent <= 0) {
                     Log.e(SendingTask.LOG_TAG, "Error during message playing. AudioTrack error code is: " +
                             sent);
-                    this.message.setMessageState(Message.MessageState.ABORT);
+                    this.message.setMessageState(Message.MessageState.SENDING_ABORT);
                     break;
                 }
                 totalSamplesSent += sent;
             }
         } catch (IllegalStateException e) {
             Log.e(SendingTask.LOG_TAG, e.getMessage());
-            this.message.setMessageState(Message.MessageState.ABORT);
+            this.message.setMessageState(Message.MessageState.SENDING_ABORT);
         }
         this.message.setMessageState(Message.MessageState.SENT);
         this.transmitter.getAudioTrack().stop();

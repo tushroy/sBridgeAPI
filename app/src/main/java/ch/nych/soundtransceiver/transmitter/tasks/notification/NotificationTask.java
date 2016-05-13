@@ -1,7 +1,7 @@
 package ch.nych.soundtransceiver.transmitter.tasks.notification;
 
 import ch.nych.soundtransceiver.transmitter.Transmitter;
-import ch.nych.soundtransceiver.transmitter.tasks.Message;
+import ch.nych.soundtransceiver.util.Message;
 import ch.nych.soundtransceiver.transmitter.tasks.TransmissionTask;
 
 /**

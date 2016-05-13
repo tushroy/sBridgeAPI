@@ -12,19 +12,13 @@ import ch.nych.soundtransceiver.util.Configuration;
  * This class can't be instantiated.
  * Created by nych on 4/12/16.
  */
-public class ToneFactory {
+public abstract class ToneFactory {
 
     /**
      * The local log tag
      */
     private final static String LOG_TAG = Configuration.GLOBAL_LOG_TAG +
             ":ToneFactory";
-
-    /**
-     * The constructor is set to private, so it is not possible to instantiate
-     * the class.
-     */
-    private ToneFactory() {}
 
     /**
      * This method instantiates a set of tones.

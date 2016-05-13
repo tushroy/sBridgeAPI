@@ -2,6 +2,7 @@ package ch.nych.soundtransceiver.transmitter.tasks;
 
 import ch.nych.soundtransceiver.transmitter.Transmitter;
 import ch.nych.soundtransceiver.util.Configuration;
+import ch.nych.soundtransceiver.util.Message;
 
 /**
  * Super class for the different transmission tasks. The whole transmission process is divided into
