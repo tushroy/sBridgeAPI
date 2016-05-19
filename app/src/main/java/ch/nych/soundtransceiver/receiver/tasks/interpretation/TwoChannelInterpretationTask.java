@@ -1,5 +1,7 @@
 package ch.nych.soundtransceiver.receiver.tasks.interpretation;
 
+import android.util.Log;
+
 import java.util.List;
 
 import ch.nych.soundtransceiver.receiver.Receiver;
@@ -16,13 +18,18 @@ public class TwoChannelInterpretationTask extends InterpretationTask {
     }
 
     @Override
-    protected int mapData(final List<Byte> list,
-                          final int from,
-                          final int size) {
-        int index = -1;
+    protected void interpretMessage(final List<Byte> list) {
+        if(list == null) {
+            Log.d(InterpretationTask.LOG_TAG, "list passed to " +
+                    "interpretMessage was null");
+            return;
+        }
+        Log.d(InterpretationTask.LOG_TAG, "interpretMessage");
+
+		int index = -1;
         int last = -1;
 
-        for (int i = from; i < this.frequencyDomainData[0].length; i++) {
+        for (int i = 0; i < this.frequencyDomainData[0].length; i++) {
             if ((index = getMaxInRow(i)) == last ||
                     this.frequencyDomainData[index][i]
                             < this.thresholds[index]) {
@@ -30,20 +37,11 @@ public class TwoChannelInterpretationTask extends InterpretationTask {
             }
             if (index == 1 || index == 3) {
                 list.add((byte) 0);
-                if (list.size() > size) {
-                    list.remove(list.size() - 1);
-                    return i;
-                }
             } else if (index == 2 || index == 4) {
                 list.add((byte) 1);
-                if (list.size() > size) {
-                    list.remove(list.size() - 1);
-                    return i;
-                }
             }
             last = index;
         }
-        return this.frequencyDomainData[0].length;
     }
 
 }

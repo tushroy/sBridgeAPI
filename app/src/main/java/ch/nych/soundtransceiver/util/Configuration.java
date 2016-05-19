@@ -639,10 +639,36 @@ public class Configuration {
         return this.preamble;
     }
 
+    public Configuration() {
+        // TODO: 5/15/16 remove
+    }
     /**
      *
+     * @param transmissionMode
+     * @param sampleRate
+     * @param toneType
+     * @param toneVolume
+     * @param windowFunction
+     * @param sampleBufferSize
+     * @param frequencyResolutionFactor
+     * @param overlappingFactor
+     * @param preamble
+     * @param maxFrameSize
+     * @param interFrameGap
      */
-    private Configuration() {};
+    public Configuration(final TransmissionMode transmissionMode,
+                         final SampleRate sampleRate,
+                         final ToneType toneType,
+                         final double toneVolume,
+                         final WindowFunction windowFunction,
+                         final int sampleBufferSize,
+                         final int frequencyResolutionFactor,
+                         final int overlappingFactor,
+                         final byte[] preamble,
+                         final int maxFrameSize,
+                         final int interFrameGap) {
+        // TODO: 5/14/16
+    };
 
     /**
      *
@@ -681,7 +707,6 @@ public class Configuration {
         configuration.windowSize = 120;
         configuration.toneSize = 240;
         configuration.controlToneSize = 960;
-        configuration.preamble = Configuration.DEFAULT_PREAMBLE;
         configuration.baseFrequency = configuration.calcBaseFrequency(18000);
         configuration.receiverThreshold = 10000000.0;
         return configuration;

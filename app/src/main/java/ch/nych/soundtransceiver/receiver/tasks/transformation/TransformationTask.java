@@ -15,8 +15,10 @@ import ch.nych.soundtransceiver.util.Message;
  * The transformation is done with the Goertzel algorithm implemented by the {@link Goertzel} class.
  * Instead of scanning the whole spectrum, the Goertzel is aligned to a specific frequency range.
  * Because of the lower complexity it is more efficient than e FFT.
- * The detectFrameBegin() is analyzing the incoming window until it detects the presence of the
- * frame start. Once the beginning is detected, the recordFrame() method is analyzing the carrier
+ * The detectMessageBegin() is analyzing the incoming window until it detects
+ * the presence of the
+ * frame start. Once the beginning is detected, the recordMessage() method is
+ * analyzing the carrier
  * frequencies until the end of the frame is detected.
  *
  *                                          TODO
@@ -117,7 +119,7 @@ public class TransformationTask extends ReceiverTask {
     /**
      * This method is still in progress
      */
-    private double detectFrameBegin() {
+    private double detectMessageBegin() {
         Goertzel listener = this.goertzels[0];
         double threshold = this.configuration.getReceiverThreshold();
         double sum = 0.0;
@@ -160,11 +162,12 @@ public class TransformationTask extends ReceiverTask {
     /**
      * This method is still in progress
      */
-    private Message recordFrame(final double volume) {
+    private Message recordMessage(final double volume) {
         Log.d(TransformationTask.LOG_TAG, "Start recording frame");
         double threshold = volume / 5;
         int maxFrameSize = this.configuration.getMaxFrameSize();
 		Message message = new Message(null);
+        message.setMessageState(Message.MessageState.IN_PROGRESS);
 		double[][] frequencyDomainData = new double[this.configuration
 				.getTransmissionMode().getNumOfChannels()][this.configuration
 				.getMaxFrameSize()];
@@ -238,9 +241,9 @@ public class TransformationTask extends ReceiverTask {
         double volume = 0.0;
         Message message = null;
         while(!this.shutdown) {
-            volume = this.detectFrameBegin();
+            volume = this.detectMessageBegin();
             if(volume > 0) {
-                message = this.recordFrame(volume);
+                message = this.recordMessage(volume);
                 this.receiver.callback(message);
             }
         }

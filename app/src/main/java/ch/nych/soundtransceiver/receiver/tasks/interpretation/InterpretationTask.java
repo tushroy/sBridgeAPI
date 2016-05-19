@@ -48,22 +48,28 @@ public abstract class InterpretationTask extends ReceiverTask {
     public InterpretationTask(final Receiver receiver, final Message message) {
         super(receiver);
         this.message = message;
-        this.frequencyDomainData = this.message.getFrequencyDomainData();
-        this.thresholds = new double[this.frequencyDomainData.length];
-        this.filterData();
-        this.calcThresholds();
-        this.preamble = this.configuration.getPreamble();
     }
 
     @Override
     public boolean initTask() {
-        return false;
+		Log.d(InterpretationTask.LOG_TAG, "initialize InterpretationTask");
+        if(this.message == null ||
+                this.message.getFrequencyDomainData() == null) {
+            return false;
+        } else {
+            this.frequencyDomainData = this.message.getFrequencyDomainData();
+            this.thresholds = new double[this.frequencyDomainData.length];
+
+            this.preamble = this.configuration.getPreamble();
+        }
+        return true;
     }
 
     /**
      *
      */
-    protected void filterData() {
+    protected void smoothData() {
+		Log.d(InterpretationTask.LOG_TAG, "smooth frequency domain data");
         // TODO: 5/7/16 validation and dynamic
         double[] coefficients = configuration.getFilterCoefficients();
 		double[][] copyOfData = new double[this.frequencyDomainData.length][];
@@ -95,6 +101,7 @@ public abstract class InterpretationTask extends ReceiverTask {
      *
      */
     private void calcThresholds() {
+		Log.d(InterpretationTask.LOG_TAG, "calculate thresholds");
         for(int i = 0; i < this.thresholds.length; i++) {
             for(int j = 0; j < this.frequencyDomainData[i].length; j++) {
                 this.thresholds[i] +=
@@ -125,7 +132,8 @@ public abstract class InterpretationTask extends ReceiverTask {
     }
 
     private boolean compareAgainstPreamble(List<Byte> dataBytes) {
-        if(this.preamble.length != dataBytes.size()) {
+		Log.d(InterpretationTask.LOG_TAG, "compare against preamble");
+        if(this.preamble.length >= dataBytes.size()) {
             return false;
         }
         for(int i = 0; i < this.preamble.length; i++) {
@@ -142,7 +150,8 @@ public abstract class InterpretationTask extends ReceiverTask {
      * @param list
      * @return
      */
-    private byte[] mergeBits(final List<Byte> list) {
+    private byte[] mergeBitsToBytes(final List<Byte> list) {
+		Log.d(InterpretationTask.LOG_TAG, "merge bits to bytes");
         byte[] bytes = new byte[list.size() / 8];
         int temp = 0;
         int j = 0;
@@ -163,21 +172,20 @@ public abstract class InterpretationTask extends ReceiverTask {
      *
      * @return
      */
-    protected abstract int mapData(final List<Byte> list,
-                                   final int from,
-                                   final int size);
+    protected abstract void interpretMessage(final List<Byte> list);
 
     @Override
     public void run() {
         List<Byte> dataBytes = new ArrayList<Byte>();
-        int index = this.mapData(dataBytes, 0, this.preamble.length);
-        if(!this.compareAgainstPreamble(dataBytes)) {
-            Log.d(InterpretationTask.LOG_TAG, "Message unequal to preamble");
-            return;
-        }
-        this.mapData(dataBytes, index, Integer.MAX_VALUE);
-        this.message.setDataBytes(this.mergeBits(dataBytes));
-        this.message.setMessageState(Message.MessageState.INTERPRETED_SUCCESSFULLY);
-        this.receiver.callback(this.message);
+        this.smoothData();
+        this.calcThresholds();
+        this.interpretMessage(dataBytes);
+        if(this.compareAgainstPreamble(dataBytes)) {
+			this.message.setDataBytes(this.mergeBitsToBytes(dataBytes));
+			this.message.setMessageState(Message.MessageState.INTERPRETED_SUCCESSFULLY);
+        } else {
+			this.message.setMessageState(Message.MessageState.CORRUPTED);
+		}
+		this.receiver.callback(this.message);
     }
 }

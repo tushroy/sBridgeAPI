@@ -160,7 +160,13 @@ public class Receiver {
                 interpretationTask =
                         new ThreeChannelInterpretationTask(this, message);
             }
-            this.executorServices[2].execute(interpretationTask);
+
+            if(interpretationTask.initTask()) {
+                this.executorServices[2].execute(interpretationTask);
+            } else {
+                Log.d(Receiver.LOG_TAG, "Could not initialize " +
+                        "InterpretationTask");
+            }
         } else if(message.getMessageState() == Message.MessageState.CORRUPTED){
             Log.d(Receiver.LOG_TAG, "Message corrupted");
         } else {
@@ -173,6 +179,7 @@ public class Receiver {
      * @param message
      */
     private void notifyReceiverListeners(final Message message) {
+        Log.d(Receiver.LOG_TAG, "notify listeners");
         for(int i = 0; i < this.receiverListeners.size(); i++) {
 			this.receiverListeners.get(i).messageReceived(message);
 		}
