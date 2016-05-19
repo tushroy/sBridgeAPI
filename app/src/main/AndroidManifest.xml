@@ -18,8 +18,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="ch.nych.demoApp.Transmission"></activity>
-        <activity android:name="ch.nych.demoApp.Receiving"></activity>
+        <activity android:name="ch.nych.demoApp.BroadcastActivity"></activity>
+        <activity android:name="ch.nych.demoApp.ReceivingActivity"></activity>
     </application>
 
 </manifest>

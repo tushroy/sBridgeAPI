@@ -10,7 +10,8 @@ import ch.nych.soundtransceiver.receiver.Receiver;
 import ch.nych.soundtransceiver.util.Message;
 import ch.nych.soundtransceiver.util.Configuration;
 
-public class Receiving extends AppCompatActivity implements ReceiverListener {
+public class ReceivingActivity extends AppCompatActivity
+        implements ReceiverListener {
 
     private TextView textView = null;
     private Receiver receiver = null;

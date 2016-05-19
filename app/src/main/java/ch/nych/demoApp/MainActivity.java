@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
             btn_receiver.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    v.getContext().startActivity(new Intent(v.getContext(), Receiving.class));
+                    v.getContext().startActivity(new Intent(v.getContext(), ReceivingActivity.class));
                 }
             });
         }
@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
             btn_sender.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    v.getContext().startActivity(new Intent(v.getContext(), Transmission.class));
+                    v.getContext().startActivity(new Intent(v.getContext(), BroadcastActivity.class));
                 }
             });
         }

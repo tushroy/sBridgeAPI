@@ -7,7 +7,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="ch.nych.demoApp.Transmission">
+    tools:context="ch.nych.demoApp.BroadcastActivity">
 
     <EditText
         android:layout_width="wrap_content"
@@ -22,8 +22,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Send"
-        android:id="@+id/btn_send"
+        android:id="@+id/sendButton"
         android:layout_below="@+id/editText"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="28dp" />
+
 </RelativeLayout>
