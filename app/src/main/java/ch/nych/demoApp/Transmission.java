@@ -17,6 +17,7 @@ public class Transmission extends AppCompatActivity
         implements TransmitterListener {
 
 	private Transmitter transmitter;
+	private Button sendButton = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
