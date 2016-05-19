@@ -141,7 +141,9 @@ public abstract class InterpretationTask extends ReceiverTask {
                 return false;
             }
         }
-        dataBytes.clear();
+        for(int i = 0; i < this.preamble.length; i++) {
+			dataBytes.remove(0);
+		}
         return true;
     }
 
