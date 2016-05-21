@@ -13,17 +13,35 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Receiver"
-        android:id="@+id/btn_receiver"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="174dp" />
+        android:id="@+id/receiverActivityButton"
+        android:layout_above="@+id/broadcastActivityButton"
+        android:layout_alignLeft="@+id/broadcastActivityButton"
+        android:layout_alignStart="@+id/broadcastActivityButton"
+        android:layout_marginBottom="48dp"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Sender"
-        android:id="@+id/btn_sender"
-        android:layout_below="@+id/btn_receiver"
+        android:id="@+id/broadcastActivityButton"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SoundBeacon"
+        android:id="@+id/soundBeaconButton"
+        android:layout_marginTop="55dp"
+        android:layout_below="@+id/broadcastActivityButton"
+        android:layout_centerHorizontal="true"/>
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/configurationSpinner"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="44dp" />
+        android:layout_marginBottom="32dp"
+        android:spinnerMode="dropdown"/>
 </RelativeLayout>

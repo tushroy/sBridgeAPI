@@ -4,10 +4,12 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.util.Log;
 
+import java.io.Serializable;
+
 /**
  * Created by nych on 4/13/16.
  */
-public class Configuration {
+public class Configuration implements Serializable {
 
     /**
     * Global log tag
@@ -642,6 +644,24 @@ public class Configuration {
     public Configuration() {
         // TODO: 5/15/16 remove
     }
+
+    public long getByteTransmissionTime() {
+        double byteTransmissionTime = 0.0;
+        byteTransmissionTime = this.getToneSize() * 8;
+        byteTransmissionTime /= this.sampleRate.getSampleRate();
+        byteTransmissionTime *= 1000;
+        return (long) byteTransmissionTime;
+    }
+
+	public long getMessageTransmissionTime() {
+		double messageTransmissionTime = 0.0;
+		messageTransmissionTime = (this.preamble.length * this.getToneSize());
+		messageTransmissionTime += (this.getControlToneSize() * 2);
+		messageTransmissionTime /= this.sampleRate.getSampleRate();
+		messageTransmissionTime *= 1000;
+		return (long) messageTransmissionTime;
+	}
+
     /**
      *
      * @param transmissionMode
@@ -702,7 +722,7 @@ public class Configuration {
      *
      * @return
      */
-    public static Configuration newUltrasonicConfiguration() {
+    public static Configuration newInaudibleConfiguration() {
         Configuration configuration = Configuration.defaultBaseConfiguration();
         configuration.windowSize = 120;
         configuration.toneSize = 240;

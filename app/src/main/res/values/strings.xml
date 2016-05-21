@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">SoundTransmitter</string>
+    <string-array name="configuration_array">
+        <item>Inaudible</item>
+        <item>Audible</item>
+    </string-array>
 </resources>

@@ -28,7 +28,7 @@ public class ReceivingActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        if(!receiver.initReceiver(Configuration.newUltrasonicConfiguration())) {
+        if(!receiver.initReceiver(Configuration.newInaudibleConfiguration())) {
             this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

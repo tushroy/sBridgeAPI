@@ -52,7 +52,7 @@ public class BroadcastActivity extends AppCompatActivity
 	protected void onStart() {
 		super.onStart();
 		if(!this.transmitter.initTransmitter(Configuration
-				.newUltrasonicConfiguration())) {
+				.newInaudibleConfiguration())) {
 			this.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
