@@ -15,9 +15,12 @@ import ch.nych.TransmitterListener;
 import ch.nych.soundtransceiver.util.Message;
 import ch.nych.soundtransceiver.transmitter.tasks.TransmissionTask;
 import ch.nych.soundtransceiver.transmitter.tasks.modulation.ModulationTask;
-import ch.nych.soundtransceiver.transmitter.tasks.modulation.SingleChannelModulationTask;
-import ch.nych.soundtransceiver.transmitter.tasks.modulation.ThreeChannelModulation;
-import ch.nych.soundtransceiver.transmitter.tasks.modulation.TwoChannelModulationTask;
+import ch.nych.soundtransceiver.transmitter.tasks.modulation
+		.SingleChannelModulationTask;
+import ch.nych.soundtransceiver.transmitter.tasks.modulation
+		.ThreeChannelModulation;
+import ch.nych.soundtransceiver.transmitter.tasks.modulation
+		.TwoChannelModulationTask;
 import ch.nych.soundtransceiver.transmitter.tasks.modulation.tone.Tone;
 import ch.nych.soundtransceiver.transmitter.tasks.modulation.tone.ToneFactory;
 import ch.nych.soundtransceiver.util.Configuration;
@@ -178,20 +181,21 @@ public class Transmitter implements Runnable {
     /**
      * The transmitData() method is broadcasting the data over sound waves.
 	 * The transmission rate is low, so don't try to send huge amounts of data.
-     * @param data a simple byte array containing your data which might be
+     * @param dataBytes a simple byte array containing your data which might be
 	 *                some ascii values as an example.
      * @return the reference to the {@link Message} instance containing your
 	 * data. This allows you to query the status of the message and more. If
 	 * the transmitter is not initialized or the  argument is null, the
 	 * method will return null.
      */
-    public Message transmitData(final byte[] data) {
+    public Message transmitData(final byte[] dataBytes) {
         Message message = null;
         if(!this.initialized) {
             Log.w(Transmitter.LOG_TAG, "Transmitter not initialized. Couldn't" +
 					" transmit data");
-        } else if(data != null && data.length > 0) {
-            message = new Message(data);
+        } else if(dataBytes != null && dataBytes.length > 0) {
+            message = new Message(Message.MessageState.IN_PROGRESS);
+			message.setDataBytes(dataBytes);
             ModulationTask modulationTask = null;
             if(this.configuration.getTransmissionMode() ==
                     Configuration.TransmissionMode.SINGLE_CHANNEL) {

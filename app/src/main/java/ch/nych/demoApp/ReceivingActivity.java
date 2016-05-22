@@ -53,18 +53,15 @@ public class ReceivingActivity extends AppCompatActivity
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast toast = null;
+                Toast toast = Toast.makeText(
+						getApplicationContext(),
+						"Message received",
+						Toast.LENGTH_SHORT);;
 
-                if(message.getMessageState() ==
-                        Message.MessageState.VALID) {
-                    toast = Toast.makeText(
-                            getApplicationContext(),
-                            "Message received",
-                            Toast.LENGTH_SHORT);
-
-                    char[] text = new char[message.getDataBytes().length];
+                if(message.getMessageState() == Message.MessageState.VALID) {
+                    char[] text = new char[message.getDataBytes(false).length];
                     for (int i = 0; i < text.length; i++) {
-                        text[i] = (char) message.getDataBytes()[i];
+                        text[i] = (char) message.getDataBytes(false)[i];
                     }
                     textView.setText(text, 0, text.length);
                 } else {

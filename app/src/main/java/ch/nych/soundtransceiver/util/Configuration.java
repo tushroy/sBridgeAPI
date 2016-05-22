@@ -102,7 +102,7 @@ public class Configuration implements Serializable {
     public final static double DEFAULT_RECEIVER_THRESHOLD = 10000000.0;
 
     /**
-     * The default preamble for a frame
+     * The default preambleBytes for a frame
      */
     public final static byte[] DEFAULT_PREAMBLE = new byte[]{0, 1, 0, 1, 1};
 
@@ -330,7 +330,8 @@ public class Configuration implements Serializable {
     public boolean setFrequencyResolutionFactor(
 			final double frequencyResolutionFactor) {
         if(frequencyResolutionFactor < 1) {
-            Log.w(Configuration.LOG_TAG, "Minimum for the resolution factor is 1");
+            Log.w(Configuration.LOG_TAG, "Minimum for the resolution factor " +
+					"is 1");
             return false;
         }
 
@@ -339,8 +340,8 @@ public class Configuration implements Serializable {
 
         if((frequencyDelta * this.transmissionMode.getNumOfChannels() +
 				this.baseFrequency) > this.getNyquistFrequency()) {
-            Log.w(Configuration.LOG_TAG, "Reduce the factor, nyquist frequency" +
-					"exceeded.");
+            Log.w(Configuration.LOG_TAG, "Reduce the factor, nyquist " +
+					"frequency exceeded.");
             return false;
         }
 
@@ -371,8 +372,8 @@ public class Configuration implements Serializable {
      */
     public double calcBaseFrequency(final double approximationValue) {
         if(approximationValue <= 0) {
-            Log.w(Configuration.LOG_TAG, "A calculation of a base frequency of zero or" +
-					"below is not allowed");
+            Log.w(Configuration.LOG_TAG, "A calculation of a base frequency " +
+					"of zero or below is not allowed");
             return -1;
         }
         double baseFrequency;
@@ -429,11 +430,12 @@ public class Configuration implements Serializable {
                 (this.transmissionMode.getNumOfChannels() *
 						this.getFrequencyDelta());
         if(baseFrequency <= 0) {
-            Log.w(Configuration.LOG_TAG, "Base frequency can't be zero or less");
+            Log.w(Configuration.LOG_TAG, "Base frequency can't be zero or " +
+					"less");
             return false;
         } else if(baseFrequency > nyquistLimit) {
-            Log.w(Configuration.LOG_TAG, "Base frequency can't be higher than the " +
-					"nyquist frequency of: " + nyquistLimit);
+            Log.w(Configuration.LOG_TAG, "Base frequency can't be higher than" +
+					" the nyquist frequency of: " + nyquistLimit);
             return false;
         }
         if(secureFlag) {
@@ -486,8 +488,8 @@ public class Configuration implements Serializable {
      */
     public boolean setSampleBufferSize(final int sampleBufferSize) {
         if(sampleBufferSize < this.minBufferSize) {
-            Log.w(Configuration.LOG_TAG, "Invalid sampleBuffer size. Minimal size is: "
-					+ minBufferSize);
+            Log.w(Configuration.LOG_TAG, "Invalid sampleBuffer size. Minimal " +
+					"size is: " + minBufferSize);
             return false;
         }
         this.sampleBufferSize = sampleBufferSize;
@@ -515,8 +517,8 @@ public class Configuration implements Serializable {
      */
     public boolean setOverlappingFactor(final int overlappingFactor) {
         if(overlappingFactor < 1) {
-            Log.w(Configuration.LOG_TAG, "Invalid Overlapping factor. Can not be " +
-					"smaller than one");
+            Log.w(Configuration.LOG_TAG, "Invalid Overlapping factor. Can not" +
+					" be smaller than one");
             return false;
         }
         this.overlappingFactor = overlappingFactor;
@@ -617,15 +619,14 @@ public class Configuration implements Serializable {
     public boolean setPreamble(final byte[] preamble) {
         // TODO: 5/2/16 Validation and Testcase
         if(preamble == null) {
-            Log.w(Configuration.LOG_TAG, "Your preamble shouldn't be null. If no " +
-					"preamble is used, init" +
-                    "with new byte[0]");
+            Log.w(Configuration.LOG_TAG, "Your preambleBytes shouldn't be " +
+					"null. If no preambleBytes is used, init with new byte[0]");
             this.preamble = new byte[0];
         }
         for(int i = 0; i < preamble.length; i++) {
             if(preamble[i] > 1) {
-                Log.w(Configuration.LOG_TAG, "Your preamble contains values unequal to " +
-						"zero or one");
+                Log.w(Configuration.LOG_TAG, "Your preambleBytes contains " +
+						"values unequal to zero or one");
                 return false;
             }
         }
@@ -634,7 +635,7 @@ public class Configuration implements Serializable {
     }
 
     /**
-     * Getter for the preamble
+     * Getter for the preambleBytes
      * @return
      */
     public byte[] getPreamble() {

@@ -11,8 +11,8 @@ import ch.nych.soundtransceiver.transmitter.tasks.notification.NotificationTask;
 import ch.nych.soundtransceiver.util.Configuration;
 
 /**
- * This class is responsible for the transmission of the message, by playing the modulated audio
- * signal.
+ * This class is responsible for the transmission of the message, by playing
+ * the modulated audio signal.
  * Created by nych on 4/6/16.
  */
 public class SendingTask extends TransmissionTask {
@@ -25,9 +25,11 @@ public class SendingTask extends TransmissionTask {
 
     /**
      * Default constructor
-     * @param transmitter    the reference to the calling {@link Transmitter} instance is used for
-     *                       the shared resources and the callback.
-     * @param message        The {@link Message} instance, containing the data to modulate
+     * @param transmitter    the reference to the calling {@link Transmitter}
+	 *                          instance is used for the shared resources and
+	 *                          the callback.
+     * @param message        The {@link Message} instance, containing the
+	 *                          data to modulate
      */
     public SendingTask(final Transmitter transmitter, final Message message) {
         super(transmitter, message, TaskType.SENDING);
@@ -42,7 +44,7 @@ public class SendingTask extends TransmissionTask {
     public void run() {
         Log.d(SendingTask.LOG_TAG, "sending tone sequence");
         AudioTrack audioTrack = this.transmitter.getAudioTrack();
-        Tone[] toneSequence = this.message.getTimeDomainData(true);
+        Tone[] toneSequence = this.message.getTimeDomainData();
 
         int totalSamplesSent = 0;
         try {
@@ -50,12 +52,13 @@ public class SendingTask extends TransmissionTask {
             this.message.setMessageState(Message.MessageState.SENDING);
             int sent = 0;
             for(Tone tone : toneSequence) {
-                Log.d(SendingTask.LOG_TAG, "Sending tone: " + tone.getFrequency());
-                sent = audioTrack.write(tone.getSamples(), 0, (int) tone.getLength());
+                sent = audioTrack.write(tone.getSamples(), 0,
+						(int) tone.getLength());
                 if(sent <= 0) {
-                    Log.e(SendingTask.LOG_TAG, "Error during message playing. AudioTrack error code is: " +
-                            sent);
-                    this.message.setMessageState(Message.MessageState.SENDING_ABORT);
+                    Log.e(SendingTask.LOG_TAG, "Error during message playing." +
+							" AudioTrack error code is: " + sent);
+                    this.message.setMessageState(
+							Message.MessageState.SENDING_ABORT);
                     break;
                 }
                 totalSamplesSent += sent;
@@ -66,7 +69,8 @@ public class SendingTask extends TransmissionTask {
         }
         this.message.setMessageState(Message.MessageState.SENT);
         this.transmitter.getAudioTrack().stop();
-        Log.d(SendingTask.LOG_TAG, "sent a total of " + totalSamplesSent + " samples");
+        Log.d(SendingTask.LOG_TAG, "sent a total of " + totalSamplesSent +
+				" samples");
         this.transmitterCallback();
     }
 }
