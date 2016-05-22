@@ -2,7 +2,6 @@ package ch.nych.soundtransceiver.receiver.tasks.interpretation;
 
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -100,7 +99,7 @@ public abstract class InterpretationTask extends ReceiverTask {
     /**
      *
      */
-    private void calcThresholds() {
+    private void calculateThresholds() {
 		Log.d(InterpretationTask.LOG_TAG, "calculate thresholds");
         for(int i = 0; i < this.thresholds.length; i++) {
             for(int j = 0; j < this.frequencyDomainData[i].length; j++) {
@@ -131,8 +130,8 @@ public abstract class InterpretationTask extends ReceiverTask {
         return maxIndex;
     }
 
-    private boolean compareAgainstPreamble(List<Byte> dataBytes) {
-		Log.d(InterpretationTask.LOG_TAG, "compare against preamble");
+    private boolean checkPreamble(List<Byte> dataBytes) {
+		Log.d(InterpretationTask.LOG_TAG, "check preamble");
         if(this.preamble.length >= dataBytes.size()) {
             return false;
         }
@@ -144,23 +143,24 @@ public abstract class InterpretationTask extends ReceiverTask {
         for(int i = 0; i < this.preamble.length; i++) {
 			dataBytes.remove(0);
 		}
+		Log.d(InterpretationTask.LOG_TAG, "valid preamble");
         return true;
     }
 
     /**
      *
-     * @param list
+     * @param bitList
      * @return
      */
-    private byte[] mergeBitsToBytes(final List<Byte> list) {
+    private byte[] mergeBitsToBytes(final List<Byte> bitList) {
 		Log.d(InterpretationTask.LOG_TAG, "merge bits to bytes");
-        byte[] bytes = new byte[list.size() / 8];
+		byte[] bytes = new byte[bitList.size() / 8];
         int temp = 0;
         int j = 0;
 
-        for(int i = 1; i <= list.size(); i++) {
+		for(int i = 1; i <= bitList.size(); i++) {
             temp = temp << 1;
-            temp = temp | list.get(i - 1);
+            temp = temp | bitList.get(i - 1);
             if(i % 8 == 0) {
                 Log.d(InterpretationTask.LOG_TAG, Integer.toHexString(temp));
                 bytes[j++] = (byte) temp;
@@ -174,19 +174,21 @@ public abstract class InterpretationTask extends ReceiverTask {
      *
      * @return
      */
-    protected abstract void interpretMessage(final List<Byte> list);
+    protected abstract List<Byte> interpretMessage();
 
     @Override
     public void run() {
-        List<Byte> dataBytes = new ArrayList<Byte>();
         this.smoothData();
-        this.calcThresholds();
-        this.interpretMessage(dataBytes);
-        if(this.compareAgainstPreamble(dataBytes)) {
-			this.message.setDataBytes(this.mergeBitsToBytes(dataBytes));
-			this.message.setMessageState(Message.MessageState.INTERPRETED_SUCCESSFULLY);
+        this.calculateThresholds();
+		List<Byte> bitList = this.interpretMessage();
+		if(bitList.size() < (40 + this.preamble.length)) {
+			Log.d(InterpretationTask.LOG_TAG, "Received message is to small");
+			return;
+		}
+        if(this.checkPreamble(bitList)) {
+			this.message.setDataBytes(this.mergeBitsToBytes(bitList));
         } else {
-			this.message.setMessageState(Message.MessageState.CORRUPTED);
+			this.message.setMessageState(Message.MessageState.INVALID_PREAMBLE);
 		}
 		this.receiver.callback(this.message);
     }

@@ -11,12 +11,17 @@ import java.util.concurrent.TimeUnit;
 import ch.nych.ReceiverListener;
 import ch.nych.soundtransceiver.receiver.tasks.ReceiverTask;
 import ch.nych.soundtransceiver.receiver.tasks.SampleBuffer;
-import ch.nych.soundtransceiver.receiver.tasks.interpretation.InterpretationTask;
-import ch.nych.soundtransceiver.receiver.tasks.interpretation.SingleChannelInterpretationTask;
-import ch.nych.soundtransceiver.receiver.tasks.interpretation.ThreeChannelInterpretationTask;
-import ch.nych.soundtransceiver.receiver.tasks.interpretation.TwoChannelInterpretationTask;
+import ch.nych.soundtransceiver.receiver.tasks.interpretation
+		.InterpretationTask;
+import ch.nych.soundtransceiver.receiver.tasks.interpretation
+		.SingleChannelInterpretationTask;
+import ch.nych.soundtransceiver.receiver.tasks.interpretation
+		.ThreeChannelInterpretationTask;
+import ch.nych.soundtransceiver.receiver.tasks.interpretation
+		.TwoChannelInterpretationTask;
 import ch.nych.soundtransceiver.receiver.tasks.recording.RecordingTask;
-import ch.nych.soundtransceiver.receiver.tasks.transformation.TransformationTask;
+import ch.nych.soundtransceiver.receiver.tasks.transformation
+		.TransformationTask;
 import ch.nych.soundtransceiver.util.Configuration;
 import ch.nych.soundtransceiver.util.Message;
 
@@ -149,7 +154,7 @@ public class Receiver {
      * @param message
      */
     public void callback(final Message message) {
-        if(message.getMessageState() == Message.MessageState.IN_PROGRESS) {
+        if(message.getMessageState() == Message.MessageState.RECEIVED) {
             InterpretationTask interpretationTask = null;
             if(this.configuration.getTransmissionMode() ==
                     Configuration.TransmissionMode.SINGLE_CHANNEL) {
@@ -171,8 +176,6 @@ public class Receiver {
                 Log.d(Receiver.LOG_TAG, "Could not initialize " +
                         "InterpretationTask");
             }
-        } else if(message.getMessageState() == Message.MessageState.CORRUPTED){
-            Log.d(Receiver.LOG_TAG, "Message corrupted");
         } else {
             this.notifyReceiverListeners(message);
         }

@@ -11,19 +11,15 @@ import ch.nych.soundtransceiver.util.Configuration;
 import ch.nych.soundtransceiver.util.Message;
 
 /**
- * This class implements the signal transformation from the time domain to the frequency domain.
- * The transformation is done with the Goertzel algorithm implemented by the {@link Goertzel} class.
- * Instead of scanning the whole spectrum, the Goertzel is aligned to a specific frequency range.
- * Because of the lower complexity it is more efficient than e FFT.
- * The detectMessageBegin() is analyzing the incoming window until it detects
- * the presence of the
- * frame start. Once the beginning is detected, the recordMessage() method is
- * analyzing the carrier
- * frequencies until the end of the frame is detected.
- *
- *                                          TODO
- *
- *
+ * This class implements the signal transformation from the time domain to
+ * the frequency domain. The transformation is done with the Goertzel
+ * algorithm implemented by the {@link Goertzel} class. Instead of scanning
+ * the whole spectrum, the Goertzel is aligned to a specific frequency range.
+ * Because of the lower complexity it is more efficient than e FFT. The
+ * detectMessageBegin() is analyzing the incoming window until it detects the
+ * presence of the frame start. Once the beginning is detected, the
+ * recordMessage() method is analyzing the carrier frequencies until the end
+ * of the frame is detected.
  */
 public class TransformationTask extends ReceiverTask {
 
@@ -166,8 +162,7 @@ public class TransformationTask extends ReceiverTask {
         Log.d(TransformationTask.LOG_TAG, "Start recording frame");
         double threshold = volume / 5;
         int maxFrameSize = this.configuration.getMaxFrameSize();
-		Message message = new Message(null);
-        message.setMessageState(Message.MessageState.IN_PROGRESS);
+		Message message = new Message(Message.MessageState.RECEIVED);
 		double[][] frequencyDomainData = new double[this.configuration
 				.getTransmissionMode().getNumOfChannels()][this.configuration
 				.getMaxFrameSize()];
@@ -224,9 +219,9 @@ public class TransformationTask extends ReceiverTask {
     }
 
     /**
-     * The preprocessing of the samples with a window function can improve the result of the
-     * transformation. Every sample of the window is multiplied with its corresponding window
-     * function value
+     * The preprocessing of the samples with a window function can improve
+     * the result of the transformation. Every sample of the window is
+     * multiplied with its corresponding window function value.
      * @param window the window that needs to be preprocessed
      */
     private void preprocessWindow(final short[] window) {

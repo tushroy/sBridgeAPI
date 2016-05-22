@@ -142,7 +142,7 @@ public class SoundBeaconActivity extends AppCompatActivity
 
 	@Override
 	public void messageSent(Message message) {
-		if(message.getMessageState() == Message.MessageState.CORRUPTED ||
+		if(message.getMessageState() == Message.MessageState.INVALID_CHECKSUM ||
 				message.getMessageState() == Message.MessageState
 						.SENDING_ABORT) {
 			Toast toast = Toast.makeText(getApplicationContext(),

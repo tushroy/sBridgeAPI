@@ -2,6 +2,7 @@ package ch.nych.soundtransceiver.receiver.tasks.interpretation;
 
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ch.nych.soundtransceiver.receiver.Receiver;
@@ -18,13 +19,10 @@ public class ThreeChannelInterpretationTask extends InterpretationTask {
     }
 
     @Override
-    protected void interpretMessage(final List<Byte> list) {
-        if(list == null) {
-            Log.d(InterpretationTask.LOG_TAG, "list passed to " +
-                    "interpretMessage was null");
-            return;
-        }
-        Log.d(InterpretationTask.LOG_TAG, "interpretMessage");
+    protected List<Byte> interpretMessage() {
+        Log.d(InterpretationTask.LOG_TAG, "interpret frequency domain data");
+
+        List<Byte> list = new ArrayList<Byte>();
 
         int index = -1;
         int last = -1;
@@ -42,5 +40,6 @@ public class ThreeChannelInterpretationTask extends InterpretationTask {
             }
             last = index;
         }
+        return list;
     }
 }

@@ -56,10 +56,10 @@ public class ReceivingActivity extends AppCompatActivity
                 Toast toast = null;
 
                 if(message.getMessageState() ==
-                        Message.MessageState.INTERPRETED_SUCCESSFULLY) {
+                        Message.MessageState.VALID) {
                     toast = Toast.makeText(
                             getApplicationContext(),
-                            "Message received: ",
+                            "Message received",
                             Toast.LENGTH_SHORT);
 
                     char[] text = new char[message.getDataBytes().length];
@@ -67,10 +67,10 @@ public class ReceivingActivity extends AppCompatActivity
                         text[i] = (char) message.getDataBytes()[i];
                     }
                     textView.setText(text, 0, text.length);
-                    toast.show();
                 } else {
-                    textView.setText("Message corrupted");
+                    textView.setText(message.getMessageState().toString());
                 }
+                toast.show();
             }
         });
     }
